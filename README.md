@@ -1,4 +1,4 @@
-=Tools for exploring OpenVG on the Raspberry Pi.=
+#Tools for exploring OpenVG on the Raspberry Pi.
 
 For now there is a single program "shapes". If you run the program with no command line arguments, you get a "reference card" that 
 demonstrates the calls in the library (Text, Arc, Circle, Ellipse, Rect, Roundrect, Line, Polyline, Polygon, Cubic Bezier, 
