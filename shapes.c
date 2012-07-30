@@ -1,6 +1,5 @@
-// shapes: minimal program to explore OpenVG
+// shapes: testbed for OpenVG APIs
 // Anthony Starks (ajstarks@gmail.com)
-//
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -18,12 +17,48 @@ typedef struct {
 	uint32_t screen_height;
 	// OpenGL|ES objects
 	EGLDisplay display;
+
 	EGLSurface surface;
 	EGLContext context;
 } STATE_T;
 
-static void exit_func(void);
+static void finish(void);
 static STATE_T _state, *state=&_state;
+static const int MAXFONTPATH=256;
+VGPath DejaVuSansPaths[256];
+
+//
+//  Font functions
+//
+
+// loadfont loads font path data
+void  loadfont(const int *Points, const int *PointIndices, const unsigned char *Instructions, const int *InstructionIndices, const int *InstructionCounts, int ng, VGPath *glyphs) {
+	int i;
+	if (ng > MAXFONTPATH) {
+		return;
+	}
+ 	memset(glyphs, 0, MAXFONTPATH*sizeof(VGPath));
+	for(i=0; i < ng; i++) {
+		const int* p = &Points[PointIndices[i]*2];
+		const unsigned char* instructions = &Instructions[InstructionIndices[i]];
+		int ic = InstructionCounts[i];
+
+		//printf("glyph %3d = %x, %x %d\n", i, p, instructions, ic);
+		VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_S_32, 1.0f/65536.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
+		glyphs[i] = path;
+		if(ic) {
+			vgAppendPathData(path, ic, instructions, p);
+		}
+	}
+}
+
+// unloadfont frees font path data
+void unloadfont(VGPath *glyphs, int n) {
+	int i;
+ 	for(i=0; i<n; i++) {
+		vgDestroyPath(glyphs[i]);
+	}
+}
 
 // init_ogl sets the display, OpenGL|ES context and screen information
 // state holds the OGLES model information
@@ -113,47 +148,29 @@ static void init_ogl(STATE_T *state) {
 	glFrustumf(-ratio, ratio, -1.0f, 1.0f, 1.0f, 10.0f);
 }
 
-// exit_func cleans up
-static void exit_func(void) {
+// init sets the system to its initial state
+void init() {
+	bcm_host_init();
+	memset( state, 0, sizeof( *state ) );
+	init_ogl(state);
+   	loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices,
+            DejaVuSans_glyphInstructions, DejaVuSans_glyphInstructionIndices,
+            DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount,
+            DejaVuSansPaths);
+}
+// finish cleans up
+static void finish(void) {
+	// Release font data
+	unloadfont(DejaVuSansPaths, DejaVuSans_glyphCount);
 	// clear screen
 	glClear( GL_COLOR_BUFFER_BIT );
 	eglSwapBuffers(state->display, state->surface);
-
 	// Release OpenGL resources
 	eglMakeCurrent( state->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT );
 	eglDestroySurface( state->display, state->surface );
 	eglDestroyContext( state->display, state->context );
 	eglTerminate( state->display );
 }
-//
-//  Font functions
-//
-
-// loadfont loads font path data
-void  loadfont(const int *Points, const int *PointIndices, const unsigned char *Instructions, const int *InstructionIndices, const int *InstructionCounts, int ng, VGPath *glyphs) {
-	int i;
- 	memset(glyphs, 0, ng*sizeof(VGPath));
-	for(i=0; i < ng; i++) {
-		const int* p = &Points[PointIndices[i]*2];
-		const unsigned char* instructions = &Instructions[InstructionIndices[i]];
-		int ic = InstructionCounts[i];
-
-		VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_S_32, 1.0f/65536.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
-		glyphs[i] = path;
-		if(ic) {
-			vgAppendPathData(path, ic, instructions, p);
-		}
-	}
-}
-
-// unloadfont frees font path data
-void unloadfont(VGPath *glyphs, int n) {
-	int i;
- 	for(i=0; i<n; i++) {
-		vgDestroyPath(glyphs[i]);
-	}
- }
-
 //
 // Style functions
 //
@@ -180,7 +197,7 @@ void setstroke(float color[4], float width) {
 }
 
 // Text renders a string of text at a specified location, using the specified font glyphs
-void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[4], VGPath *glyphs, const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags) {
+void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[4], VGPath *gp, const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags) {
 	float size = (float)pointsize;
 	float xx = x;
 	float mm[9];
@@ -202,8 +219,9 @@ void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[
 
 		vgLoadMatrix(mm);
 		vgMultMatrix(mat);
-		vgDrawPath(glyphs[glyph], renderFlags);
+		vgDrawPath(gp[glyph], renderFlags);
 		xx += size * glyphAdvances[glyph] / 65536.0f;
+		//printf("char %c advances %d\n", character, glyphAdvances[glyph]);
 	}
 	vgLoadMatrix(mm);
 }
@@ -263,7 +281,7 @@ void interleave(VGfloat *x, VGfloat *y, int n, VGfloat *points) {
 void Poly(VGfloat *x, VGfloat *y, VGint n, VGfloat sw, VGfloat fill[4], VGfloat stroke[4], VGboolean dofill) {
 	VGfloat points[n*2];
 	VGPath path = newpath();
-	VGubyte pflag;
+	VGbitfield pflag;
 
 	interleave(x, y, n, points);
 	vguPolygon(path, points, n, VG_FALSE);
@@ -298,11 +316,7 @@ void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat sw, VGfloat st
 	vgDestroyPath(path);
 }
 // Roundrect makes an rounded rectangle at the specified location and dimensions, applying style
-void Roundrect(	
-	VGfloat x, VGfloat y, 
-	VGfloat w, VGfloat h, 
-	VGfloat rw, VGfloat rh, 
-	VGfloat sw, VGfloat fill[4], VGfloat stroke[4]) {
+void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh, VGfloat sw, VGfloat fill[4], VGfloat stroke[4]) {
 
 	VGPath path = newpath();
 	vguRoundRect(path, x, y, w, h, rw, rh);
@@ -328,9 +342,7 @@ void Circle(VGfloat x, VGfloat y, VGfloat r, VGfloat sw, VGfloat fill[4], VGfloa
 }
 
 // Arc makes an elliptical arc at the specified location and dimensions, applying style
-void Arc(	VGfloat x, VGfloat y, VGfloat w, VGfloat h, 
-			VGfloat sa, VGfloat aext,
-			VGfloat sw, VGfloat fill[4], VGfloat stroke[4]) {
+void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext, VGfloat sw, VGfloat fill[4], VGfloat stroke[4]) {
 	VGPath path = newpath();
 	vguArc(path, x, y, w, h, sa, aext, VGU_ARC_OPEN);
 	setfill(fill);
@@ -363,6 +375,7 @@ VGfloat randf(n) {
 	return (VGfloat)(rand() % n);
 }
 
+// rlines makes random lines
 void rlines(VGfloat x, VGfloat y, int width, int height) {
 	int i = (int)x;
 	VGfloat rcolor[4] = {0,0,0,.40};
@@ -374,10 +387,10 @@ void rlines(VGfloat x, VGfloat y, int width, int height) {
 	}
 }
 
-
+// coordpoint marks a coordinate
 void coordpoint(VGfloat x, VGfloat y, VGfloat size) {
 	VGfloat dotcolor[4] = {0.3, 0.3, 0.3, 1}, white[4] = {1,1,1,1};
-Circle(x, y, size, 0, dotcolor, white);
+	Circle(x, y, size, 0, dotcolor, white);
 }
 
 
@@ -387,25 +400,19 @@ void refcard(int width, int height) {
 		"Circle", "Ellipse", "Rectangle", "Rounded Rectangle", 
 		"Line", "Polyline", "Polygon", "Arc", "Quadratic Bezier", "Cubic Bezier"
 	};
-	VGfloat strokecolor[4] = {0,0,0,1}, shapecolor[4] = {202.0/255.0, 225.0/255.0,1,1}, textcolor[4] = {0,0,0,1}, bgcolor[4] = {1,1,1,1};
+	VGfloat strokecolor[4] = {0.8,0.8,0.8,1}, shapecolor[4] = {202.0/255.0, 225.0/255.0,1,1}, textcolor[4] = {0,0,0,1}, bgcolor[4] = {1,1,1,1};
 
-	VGfloat strokewidth = 2;
+	VGfloat strokewidth = 1;
 	VGfloat top=height-100, sx = 500, sy = top, sw=100, sh=50, dotsize=7, spacing=2.0;
-    VGPath DejaVuSans_Paths[DejaVuSans_glyphCount];
-    loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices,
-            DejaVuSans_glyphInstructions, DejaVuSans_glyphInstructionIndices,
-            DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount,
-            DejaVuSans_Paths);
-
 	int i, ns = sizeof(shapenames)/sizeof(char *), fontsize = 36;
 	Start(width, height, bgcolor);
 	setfill(textcolor);
 	sx = width * 0.10;
 	textcolor[0] = 0.5;
-	Text(width*.50, height/2, "OpenVG on the Raspberry Pi", 48, textcolor, DejaVuSans_Paths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", 48, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
 	textcolor[0] = 0;
 	for (i=0; i < ns; i++) {
-		Text(sx+sw+sw/2, sy, shapenames[i], fontsize, textcolor, DejaVuSans_Paths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+		Text(sx+sw+sw/2, sy, shapenames[i], fontsize, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
 		sy -= sh*spacing; 
 	}
 	sy = top;
@@ -444,7 +451,6 @@ void refcard(int width, int height) {
 	coordpoint(cx, sy, dotsize);
 	coordpoint(ex, ey, dotsize);
 	End();
-	unloadfont(DejaVuSans_Paths, DejaVuSans_glyphCount);
 }
 
 
@@ -455,12 +461,7 @@ void rshapes(int width, int height, int n) {
 	scolor[3] = 1; // strokes are solid
 	VGfloat sx, sy, cx, cy, px, py, ex, ey, pox, poy;
 	VGfloat polyx[np], polyy[np];
-	VGPath DejaVuSans_Paths[DejaVuSans_glyphCount];
 	int i,j;
-	loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices, 
-			DejaVuSans_glyphInstructions, DejaVuSans_glyphInstructionIndices, 
-			DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount,
- 		 	DejaVuSans_Paths);
 	srand ( time(NULL) );
 	Start(width, height, bgcolor);
 	for (i=0; i < n; i++) {
@@ -513,8 +514,7 @@ void rshapes(int width, int height, int n) {
 		}
 		Poly(polyx, polyy, np, 4, rcolor, scolor, VG_FALSE);
 	}
-	Text(randf(100), randf(height-100), "OpenVG on the Raspberry Pi", 64, textcolor, DejaVuSans_Paths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
-	unloadfont(DejaVuSans_Paths, DejaVuSans_glyphCount);
+	Text(randf(100), randf(height-100), "OpenVG on the Raspberry Pi", 64, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
 	End();
 }
 
@@ -523,9 +523,8 @@ void rshapes(int width, int height, int n) {
 // exit and clean up when you hit [RETURN].
 int main (int argc, char **argv) {
 	int w, h;
-	bcm_host_init();
-	memset( state, 0, sizeof( *state ) );
-	init_ogl(state);
+
+	init();
 	w = state->screen_width;
 	h = state->screen_height;
 	if (argc > 1) {
@@ -536,6 +535,6 @@ int main (int argc, char **argv) {
 	while (getchar() != '\n') {
 		;
 	}
-	exit_func();
+	finish();
 	return 0;
 }
