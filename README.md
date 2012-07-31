@@ -16,31 +16,42 @@ Begin the picture, clear the screen with the specified color
 	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat sw, VGfloat stroke[4]))
 draw a line between (x1, y1) and (x2, y3)
 
-	Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
 draw a rectangle with its origin (lower left) at (x,y), and size is (width,height)
 
-	Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
 draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).  The width and height of the corners are specified with (rw,rh)
 
-	Poly(VGfloat *x, VGfloat *y, VGint n, VGfloat sw, VGfloat fill[4], VGfloat stroke[4], VGboolean dofill)
+	void Poly(VGfloat *x, VGfloat *y, VGint n, VGfloat sw, VGfloat fill[4], VGfloat stroke[4], VGboolean dofill)
 draw a polyline (dofill=true), or polygon (dofill=false), using the coordinates in arrays points to by x and y.  The number of coordinates is n.
 
-	Circle(VGfloat x, VGfloat y, VGfloat r, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Circle(VGfloat x, VGfloat y, VGfloat r, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
 draw a circle centered at (x,y) with radius r.
 
-	Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
 draw an ellipse centered at (x,y) with radii (w, h).
 
-	Qbezier(Gfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey, VGfloat sw, VGfloat fill[4], VGfloat stroke[4]))
+	void Qbezier(Gfloat sx, VGfloat sy, 
+	VGfloat cx, VGfloat cy, 
+	VGfloat px, VGfloat py, 
+	VGfloat ex, VGfloat ey, 
+	VGfloat sw, VGfloat fill[4], VGfloat stroke[4]))
 draw a quadratic bezier curve beginning at (sx, sy), using control points at (px, py), ending at (ex, ey)
 
-	Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Cbezier(VGfloat sx, VGfloat sy, 
+		VGfloat cx, VGfloat cy, 
+		VGfloat px, VGfloat py, 
+		VGfloat ex, VGfloat ey, 
+		VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
 draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey)
 
-	Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext, VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Arc(VGfloat x, VGfloat y, 
+		VGfloat w, VGfloat h, 
+		VGfloat sa, VGfloat aext, 
+		VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
 draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
-	Text(VGfloat x, VGfloat y, const char* s, int pointsize, 
+	void Text(VGfloat x, VGfloat y, const char* s, int pointsize, 
 		VGfloat fillcolor[4], VGPath *gp, const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags)
 draw a the text srtring (s) at location (x,y), using pointsize, filled with fillcolor. 
 
