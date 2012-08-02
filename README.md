@@ -42,8 +42,8 @@ draw a circle centered at (x,y) with radius r.
 	void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 draw an ellipse centered at (x,y) with radii (w, h).
 
-	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
-draw a quadratic bezier curve beginning at (sx, sy), using control points at (px, py), ending at (ex, ey)
+	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
+draw a quadratic bezier curve beginning at (sx, sy), using control points at (cx, cy), ending at (ex, ey)
 
 	void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
 draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey)
@@ -64,7 +64,6 @@ renderflags specifies how the text will be rendered.
 	
 	End()
 end the picture, rendering to the screen.
-
 
 ## Using fonts
 
