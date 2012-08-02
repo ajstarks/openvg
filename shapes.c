@@ -56,7 +56,7 @@ void unloadfont(VGPath *glyphs, int n) {
 void init() {
 	bcm_host_init();
 	memset( state, 0, sizeof( *state ) );
-	init_ogl(state);
+	oglinit(state);
 	loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices, DejaVuSans_glyphInstructions, 
 			DejaVuSans_glyphInstructionIndices, DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount, DejaVuSansPaths);
 }
