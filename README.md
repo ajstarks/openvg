@@ -7,46 +7,48 @@ Running with a numeric command line argument shows the specified number of rando
 ## API
 
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
-Color is specified as a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0.
-Shapes are filled with the color specified as fill[4], stroke color as stroke[4], and stroke width as sw.
+Colors are specified with a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0.
 
 	void Start(int width, int height, float fill[4])
 Begin the picture, clear the screen with the specified color
 
-	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, 
-			  VGfloat sw, VGfloat stroke[4]))
+	void setfill(float color[4])
+Set the fill color
+
+	void setstroke(float color[4])
+Set the stroke color
+
+	void strokeWidth(float width)
+Set the stroke width
+
+	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
 draw a line between (x1, y1) and (x2, y2)
 
-	void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sw, 
-			  VGfloat fill[4], VGfloat stroke[4])
+	void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 draw a rectangle with its origin (lower left) at (x,y), and size is (width,height)
 
-	void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh, VGfloat sw, 
-				   VGfloat fill[4], VGfloat stroke[4])
+	void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
 draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).  The width and height of the corners are specified with (rw,rh)
 
-	void Poly(VGfloat *x, VGfloat *y, VGint n, VGfloat sw, 
-			  VGfloat fill[4], VGfloat stroke[4], VGboolean dofill)
-draw a polyline (dofill=true), or polygon (dofill=false), using the coordinates in arrays points to by x and y.  The number of coordinates is n.
+	void Polygon(VGfloat *x, VGfloat *y, VGint n)
+draw a polygon using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
 
-	void Circle(VGfloat x, VGfloat y, VGfloat r, VGfloat sw, 
-				VGfloat fill[4], VGfloat stroke[4])
+	void Polyline(VGfloat *x, VGfloat *y, VGint n)
+draw a polyline using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
+
+	void Circle(VGfloat x, VGfloat y, VGfloat r)
 draw a circle centered at (x,y) with radius r.
 
-	void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h, 
-				 VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 draw an ellipse centered at (x,y) with radii (w, h).
 
-	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey, 
-				 VGfloat sw, VGfloat fill[4], VGfloat stroke[4]))
+	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
 draw a quadratic bezier curve beginning at (sx, sy), using control points at (px, py), ending at (ex, ey)
 
-	void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey, 
-				 VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
 draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey)
 
-	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext, 
-			 VGfloat sw, VGfloat fill[4], VGfloat stroke[4])
+	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
 draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
 	void Text(VGfloat x, VGfloat y, const char* s, int pointsize, 
@@ -95,7 +97,6 @@ The unloadfont function releases the path information:
 # Build and run
 
 	pi@raspberrypi ~/vg $ make fonts shapes
-	g++ -I /usr/include/freetype2 font2openvg.cpp   -o font2openvg -lfreetype
 	for f in /usr/share/fonts/truetype/ttf-dejavu/*.ttf; do fn=`basename $f .ttf`; ./font2openvg $f $fn.inc $fn; done
 	224 glyphs written
 	224 glyphs written
@@ -103,7 +104,8 @@ The unloadfont function releases the path information:
 	224 glyphs written
 	224 glyphs written
 	224 glyphs written
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapes shapes.c -L/opt/vc/lib -lGLESv2
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapes oglinit.o shapes.c  -L/opt/vc/lib -lGLESv2 
 	pi@raspberrypi ~/vg $ ./shapes # hit return when you are done looking at the awesomness
 
 	pi@raspberrypi ~/vg $ ./shapes 100 # show 100 random shapes
