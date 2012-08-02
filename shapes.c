@@ -12,12 +12,12 @@
 #include "VG/vgu.h"
 #include "EGL/egl.h"
 #include "GLES/gl.h"
-#include "DejaVuSans.inc"
-#include "eglstate.h"					// data structures for graphics state
+#include "DejaVuSans.inc" // font data
+#include "eglstate.h"	// data structures for graphics state
 
 static STATE_T _state, *state=&_state; // global graphics state
 static const int MAXFONTPATH=256;
-VGPath DejaVuSansPaths[256];
+VGPath DejaVuSansPaths[256];	// font paths
 
 //
 // Font functions
@@ -25,7 +25,9 @@ VGPath DejaVuSansPaths[256];
 
 // loadfont loads font path data
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
-void loadfont(const int *Points, const int *PointIndices, const unsigned char *Instructions, const int *InstructionIndices, const int *InstructionCounts, int ng, VGPath *glyphs) {
+void loadfont(const int *Points, const int *PointIndices, 
+		const unsigned char *Instructions, const int *InstructionIndices, 
+		const int *InstructionCounts, int ng, VGPath *glyphs) {
 	int i;
 	if (ng > MAXFONTPATH) {
 		return;
@@ -105,7 +107,8 @@ void strokeWidth(float width) {
 
 // Text renders a string of text at a specified location, using the specified font glyphs
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
-void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[4], VGPath *gp, const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags) {
+void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[4], 
+		VGPath *gp, const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags) {
 	float size = (float)pointsize;
 	float xx = x;
 	float mm[9];
@@ -119,9 +122,9 @@ void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[
 			continue;	//glyph is undefined
 		}
 		VGfloat mat[9] = {
-			size,	0.0f,	0.0f,
-			0.0f,	size,	0.0f,
-			xx,		y,		1.0f
+			size, 0.0f, 0.0f,
+			0.0f, size, 0.0f,
+			xx,	y, 1.0f
 		};
 		vgLoadMatrix(mm);
 		vgMultMatrix(mat);
@@ -139,26 +142,25 @@ VGPath newpath() {
 	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
 }
 
-// CBezier makes a quadratic bezier curve
-void Cbezier( VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
-	
-	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
-	VGfloat coords[]   = { sx, sy, cx, cy, px, py, ex, ey };
+// makecurve makes path data using specified segments and coordinates
+void makecurve(VGubyte *segments, VGfloat *coords) {
 	VGPath path = newpath();
 	vgAppendPathData( path, 2, segments, coords );
 	vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
 	vgDestroyPath(path);
 }
+// CBezier makes a quadratic bezier curve
+void Cbezier( VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
+	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
+	VGfloat coords[]   = { sx, sy, cx, cy, px, py, ex, ey };
+	makecurve(segments, coords);
+}
 
 // QBezier makes a quadratic bezier curve
 void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
-
 	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
 	VGfloat coords[]   = { sx, sy, cx, cy, ex, ey };
-	VGPath path = newpath();
-	vgAppendPathData( path, 2, segments, coords );
-	vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
-	vgDestroyPath(path);
+	makecurve(segments, coords);
 }
 
 // interleave interleaves arrays of x, y into a single array
@@ -211,7 +213,6 @@ void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat r
 	vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
 	vgDestroyPath(path);
 }
-
 
 // Ellipse makes an ellipse at the specified location and dimensions
 void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
@@ -274,7 +275,7 @@ void rlines(VGfloat x, VGfloat y, int width, int height) {
 	}
 }
 
-// coordpoint marks a coordinate
+// coordpoint marks a coordinate, preserving a previous color
 void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
 	VGfloat dotcolor[4] = {0.3, 0.3, 0.3, 1};
 	setfill(dotcolor);
@@ -288,7 +289,10 @@ void refcard(int width, int height) {
 		"Circle", "Ellipse", "Rectangle", "Rounded Rectangle", 
 		"Line", "Polyline", "Polygon", "Arc", "Quadratic Bezier", "Cubic Bezier"
 	};
-	VGfloat strokecolor[4] = {0.8,0.8,0.8,1}, shapecolor[4] = {202.0/255.0, 225.0/255.0,1,1}, textcolor[4] = {0,0,0,1}, bgcolor[4] = {1,1,1,1};
+	VGfloat strokecolor[4] = {0.8,0.8,0.8,1}, 
+			shapecolor[4] = {202.0/255.0, 225.0/255.0,1,1}, 
+			textcolor[4] = {0,0,0,1}, 
+			bgcolor[4] = {1,1,1,1};
 
 	VGfloat linewidth = 1;
 	VGfloat top=height-100, sx = 500, sy = top, sw=100, sh=50, dotsize=7, spacing=2.0;
@@ -297,10 +301,12 @@ void refcard(int width, int height) {
 	setfill(textcolor);
 	sx = width * 0.10;
 	textcolor[0] = 0.5;
-	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", 48, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", 48, textcolor, 
+		DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
 	textcolor[0] = 0;
 	for (i=0; i < ns; i++) {
-		Text(sx+sw+sw/2, sy, shapenames[i], fontsize, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+		Text(sx+sw+sw/2, sy, shapenames[i], fontsize, textcolor, 
+			DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
 		sy -= sh*spacing; 
 	}
 	sy = top;
@@ -352,7 +358,6 @@ void refcard(int width, int height) {
 
 	End();
 }
-
 
 // rshapes draws shapes (rect and ellipse) with random colors, strokes, and sizes. 
 void rshapes(int width, int height, int n) {
@@ -416,7 +421,8 @@ void rshapes(int width, int height, int n) {
 		}
 		Polyline(polyx, polyy, np);
 	}
-	Text(randf(100), randf(height-100), "OpenVG on the Raspberry Pi", 64, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+	Text(randf(100), randf(height-100), "OpenVG on the Raspberry Pi", 64, textcolor, 
+		DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
 	End();
 }
 
