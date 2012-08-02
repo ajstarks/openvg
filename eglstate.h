@@ -8,4 +8,4 @@ typedef struct {
 	EGLContext context;
 } STATE_T;
 
-extern void init_ogl(STATE_T *);
+extern void oglinit(STATE_T *);
