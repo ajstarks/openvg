@@ -1,20 +1,11 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
+#include "eglstate.h"
 #include <assert.h>
 
-typedef struct {
-	uint32_t screen_width;
-	uint32_t screen_height;
-	// OpenGL|ES objects
-	EGLDisplay display;
-
-	EGLSurface surface;
-	EGLContext context;
-} STATE_T;
-
-// init_ogl sets the display, OpenGL|ES context and screen information
+// oglinit sets the display, OpenGL|ES context and screen information
 // state holds the OGLES model information
-extern void init_ogl(STATE_T *state) {
+extern void oglinit(STATE_T *state) {
 	int32_t success = 0;
 	EGLBoolean result;
 	EGLint num_config;
