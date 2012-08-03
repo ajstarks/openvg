@@ -13,11 +13,13 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "DejaVuSans.inc"               // font data
+#include "DejaVuSerif.inc"
 #include "eglstate.h"                   // data structures for graphics state
+#include "fontinfo.h"                   // font data structure
 
 static STATE_T _state, *state=&_state;  // global graphics state
 static const int MAXFONTPATH=256;
-VGPath DejaVuSansPaths[256];            // font paths
+Fontinfo DejaFont, DejaSerif;
 
 //
 // Font functions
@@ -25,25 +27,42 @@ VGPath DejaVuSansPaths[256];            // font paths
 
 // loadfont loads font path data
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
-void loadfont(const int *Points, const int *PointIndices, 
-		const unsigned char *Instructions, const int *InstructionIndices, 
-		const int *InstructionCounts, int ng, VGPath *glyphs) {
+Fontinfo loadfont(	const int *Points, 
+					const int *PointIndices, 
+					const unsigned char *Instructions, 
+					const int *InstructionIndices, 
+					const int *InstructionCounts, 
+					const int *adv, 
+					const short *cmap, 
+					int ng) {
+
+	Fontinfo f;
 	int i;
+
+ 	memset(f.Glyphs, 0, MAXFONTPATH*sizeof(VGPath));
 	if (ng > MAXFONTPATH) {
-		return;
+		return f;
 	}
- 	memset(glyphs, 0, MAXFONTPATH*sizeof(VGPath));
 	for(i=0; i < ng; i++) {
 		const int* p = &Points[PointIndices[i]*2];
 		const unsigned char* instructions = &Instructions[InstructionIndices[i]];
 		int ic = InstructionCounts[i];
 
 		VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_S_32, 1.0f/65536.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
-		glyphs[i] = path;
+		f.Glyphs[i] = path;
 		if(ic) {
 			vgAppendPathData(path, ic, instructions, p);
 		}
 	}
+	f.Points = Points;
+	f.PointIndices = PointIndices;
+	f.Instructions = Instructions;
+	f.CharacterMap = cmap;
+	f.InstructionIndices = InstructionIndices;
+	f.InstructionCounts = InstructionCounts;
+	f.GlyphAdvances = adv;
+	f.Count = ng;
+	return f;
 }
 
 // unloadfont frees font path data
@@ -59,9 +78,24 @@ void init(int *w, int *h) {
 	bcm_host_init();
 	memset( state, 0, sizeof( *state ) );
 	oglinit(state);
-	loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices, 
-			DejaVuSans_glyphInstructions, DejaVuSans_glyphInstructionIndices, 
-			DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount, DejaVuSansPaths);
+	DejaFont = loadfont(DejaVuSans_glyphPoints, 
+						DejaVuSans_glyphPointIndices, 
+						DejaVuSans_glyphInstructions, 
+						DejaVuSans_glyphInstructionIndices, 
+						DejaVuSans_glyphInstructionCounts, 
+						DejaVuSans_glyphAdvances,
+						DejaVuSans_characterMap, 
+						DejaVuSans_glyphCount);
+
+	DejaSerif = loadfont(DejaVuSerif_glyphPoints,
+                        DejaVuSerif_glyphPointIndices,
+                        DejaVuSerif_glyphInstructions,
+                        DejaVuSerif_glyphInstructionIndices,
+                        DejaVuSerif_glyphInstructionCounts,
+                        DejaVuSerif_glyphAdvances,
+                        DejaVuSerif_characterMap,
+                        DejaVuSerif_glyphCount);
+
 	*w = state->screen_width;
 	*h = state->screen_height;
 }
@@ -69,7 +103,8 @@ void init(int *w, int *h) {
 // finish cleans up
 static void finish(void) {
 	// Release font data
-	unloadfont(DejaVuSansPaths, DejaVuSans_glyphCount);
+	unloadfont(DejaFont.Glyphs, DejaFont.Count);
+	unloadfont(DejaSerif.Glyphs, DejaSerif.Count);
 	// clear screen
 	glClear( GL_COLOR_BUFFER_BIT );
 	eglSwapBuffers(state->display, state->surface);
@@ -153,10 +188,9 @@ void strokeWidth(float width) {
 	vgSeti(VG_STROKE_JOIN_STYLE, VG_JOIN_MITER);
 }
 
-// Text renders a string of text at a specified location, using the specified font glyphs
+// Text renders a string of text at a specified location, size, and fill, using the specified font glyphs
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
-void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[4], 
-		VGPath *gp, const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags) {
+void Text(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize, VGfloat fillcolor[4]) {
 	float size = (float)pointsize;
 	float xx = x;
 	float mm[9];
@@ -165,7 +199,7 @@ void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[
 	setfill(fillcolor);
 	for(i=0; i < (int)strlen(s); i++) {
 		unsigned int character = (unsigned int)s[i];
-		int glyph = characterMap[character];
+		int glyph = f.CharacterMap[character];
 		if( glyph == -1 ) {
 			continue;	//glyph is undefined
 		}
@@ -176,8 +210,8 @@ void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[
 		};
 		vgLoadMatrix(mm);
 		vgMultMatrix(mat);
-		vgDrawPath(gp[glyph], renderFlags);
-		xx += size * glyphAdvances[glyph] / 65536.0f;
+		vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH);
+		xx += size * f.GlyphAdvances[glyph] / 65536.0f;
 	}
 	vgLoadMatrix(mm);
 }
@@ -185,6 +219,7 @@ void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[
 //
 // Shape functions
 //
+
 
 // newpath creates path data
 VGPath newpath() {
@@ -221,24 +256,24 @@ void interleave(VGfloat *x, VGfloat *y, int n, VGfloat *points) {
 	} 
 }
 
+// poly makes either a polygon or polyline
+void poly(VGfloat *x, VGfloat *y, VGint n, VGbitfield flag) {
+    VGfloat points[n*2];
+    VGPath path = newpath();
+    interleave(x, y, n, points);
+    vguPolygon(path, points, n, VG_FALSE);
+    vgDrawPath(path, flag);
+    vgDestroyPath(path);
+}
+
 // Polygon makes a filled polygon with vertices in x, y arrays
 void Polygon(VGfloat *x, VGfloat *y, VGint n) {
-	VGfloat points[n*2];
-	VGPath path = newpath();
-	interleave(x, y, n, points);
-	vguPolygon(path, points, n, VG_FALSE);
-	vgDrawPath(path, VG_FILL_PATH);
-	vgDestroyPath(path);
+	poly(x, y, n, VG_FILL_PATH);
 }
 
 // Polyline makes a polyline with vertices at x, y arrays
 void Polyline(VGfloat *x, VGfloat *y, VGint n) {
-	VGfloat points[n*2];
-	VGPath path = newpath();
-	interleave(x, y, n, points);
-	vguPolygon(path, points, n, VG_FALSE);
-	vgDrawPath(path, VG_STROKE_PATH);
-	vgDestroyPath(path);
+	poly(x, y, n, VG_STROKE_PATH);
 }
 
 // Rect makes a rectangle at the specified location and dimensions
@@ -249,7 +284,7 @@ void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
 	vgDestroyPath(path);
 }
 
-// Line makes a line
+// Line makes a line from (x1,y1) to (x2,y2)
 void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
 	VGPath path = newpath();
 	vguLine(path, x1, y1, x2, y2);
@@ -351,12 +386,11 @@ void refcard(int width, int height) {
 	setfill(textcolor);
 	sx = width * 0.10;
 	textcolor[0] = 0.5;
-	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", 48, textcolor, 
-		DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", DejaFont, 48, textcolor);
+		
 	textcolor[0] = 0;
 	for (i=0; i < ns; i++) {
-		Text(sx+sw+sw/2, sy, shapenames[i], fontsize, textcolor, 
-			DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+		Text(sx+sw+sw/2, sy, shapenames[i], DejaFont, fontsize, textcolor);
 		sy -= sh*spacing; 
 	}
 	sy = top;
@@ -417,13 +451,13 @@ void Background(int w, int h, VGfloat fill[4]) {
 // rotext draws text, rotated around the center of the screen, progressively faded
 void rotext(VGfloat x, VGfloat y, int w, int h, int n, VGfloat deg, char *s) {
 	int i;
-	VGfloat textcolor[4] = {0,0,0,1}, bgcolor[4] = {1,1,1,1};
+	VGfloat textcolor[4] = {1,1,1,1}, bgcolor[4] = {0,0,0,1};
 	VGfloat fade = (100.0/(VGfloat)n)/100.0;
 	
 	Start(w, h, bgcolor);
 	Translate(x,y);
 	for (i=0; i < n; i++) {
-		Text(0,0, s, 256, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+		Text(0,0, s, DejaSerif, 256, textcolor);
 		textcolor[3] -= fade;
 		Rotate(deg);
 	}
@@ -492,8 +526,7 @@ void rshapes(int width, int height, int n) {
 		}
 		Polyline(polyx, polyy, np);
 	}
-	Text(randf(100), randf(height-100), "OpenVG on the Raspberry Pi", 64, textcolor, 
-		DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+	Text(randf(100), randf(height-100), "OpenVG on the Raspberry Pi", DejaFont, 64, textcolor);
 	End();
 }
 

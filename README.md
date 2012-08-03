@@ -59,16 +59,9 @@ draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy
 	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
 draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
-	void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[4], VGPath *gp, 
-				const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags)
+	void Text(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize, VGfloat fillcolor[4])
 draw a the text srtring (s) at location (x,y), using pointsize, filled with fillcolor. 
 
-The font information: 
-* gp is an array of glpyh paths
-* characterMap,
-* glyphAdvances
-
-renderflags specifies how the text will be rendered.
 	
 ### Transformations
 
@@ -111,19 +104,24 @@ For example to use the DejaVu Sans font:
 and include the generated code in your program:
 
 	#include "DejaVuSans.inc"
-	
-	VGPath DejaVuSansPaths[256];
+	Fontinfo DejaFont
 	
 The loadfont function creates OpenVG paths from the font data:
 
-	loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices,
-            DejaVuSans_glyphInstructions, DejaVuSans_glyphInstructionIndices,
-            DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount,
-            DejaVuSansPaths)
+	loadfont(DejaVuSans_glyphPoints, 
+            DejaVuSans_glyphPointIndices, 
+        	DejaVuSans_glyphInstructions,                
+        	DejaVuSans_glyphInstructionIndices, 
+            DejaVuSans_glyphInstructionCounts, 
+            DejaVuSans_glyphAdvances,
+            DejaVuSans_characterMap, 
+        	DejaVuSans_glyphCount);
+
 
 The unloadfont function releases the path information:
+	
+	unloadfont(DejaFont.Glyphs, DejaFont.Count);
 
-	unloadfont(DejaVuSansPaths, DejaVuSans_glyphCount)
 
 # Build and run
 
