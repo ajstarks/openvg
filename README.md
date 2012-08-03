@@ -59,8 +59,8 @@ draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy
 	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
 draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
-	void Text(VGfloat x, VGfloat y, const char* s, int pointsize, 
-			  VGfloat fillcolor[4], VGPath *gp, const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags)
+	void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[4], VGPath *gp, 
+				const short *characterMap, const int *glyphAdvances, VGbitfield renderFlags)
 draw a the text srtring (s) at location (x,y), using pointsize, filled with fillcolor. 
 
 The font information: 
@@ -140,3 +140,5 @@ The unloadfont function releases the path information:
 	pi@raspberrypi ~/vg $ ./shapes # hit return when you are done looking at the awesomness
 
 	pi@raspberrypi ~/vg $ ./shapes 100 # show 100 random shapes
+
+	pi@raspberrypi ~/vg $ ./shapes 10 y # show the character "y" rotated 10 times, progressively faded
