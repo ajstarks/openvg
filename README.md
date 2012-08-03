@@ -9,8 +9,14 @@ Running with a numeric command line argument shows the specified number of rando
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
 Colors are specified with a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0.
 
+
 	void Start(int width, int height, float fill[4])
 Begin the picture, clear the screen with the specified color
+
+	End()
+end the picture, rendering to the screen.
+
+### Attributes
 
 	void setfill(float color[4])
 Set the fill color
@@ -20,6 +26,8 @@ Set the stroke color
 
 	void strokeWidth(float width)
 Set the stroke width
+
+### Shapes and Text
 
 	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
 draw a line between (x1, y1) and (x2, y2)
@@ -62,8 +70,32 @@ The font information:
 
 renderflags specifies how the text will be rendered.
 	
-	End()
-end the picture, rendering to the screen.
+### Transformations
+
+	void Translate(VGfloat x, VGfloat y)
+Translate the coordinate system to (x,y)
+
+	void Rotate(VGfloat r)
+Rotate the coordinate system around angle r
+
+	void Scale(VGfloat x, VGfloat y)
+Scale by x,y
+
+	void ScaleX(VGfloat x)
+Scale the x coordinate by x
+
+	void ScaleY(VGfloat y)
+Scale the y coordinate by y
+
+	void Shear(VGfloat x, VGfloat y)
+Shear by the angles x,y
+
+	void ShearX(VGfloat x)
+Shear by x
+
+	void ShearY(VGfloat y)
+Shear by y
+
 
 ## Using fonts
 

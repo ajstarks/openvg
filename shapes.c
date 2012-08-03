@@ -12,12 +12,12 @@
 #include "VG/vgu.h"
 #include "EGL/egl.h"
 #include "GLES/gl.h"
-#include "DejaVuSans.inc" // font data
-#include "eglstate.h"	// data structures for graphics state
+#include "DejaVuSans.inc"               // font data
+#include "eglstate.h"                   // data structures for graphics state
 
-static STATE_T _state, *state=&_state; // global graphics state
+static STATE_T _state, *state=&_state;  // global graphics state
 static const int MAXFONTPATH=256;
-VGPath DejaVuSansPaths[256];	// font paths
+VGPath DejaVuSansPaths[256];            // font paths
 
 //
 // Font functions
@@ -55,12 +55,15 @@ void unloadfont(VGPath *glyphs, int n) {
 }
 
 // init sets the system to its initial state
-void init() {
+void init(int *w, int *h) {
 	bcm_host_init();
 	memset( state, 0, sizeof( *state ) );
 	oglinit(state);
-	loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices, DejaVuSans_glyphInstructions, 
-			DejaVuSans_glyphInstructionIndices, DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount, DejaVuSansPaths);
+	loadfont(DejaVuSans_glyphPoints, DejaVuSans_glyphPointIndices, 
+			DejaVuSans_glyphInstructions, DejaVuSans_glyphInstructionIndices, 
+			DejaVuSans_glyphInstructionCounts, DejaVuSans_glyphCount, DejaVuSansPaths);
+	*w = state->screen_width;
+	*h = state->screen_height;
 }
 
 // finish cleans up
@@ -76,6 +79,51 @@ static void finish(void) {
 	eglDestroyContext( state->display, state->context );
 	eglTerminate( state->display );
 }
+
+// 
+// Transformations
+//
+
+// Translate the coordinate system to x,y
+void Translate(VGfloat x, VGfloat y) {
+	vgTranslate(x, y);
+}
+
+// Rotate around angle r
+void Rotate(VGfloat r) {
+	vgRotate(r);
+}
+
+// Shear shears the x coordinate by x degrees, the y coordinate by y degrees
+void Shear(VGfloat x, VGfloat y) {
+	vgShear(x,y);
+}
+
+// Scale scales by  x, y
+void Scale(VGfloat x, VGfloat y) {
+	vgScale(x,y);
+}
+
+// ScaleX scales the x coordinate by a factor of x
+void ScaleX(VGfloat x) {
+	vgScale(x, 1);
+}
+
+// ScaleY scales the y coordinate by a factor of y
+void ScaleY(VGfloat y) {
+	vgScale(1, y);
+}
+
+// ShearX scales the x coordinate by a factor of x
+void ShearX(VGfloat x) {
+	vgShear(x,0);
+}
+
+// ShearY scales the y coordinate by a factor of y
+void ShearY(VGfloat y) {
+	vgShear(0,y);
+}
+
 //
 // Style functions
 //
@@ -138,6 +186,7 @@ void Text(VGfloat x, VGfloat y, const char* s, int pointsize, VGfloat fillcolor[
 // Shape functions
 //
 
+// newpath creates path data
 VGPath newpath() {
 	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
 }
@@ -149,6 +198,7 @@ void makecurve(VGubyte *segments, VGfloat *coords) {
 	vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
 	vgDestroyPath(path);
 }
+
 // CBezier makes a quadratic bezier curve
 void Cbezier( VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
 	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
@@ -359,6 +409,27 @@ void refcard(int width, int height) {
 	End();
 }
 
+// clear the screen to a background color
+void Background(int w, int h, VGfloat fill[4]) {
+	vgSetfv(VG_CLEAR_COLOR, 4, fill);
+	vgClear(0,0,w,h);
+}
+// rotext draws text, rotated around the center of the screen, progressively faded
+void rotext(VGfloat x, VGfloat y, int w, int h, int n, VGfloat deg, char *s) {
+	int i;
+	VGfloat textcolor[4] = {0,0,0,1}, bgcolor[4] = {1,1,1,1};
+	VGfloat fade = (100.0/(VGfloat)n)/100.0;
+	
+	Start(w, h, bgcolor);
+	Translate(x,y);
+	for (i=0; i < n; i++) {
+		Text(0,0, s, 256, textcolor, DejaVuSansPaths, DejaVuSans_characterMap, DejaVuSans_glyphAdvances, VG_FILL_PATH);
+		textcolor[3] -= fade;
+		Rotate(deg);
+	}
+	End();
+}
+
 // rshapes draws shapes (rect and ellipse) with random colors, strokes, and sizes. 
 void rshapes(int width, int height, int n) {
 	int np = 10;
@@ -426,18 +497,24 @@ void rshapes(int width, int height, int n) {
 	End();
 }
 
-// main initializes the system and shows the picture, 
-// exit and clean up when you hit [RETURN].
+// main initializes the system and shows the picture. 
+// Exit and clean up when you hit [RETURN].
 int main (int argc, char **argv) {
-	int w, h;
+	int w, h, nr;
+	VGfloat r;
 
-	init();
-	w = state->screen_width;
-	h = state->screen_height;
-	if (argc > 1) {
-		rshapes(w, h, atoi(argv[1]));
-	} else {
-		refcard(w, h);
+	init(&w, &h);
+	switch (argc) {
+		case 2:
+			rshapes(w, h, atoi(argv[1]));
+			break;
+		case 3:
+			nr = atoi(argv[1]);
+			r = 360/(VGfloat)nr;
+			rotext(w/2, h/2, w, h, nr, r, argv[2]);
+			break;
+		default:
+			refcard(w,h);
 	}
 	while (getchar() != '\n') {
 		;
