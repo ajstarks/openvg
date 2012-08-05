@@ -1,8 +1,22 @@
 #Testbed for exploring OpenVG on the Raspberry Pi.
 
+
+![Refcard](http://farm8.staticflickr.com/7256/7717370238_6f30d38f12.jpg)
+
 The program "shapes" exercises a high-level API built on OpenVG. If you run the program 
 with no command line arguments, you get a "reference card" that demonstrates the calls in the library. 
-Running with a numeric command line argument shows the specified number of random shapes.
+Running with a numeric command line argument shows the specified number of random shapes, and supplying
+a number and a character string shows the string rotated and progressively faded.
+
+
+![Random](http://farm9.staticflickr.com/8427/7717369872_85c0d3917c.jpg)
+
+Random shapes
+
+![Rotext](http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg)
+
+Rotated text
+
 
 ## API
 
