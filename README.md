@@ -1,7 +1,8 @@
 #Testbed for exploring OpenVG on the Raspberry Pi.
 
 
-![Refcard](http://farm8.staticflickr.com/7256/7717370238_6f30d38f12.jpg)
+![Rotext](http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg)
+
 
 The program "shapes" exercises a high-level API built on OpenVG. If you run the program 
 with no command line arguments, you get a "reference card" that demonstrates the calls in the library. 
@@ -9,16 +10,10 @@ Running with a numeric command line argument shows the specified number of rando
 a number and a character string shows the string rotated and progressively faded.
 
 
-![Random](http://farm9.staticflickr.com/8427/7717369872_85c0d3917c.jpg)
-
-Random shapes
-
-![Rotext](http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg)
-
-Rotated text
-
 
 ## API
+
+<a href="http://www.flickr.com/photos/ajstarks/7717370238/" title="OpenVG refcard by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7256/7717370238_6f30d38f12.jpg" width="500" height="281" alt="OpenVG refcard"></a>
 
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
 Colors are specified with a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0.
