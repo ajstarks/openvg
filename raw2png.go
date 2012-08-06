@@ -1,3 +1,4 @@
+//raw2png - convert RGBA bytes to PNG
 package main
 
 import (
@@ -21,11 +22,10 @@ func main() {
 	}
 	scanline := make([]color.NRGBA, width)
 	img := image.NewNRGBA(image.Rect(0, 0, width, height))
-	for y := height; y > 0; y-- {
-		binary.Read(os.Stdin, binary.LittleEndian, &scanline)
+	for y := height; y > 0; y-- { // OpenVG has origin at lower left, y increasing up
+		binary.Read(os.Stdin, binary.LittleEndian, &scanline)  // read a row at a time
 		for x := 0; x < width; x++ {
 			img.Set(x, y, scanline[x])
-			np++
 		}
 	}
 	png.Encode(os.Stdout, img)
