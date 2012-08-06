@@ -1,7 +1,7 @@
 #Testbed for exploring OpenVG on the Raspberry Pi.
 
 
-![Rotext](http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg)
+<a href="http://www.flickr.com/photos/ajstarks/7717370084/" title="OpenVG rotext by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg" width="500" height="281" alt="OpenVG rotext"></a>
 
 
 The program "shapes" exercises a high-level API built on OpenVG. If you run the program 
@@ -25,7 +25,10 @@ Begin the picture, clear the screen with the specified color
 	End()
 end the picture, rendering to the screen.
 
-### Attributes
+	SaveEnd()
+end the picture, rendering to the screen, save the raster to the standard output file as RGBA 
+
+## Attributes
 
 	void setfill(float color[4])
 Set the fill color

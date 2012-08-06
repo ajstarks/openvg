@@ -73,6 +73,13 @@ void unloadfont(VGPath *glyphs, int n) {
 	}
 }
 
+void dumpscreen(int w, int h) {
+	void *ScreenBuffer = malloc(w*h*4);
+	vgReadPixels(ScreenBuffer, (w*4), VG_sABGR_8888, 0, 0, w, h);
+	fwrite(ScreenBuffer, 1, w*h*4, stdout); 
+	free(ScreenBuffer);
+}
+
 // init sets the system to its initial state
 void init(int *w, int *h) {
 	bcm_host_init();
@@ -101,7 +108,7 @@ void init(int *w, int *h) {
 }
 
 // finish cleans up
-static void finish(void) {
+static void finish(int w, int h) {
 	// Release font data
 	unloadfont(DejaFont.Glyphs, DejaFont.Count);
 	unloadfont(DejaSerif.Glyphs, DejaSerif.Count);
@@ -216,6 +223,20 @@ void Text(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize, VGfloa
 	vgLoadMatrix(mm);
 }
 
+// textwidth returns the width of a text string in a font
+VGfloat textwidth(char *s, Fontinfo f, VGfloat size) {
+	int i;
+	VGfloat tw = 0.0;
+	for(i=0; i < (int)strlen(s); i++) {
+        unsigned int character = (unsigned int)s[i];
+        int glyph = f.CharacterMap[character];
+        if( glyph == -1 ) {
+            continue;   //glyph is undefined
+        }
+        tw += size * f.GlyphAdvances[glyph] / 65536.0f;
+    }
+	return tw;
+}
 //
 // Shape functions
 //
@@ -338,6 +359,13 @@ void End() {
 	assert(eglGetError() == EGL_SUCCESS);
 }
 
+void SaveEnd() {
+	assert(vgGetError() == VG_NO_ERROR);
+    dumpscreen(state->screen_width, state->screen_height);
+    eglSwapBuffers(state->display, state->surface);
+    assert(eglGetError() == EGL_SUCCESS);
+}
+
 // randcolor returns a fraction of 255
 VGfloat randcolor() {
 	return (VGfloat)(rand() % 256) / 255.0;
@@ -348,18 +376,6 @@ VGfloat randf(n) {
 	return (VGfloat)(rand() % n);
 }
 
-// rlines makes random lines
-void rlines(VGfloat x, VGfloat y, int width, int height) {
-	int i = (int)x;
-	VGfloat rcolor[4] = {0,0,0,.40};
-	for (; i < width; i++ ) {
-		rcolor[0] = randcolor();
-		rcolor[1] = rcolor[0];
-		rcolor[2] = rcolor[0];
-		Line(i, y, i+randf(width), height);
-	}
-}
-
 // coordpoint marks a coordinate, preserving a previous color
 void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
 	VGfloat dotcolor[4] = {0.3, 0.3, 0.3, 1};
@@ -367,7 +383,24 @@ void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
 	Circle(x, y, size);
 	setfill(pcolor);
 }
-
+// testpattern shows a test pattern 
+void testpattern(int width, int height) {
+	VGfloat llc[4] = {1,0,0,1},
+			ulc[4] = {0,1,0,1},
+			lrc[4] = {0,0,1,1},
+			urc[4] = {0.5,0.5,0.5,1},
+			tc[4]  = {0,0,0,1},
+			bgcolor[4] = {1,1,1,1},
+			tw;
+	Start(width, height, bgcolor);
+	setfill(llc); Rect(0,0,100,100);
+	setfill(ulc); Rect(0,height-100,100,100);
+	setfill(lrc); Rect(width-100,0,100,100);
+	setfill(urc); Rect(width-100,height-100,100,100);
+	tw = textwidth("hello, Pi", DejaFont, 256);
+	Text((width/2)-(tw/2),height/2,"hello Pi", DejaFont, 256, tc);
+	End();
+}
 // refcard shows a reference card of shapes
 void refcard(int width, int height) {
 	char *shapenames[] = { 
@@ -489,8 +522,11 @@ void rshapes(int width, int height, int n) {
 		Ellipse(randf(width), randf(height), randf(200), randf(100));
 		Circle(randf(width), randf(height), randf(100));
 		Rect(randf(width), randf(height), randf(200), randf(100));
-		Line(randf(width), randf(height), randf(width), randf(height));
 		Arc(randf(width), randf(height), randf(200), randf(200), randf(360), randf(360));
+		
+		sx = randf(width);
+		sy = randf(height);
+		Line(sx, sy, sx+randf(200), sy+randf(100));
 
 		sx = randf(width);
 		sy = randf(height);
@@ -526,7 +562,7 @@ void rshapes(int width, int height, int n) {
 		}
 		Polyline(polyx, polyy, np);
 	}
-	Text(randf(100), randf(height-100), "OpenVG on the Raspberry Pi", DejaFont, 64, textcolor);
+	Text(50, 100, "OpenVG on the Raspberry Pi", DejaFont, 64, textcolor);
 	End();
 }
 
@@ -534,7 +570,6 @@ void rshapes(int width, int height, int n) {
 // Exit and clean up when you hit [RETURN].
 int main (int argc, char **argv) {
 	int w, h, nr;
-	VGfloat r;
 
 	init(&w, &h);
 	switch (argc) {
@@ -543,8 +578,7 @@ int main (int argc, char **argv) {
 			break;
 		case 3:
 			nr = atoi(argv[1]);
-			r = 360/(VGfloat)nr;
-			rotext(w/2, h/2, w, h, nr, r, argv[2]);
+			rotext(w/2, h/2, w, h, nr, 360.0/(VGfloat)nr, argv[2]);
 			break;
 		default:
 			refcard(w,h);
@@ -552,6 +586,6 @@ int main (int argc, char **argv) {
 	while (getchar() != '\n') {
 		;
 	}
-	finish();
+	finish(w, h);
 	return 0;
 }
