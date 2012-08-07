@@ -86,20 +86,8 @@ Rotate the coordinate system around angle r
 	void Scale(VGfloat x, VGfloat y)
 Scale by x,y
 
-	void ScaleX(VGfloat x)
-Scale the x coordinate by x
-
-	void ScaleY(VGfloat y)
-Scale the y coordinate by y
-
 	void Shear(VGfloat x, VGfloat y)
 Shear by the angles x,y
-
-	void ShearX(VGfloat x)
-Shear by x
-
-	void ShearY(VGfloat y)
-Shear by y
 
 
 ## Using fonts
@@ -129,11 +117,9 @@ The loadfont function creates OpenVG paths from the font data:
             DejaVuSans_characterMap, 
         	DejaVuSans_glyphCount);
 
-
 The unloadfont function releases the path information:
 	
 	unloadfont(DejaFont.Glyphs, DejaFont.Count);
-
 
 # Build and run
 
