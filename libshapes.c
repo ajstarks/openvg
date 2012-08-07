@@ -16,10 +16,9 @@
 #include "DejaVuSerif.inc"
 #include "eglstate.h"                   // data structures for graphics state
 #include "fontinfo.h"                   // font data structure
-
+#include "shapes.h"
 static STATE_T _state, *state=&_state;  // global graphics state
 static const int MAXFONTPATH=256;
-Fontinfo DejaFont, DejaSerif;
 
 //
 // Font functions
@@ -47,7 +46,6 @@ Fontinfo loadfont(	const int *Points,
 		const int* p = &Points[PointIndices[i]*2];
 		const unsigned char* instructions = &Instructions[InstructionIndices[i]];
 		int ic = InstructionCounts[i];
-
 		VGPath path = vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_S_32, 1.0f/65536.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
 		f.Glyphs[i] = path;
 		if(ic) {
@@ -108,7 +106,7 @@ void init(int *w, int *h) {
 }
 
 // finish cleans up
-static void finish(int w, int h) {
+void finish() {
 	// Release font data
 	unloadfont(DejaFont.Glyphs, DejaFont.Count);
 	unloadfont(DejaSerif.Glyphs, DejaSerif.Count);
@@ -146,32 +144,12 @@ void Scale(VGfloat x, VGfloat y) {
 	vgScale(x,y);
 }
 
-// ScaleX scales the x coordinate by a factor of x
-void ScaleX(VGfloat x) {
-	vgScale(x, 1);
-}
-
-// ScaleY scales the y coordinate by a factor of y
-void ScaleY(VGfloat y) {
-	vgScale(1, y);
-}
-
-// ShearX scales the x coordinate by a factor of x
-void ShearX(VGfloat x) {
-	vgShear(x,0);
-}
-
-// ShearY scales the y coordinate by a factor of y
-void ShearY(VGfloat y) {
-	vgShear(0,y);
-}
-
 //
 // Style functions
 //
 
 // setfill sets the fill color
-void setfill(float color[4]) {
+void setfill(VGfloat color[4]) {
 	VGPaint fillPaint = vgCreatePaint();
 	vgSetParameteri(fillPaint, VG_PAINT_TYPE, VG_PAINT_TYPE_COLOR);
 	vgSetParameterfv(fillPaint, VG_PAINT_COLOR, 4, color);	
@@ -180,7 +158,7 @@ void setfill(float color[4]) {
 }
 
 // setstroke sets the stroke color
-void setstroke(float color[4]) {
+void setstroke(VGfloat color[4]) {
 	VGPaint strokePaint = vgCreatePaint();
 	vgSetParameteri(strokePaint, VG_PAINT_TYPE, VG_PAINT_TYPE_COLOR);
 	vgSetParameterfv(strokePaint, VG_PAINT_COLOR, 4, color);	
@@ -189,7 +167,7 @@ void setstroke(float color[4]) {
 }
 
 // strokeWidth sets the stroke width
-void strokeWidth(float width) {
+void strokeWidth(VGfloat width) {
 	vgSetf(VG_STROKE_LINE_WIDTH, width);
 	vgSeti(VG_STROKE_CAP_STYLE, VG_CAP_BUTT);
 	vgSeti(VG_STROKE_JOIN_STYLE, VG_JOIN_MITER);
@@ -366,226 +344,8 @@ void SaveEnd() {
     assert(eglGetError() == EGL_SUCCESS);
 }
 
-// randcolor returns a fraction of 255
-VGfloat randcolor() {
-	return (VGfloat)(rand() % 256) / 255.0;
-}
-
-// randf returns a floating point number bounded by n
-VGfloat randf(n) {
-	return (VGfloat)(rand() % n);
-}
-
-// coordpoint marks a coordinate, preserving a previous color
-void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
-	VGfloat dotcolor[4] = {0.3, 0.3, 0.3, 1};
-	setfill(dotcolor);
-	Circle(x, y, size);
-	setfill(pcolor);
-}
-// testpattern shows a test pattern 
-void testpattern(int width, int height) {
-	VGfloat llc[4] = {1,0,0,1},
-			ulc[4] = {0,1,0,1},
-			lrc[4] = {0,0,1,1},
-			urc[4] = {0.5,0.5,0.5,1},
-			tc[4]  = {0,0,0,1},
-			bgcolor[4] = {1,1,1,1},
-			tw;
-	Start(width, height, bgcolor);
-	setfill(llc); Rect(0,0,100,100);
-	setfill(ulc); Rect(0,height-100,100,100);
-	setfill(lrc); Rect(width-100,0,100,100);
-	setfill(urc); Rect(width-100,height-100,100,100);
-	tw = textwidth("hello, Pi", DejaFont, 256);
-	Text((width/2)-(tw/2),height/2,"hello Pi", DejaFont, 256, tc);
-	End();
-}
-// refcard shows a reference card of shapes
-void refcard(int width, int height) {
-	char *shapenames[] = { 
-		"Circle", "Ellipse", "Rectangle", "Rounded Rectangle", 
-		"Line", "Polyline", "Polygon", "Arc", "Quadratic Bezier", "Cubic Bezier"
-	};
-	VGfloat strokecolor[4] = {0.8,0.8,0.8,1}, 
-			shapecolor[4] = {202.0/255.0, 225.0/255.0,1,1}, 
-			textcolor[4] = {0,0,0,1}, 
-			bgcolor[4] = {1,1,1,1};
-
-	VGfloat linewidth = 1;
-	VGfloat top=height-100, sx = 500, sy = top, sw=100, sh=50, dotsize=7, spacing=2.0;
-	int i, ns = sizeof(shapenames)/sizeof(char *), fontsize = 36;
-	Start(width, height, bgcolor);
-	setfill(textcolor);
-	sx = width * 0.10;
-	textcolor[0] = 0.5;
-	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", DejaFont, 48, textcolor);
-		
-	textcolor[0] = 0;
-	for (i=0; i < ns; i++) {
-		Text(sx+sw+sw/2, sy, shapenames[i], DejaFont, fontsize, textcolor);
-		sy -= sh*spacing; 
-	}
-	sy = top;
-	VGfloat cx = sx+(sw/2), ex = sx + sw;
-	setfill(shapecolor);
-	Circle(cx, sy, sw); coordpoint(cx, sy, dotsize, shapecolor); sy -= sh*spacing;
-	Ellipse(cx, sy, sw, sh); coordpoint(cx, sy, dotsize, shapecolor); sy -= sh*spacing;
-	Rect(sx, sy, sw, sh); coordpoint(sx, sy, dotsize, shapecolor); sy -= sh*spacing;
-	Roundrect(sx, sy, sw, sh, 20, 20); coordpoint(sx, sy, dotsize, shapecolor); sy -= sh*spacing;
-
-	strokeWidth(linewidth);
-	setstroke(strokecolor); 
-	Line(sx, sy, ex, sy); coordpoint(sx, sy, dotsize, shapecolor); coordpoint(ex, sy, dotsize, shapecolor); sy -= sh;
-
-	VGfloat px[5] = {sx, sx+(sw/4), sx+(sw/2), sx+((sw*3)/4), sx+sw}; 
-	VGfloat py[5] = {sy, sy-sh, sy, sy-sh, sy}; 
-
-	Polyline(px, py, 5); 
-	coordpoint(px[0], py[0], dotsize, shapecolor); 
-	coordpoint(px[1], py[1], dotsize, shapecolor); 
-	coordpoint(px[2], py[2], dotsize, shapecolor); 
-	coordpoint(px[3], py[3], dotsize, shapecolor);
-	coordpoint(px[4], py[4], dotsize, shapecolor);
-	sy -= sh*spacing;
-
-	py[0] = sy;
-	py[1] = sy-sh;
-	py[2] = sy-(sh/2);
-	py[3] = py[1] - (sh/4);
-	py[4] = sy;
-	Polygon(px, py, 5); sy -= (sh*spacing) + sh;
-
-	Arc(sx+(sw/2), sy, sw, sh, 0, 180); coordpoint(sx+(sw/2), sy, dotsize, shapecolor); sy -= sh*spacing;
-
-	VGfloat cy = sy + (sh/2), ey = sy;
-	Qbezier(sx, sy, cx, cy, ex, ey);
-	coordpoint(sx, sy, dotsize, shapecolor);
-	coordpoint(cx, cy, dotsize, shapecolor); 
-	coordpoint(ex, ey, dotsize, shapecolor);
-	sy -= sh*spacing;
-
-	ey = sy;
-	cy = sy + sh;
-	Cbezier(sx, sy, cx, cy, cx, sy, ex, ey); 
-	coordpoint(sx, sy, dotsize, shapecolor); 
-	coordpoint(cx, cy, dotsize, shapecolor); 
-	coordpoint(cx, sy, dotsize, shapecolor);
-	coordpoint(ex, ey, dotsize, shapecolor);
-
-	End();
-}
-
 // clear the screen to a background color
 void Background(int w, int h, VGfloat fill[4]) {
 	vgSetfv(VG_CLEAR_COLOR, 4, fill);
 	vgClear(0,0,w,h);
-}
-// rotext draws text, rotated around the center of the screen, progressively faded
-void rotext(VGfloat x, VGfloat y, int w, int h, int n, VGfloat deg, char *s) {
-	int i;
-	VGfloat textcolor[4] = {1,1,1,1}, bgcolor[4] = {0,0,0,1};
-	VGfloat fade = (100.0/(VGfloat)n)/100.0;
-	
-	Start(w, h, bgcolor);
-	Translate(x,y);
-	for (i=0; i < n; i++) {
-		Text(0,0, s, DejaSerif, 256, textcolor);
-		textcolor[3] -= fade;
-		Rotate(deg);
-	}
-	End();
-}
-
-// rshapes draws shapes (rect and ellipse) with random colors, strokes, and sizes. 
-void rshapes(int width, int height, int n) {
-	int np = 10;
-	VGfloat rcolor[4], scolor[4], bgcolor[4] = {1,1,1,1}, textcolor[4] = {0.5, 0, 0, 1};
-	scolor[3] = 1; // strokes are solid
-	VGfloat sx, sy, cx, cy, px, py, ex, ey, pox, poy;
-	VGfloat polyx[np], polyy[np];
-	int i,j;
-	srand ( time(NULL) );
-	Start(width, height, bgcolor);
-	for (i=0; i < n; i++) {
-		rcolor[0] = randcolor();
-		rcolor[1] = randcolor();
-		rcolor[2] = randcolor();
-		rcolor[3] = randcolor();
-
-		scolor[1] = randcolor();
-		scolor[2] = randcolor();
-		scolor[3] = randcolor();
-		setfill(rcolor);
-		setstroke(scolor);
-		strokeWidth(randf(10));
-		Ellipse(randf(width), randf(height), randf(200), randf(100));
-		Circle(randf(width), randf(height), randf(100));
-		Rect(randf(width), randf(height), randf(200), randf(100));
-		Arc(randf(width), randf(height), randf(200), randf(200), randf(360), randf(360));
-		
-		sx = randf(width);
-		sy = randf(height);
-		Line(sx, sy, sx+randf(200), sy+randf(100));
-
-		sx = randf(width);
-		sy = randf(height);
-		ex = sx + randf(200);
-		ey = sy;
-		cx = sx + ((ex - sx )/ 2.0);
-		cy = sy + randf(100);
-		Qbezier(sx, sy, cx, cy, ex, ey);
-
-		sx = randf(width);
-		sy = randf(height);
-		ex = sx + randf(200);
-		ey = sy;
-		cx = sx + ((ex - sx )/ 2.0);
-		cy = sy + randf(100);
-		px = cx;
-		py = sy - randf(100);
-		Cbezier(sx, sy, cx, cy, px, py, ex, ey);
-		
-		pox = randf(width);
-		poy = randf(height);
-		for (j=0; j < np; j++) {
-			polyx[j] = pox + randf(200);
-			polyy[j] = poy + randf(100);
-		}
-		Polygon(polyx, polyy, np);
-
-		pox = randf(width);
-		poy = randf(height);
-		for (j=0; j < np; j++) {
-			polyx[j] = pox + randf(200);
-			polyy[j] = poy + randf(100);
-		}
-		Polyline(polyx, polyy, np);
-	}
-	Text(50, 100, "OpenVG on the Raspberry Pi", DejaFont, 64, textcolor);
-	End();
-}
-
-// main initializes the system and shows the picture. 
-// Exit and clean up when you hit [RETURN].
-int main (int argc, char **argv) {
-	int w, h, nr;
-
-	init(&w, &h);
-	switch (argc) {
-		case 2:
-			rshapes(w, h, atoi(argv[1]));
-			break;
-		case 3:
-			nr = atoi(argv[1]);
-			rotext(w/2, h/2, w, h, nr, 360.0/(VGfloat)nr, argv[2]);
-			break;
-		default:
-			refcard(w,h);
-	}
-	while (getchar() != '\n') {
-		;
-	}
-	finish(w, h);
-	return 0;
 }

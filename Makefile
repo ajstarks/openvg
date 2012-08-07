@@ -1,13 +1,19 @@
-all: shapes font2openvg
+all: font2openvg fonts shapedemo raw2png
 
-shapes:	shapes.c oglinit.o
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapes oglinit.o shapes.c  -L/opt/vc/lib -lGLESv2 
+libshapes.o:	libshapes.c shapes.h fontinfo.h
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+
+shapedemo:	shapedemo.c libshapes.o oglinit.o
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2
 
 oglinit.o:	oglinit.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
 
 font2openvg:	font2openvg.cpp
-	g++ -I /usr/include/freetype2 font2openvg.cpp   -o font2openvg -lfreetype
+	g++ -I /usr/include/freetype2 font2openvg.cpp -o font2openvg -lfreetype
 
 fonts: font2openvg 
 	for f in /usr/share/fonts/truetype/ttf-dejavu/*.ttf; do fn=`basename $$f .ttf`; ./font2openvg $$f $$fn.inc $$fn; done
+
+raw2png:	raw2png.go
+	go build raw2png.go

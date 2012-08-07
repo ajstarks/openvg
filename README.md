@@ -4,7 +4,7 @@
 <a href="http://www.flickr.com/photos/ajstarks/7717370084/" title="OpenVG rotext by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg" width="500" height="281" alt="OpenVG rotext"></a>
 
 
-The program "shapes" exercises a high-level API built on OpenVG. If you run the program 
+The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. If you run the program 
 with no command line arguments, you get a "reference card" that demonstrates the calls in the library. 
 Running with a numeric command line argument shows the specified number of random shapes, and supplying
 a number and a character string shows the string rotated and progressively faded.
@@ -123,7 +123,8 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-	pi@raspberrypi ~/vg $ make fonts shapes
+	pi@raspberrypi ~/vg $ make
+	g++ -I /usr/include/freetype2 font2openvg.cpp -o font2openvg -lfreetype
 	for f in /usr/share/fonts/truetype/ttf-dejavu/*.ttf; do fn=`basename $f .ttf`; ./font2openvg $f $fn.inc $fn; done
 	224 glyphs written
 	224 glyphs written
@@ -131,10 +132,12 @@ The unloadfont function releases the path information:
 	224 glyphs written
 	224 glyphs written
 	224 glyphs written
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapes oglinit.o shapes.c  -L/opt/vc/lib -lGLESv2 
-	pi@raspberrypi ~/vg $ ./shapes # hit return when you are done looking at the awesomness
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2
+	go build raw2png.go
+	pi@raspberrypi ~/vg $ ./shapedemo # hit return when you are done looking at the awesomness
 
-	pi@raspberrypi ~/vg $ ./shapes 100 # show 100 random shapes
+	pi@raspberrypi ~/vg $ ./shapedemo 100 # show 100 random shapes
 
-	pi@raspberrypi ~/vg $ ./shapes 10 y # show the character "y" rotated 10 times, progressively faded
+	pi@raspberrypi ~/vg $ ./shapedemo 10 y # show the character "y" rotated 10 times, progressively faded
