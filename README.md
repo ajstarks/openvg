@@ -10,7 +10,6 @@ Running with a numeric command line argument shows the specified number of rando
 a number and a character string shows the string rotated and progressively faded.
 
 
-
 ## API
 
 <a href="http://www.flickr.com/photos/ajstarks/7717370238/" title="OpenVG refcard by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7256/7717370238_6f30d38f12.jpg" width="500" height="281" alt="OpenVG refcard"></a>
@@ -26,9 +25,10 @@ Begin the picture, clear the screen with the specified color
 end the picture, rendering to the screen.
 
 	SaveEnd()
-end the picture, rendering to the screen, save the raster to the standard output file as RGBA 
+end the picture, rendering to the screen, save the raster to the standard output file as 4-byte RGBA words, with a stride of
+width*4 bytes.  The program raw2png converts the "raw" raster to png.
 
-## Attributes
+### Attributes
 
 	void setfill(float color[4])
 Set the fill color
@@ -104,9 +104,9 @@ Shear by y
 
 ## Using fonts
 
-Also included is the font2openvg program, which will turn font information into C source that 
+Also included is the font2openvg program, which turns font information into C source that 
 you can embed in your program. The Makefile makes font code from files found in /usr/share/fonts/truetype/ttf-dejavu/. 
-If you want to use other fonts, adjust the Makefile accordingly, or generate them on your own once the font2openvg program is built.
+If you want to use other fonts, adjust the Makefile accordingly, or generate the font code on your own once the font2openvg program is built.
 
 font2openvg takes three arguments: the TrueType font file, the output file to be included and the prefix for identifiers.
 For example to use the DejaVu Sans font:
