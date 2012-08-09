@@ -1,5 +1,5 @@
 //
-// shapes: testbed for OpenVG APIs
+// shapedemo: testbed for OpenVG APIs
 // Anthony Starks (ajstarks@gmail.com)
 //
 #include <stdio.h>
@@ -30,12 +30,12 @@ void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
 	setfill(pcolor);
 }
 // testpattern shows a test pattern 
-void testpattern(int width, int height) {
+void testpattern(int width, int height, char *s) {
 	VGfloat llc[4] = {1,0,0,1},
 			ulc[4] = {0,1,0,1},
 			lrc[4] = {0,0,1,1},
 			urc[4] = {0.5,0.5,0.5,1},
-			tc[4]  = {0,0,0,1},
+			tc[4]  = {0.5,0,0,1},
 			bgcolor[4] = {1,1,1,1},
 			tw;
 	Start(width, height, bgcolor);
@@ -43,8 +43,14 @@ void testpattern(int width, int height) {
 	setfill(ulc); Rect(0,height-100,100,100);
 	setfill(lrc); Rect(width-100,0,100,100);
 	setfill(urc); Rect(width-100,height-100,100,100);
-	tw = textwidth("hello, Pi", DejaFont, 256);
-	Text((width/2)-(tw/2),height/2,"hello Pi", DejaFont, 256, tc);
+	
+	int fontsize = 256;
+	tw = textwidth(s, SansTypeface, fontsize);
+	while (tw > width) {
+		fontsize -= 20;
+		tw = textwidth(s, SansTypeface, fontsize);
+	}
+	Text((width/2)-(tw/2),(height/2)-(fontsize/2), s, SansTypeface, fontsize, tc);
 	End();
 }
 // refcard shows a reference card of shapes
@@ -65,10 +71,10 @@ void refcard(int width, int height) {
 	setfill(textcolor);
 	sx = width * 0.10;
 	textcolor[0] = 0.5;
-	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", DejaFont, 48, textcolor);
+	Text(width*.45, height/2, "OpenVG on the Raspberry Pi", SansTypeface, 48, textcolor);
 	textcolor[0] = 0;
 	for (i=0; i < ns; i++) {
-		Text(sx+sw+sw/2, sy, shapenames[i], DejaFont, fontsize, textcolor);
+		Text(sx+sw+sw/2, sy, shapenames[i], SansTypeface, fontsize, textcolor);
 		sy -= sh*spacing; 
 	}
 	sy = top;
@@ -130,7 +136,7 @@ void rotext(VGfloat x, VGfloat y, int w, int h, int n, VGfloat deg, char *s) {
 	Start(w, h, bgcolor);
 	Translate(x,y);
 	for (i=0; i < n; i++) {
-		Text(0,0, s, DejaSerif, 256, textcolor);
+		Text(0,0, s, SerifTypeface, 256, textcolor);
 		textcolor[3] -= fade;
 		Rotate(deg);
 	}
@@ -202,7 +208,7 @@ void rshapes(int width, int height, int n) {
 		}
 		Polyline(polyx, polyy, np);
 	}
-	Text(50, 100, "OpenVG on the Raspberry Pi", DejaFont, 64, textcolor);
+	Text(50, 100, "OpenVG on the Raspberry Pi", SansTypeface, 64, textcolor);
 	End();
 }
 
@@ -214,14 +220,21 @@ int main (int argc, char **argv) {
 	init(&w, &h);
 	switch (argc) {
 		case 2:
-			rshapes(w, h, atoi(argv[1]));
+			nr = atoi(argv[1]);
+			if (nr < 1 || nr > 1000) {
+				nr = 100;
+			}
+			rshapes(w, h, nr);
 			break;
 		case 3:
-			nr = atoi(argv[1]);
-			rotext(w/2, h/2, w, h, nr, 360.0/(VGfloat)nr, argv[2]);
+			if (strncmp(argv[1], "test", 4) == 0) {
+				testpattern(w,h,argv[2]);
+			} else {
+				nr = atoi(argv[1]);
+				rotext(w/2, h/2, w, h, nr, 360.0/(VGfloat)nr, argv[2]);
+			}
 			break;
 		default:
-//			testpattern(w,h);
 			refcard(w,h);
 	}
 	while (getchar() != '\n') {

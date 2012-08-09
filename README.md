@@ -4,11 +4,12 @@
 <a href="http://www.flickr.com/photos/ajstarks/7717370084/" title="OpenVG rotext by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg" width="500" height="281" alt="OpenVG rotext"></a>
 
 
-The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. If you run the program 
-with no command line arguments, you get a "reference card" that demonstrates the calls in the library. 
-Running with a numeric command line argument shows the specified number of random shapes, and supplying
-a number and a character string shows the string rotated and progressively faded.
+The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
+	./shapedemo                      # show a reference card
+	./shapedemo 10                   # show 10 random shapes
+	./shapedemo 10 a                 # rotated and faded "a"
+	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display
 
 ## API
 

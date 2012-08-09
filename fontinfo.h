@@ -10,4 +10,4 @@ typedef struct {
 	VGPath Glyphs[256];
 } Fontinfo;
 
-Fontinfo DejaFont, DejaSerif;
+Fontinfo SansTypeface, SerifTypeface;
