@@ -7,9 +7,9 @@
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
 	./shapedemo                      # show a reference card
-	./shapedemo 10                   # show 10 random shapes
-	./shapedemo 10 a                 # rotated and faded "a"
-	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display
+	./shapedemo rand 10              # show 10 random shapes
+	./shapedemo rotate 10 a          # rotated and faded "a"
+	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
 
 ## API
 
@@ -124,7 +124,7 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-	pi@raspberrypi ~/vg $ make
+	pi@raspberrypi ~/vg $ make fonts shapedemo
 	g++ -I /usr/include/freetype2 font2openvg.cpp -o font2openvg -lfreetype
 	for f in /usr/share/fonts/truetype/ttf-dejavu/*.ttf; do fn=`basename $f .ttf`; ./font2openvg $f $fn.inc $fn; done
 	224 glyphs written

@@ -29,30 +29,60 @@ void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
 	Circle(x, y, size);
 	setfill(pcolor);
 }
+
+typedef struct {
+	Fontinfo font;
+	VGfloat tw;
+	int fontsize;
+} FW;
+
+// adjust the font to fit within a width
+void fitwidth(int width, int adj, char *s, FW *f) {
+	f->tw = textwidth(s, f->font, f->fontsize);
+	while (f->tw > width) {
+		f->fontsize -= adj;
+		f->tw = textwidth(s, f->font, f->fontsize);
+	}
+}
+
 // testpattern shows a test pattern 
 void testpattern(int width, int height, char *s) {
-	VGfloat llc[4] = {1,0,0,1},
-			ulc[4] = {0,1,0,1},
-			lrc[4] = {0,0,1,1},
-			urc[4] = {0.5,0.5,0.5,1},
-			tc[4]  = {0.5,0,0,1},
-			bgcolor[4] = {1,1,1,1},
-			tw;
+	VGfloat llc[4] = {1,0,0,1}, ulc[4] = {0,1,0,1}, lrc[4] = {0,0,1,1}, 
+			urc[4] = {0.5,0.5,0.5,1}, tc[4]  = {0.5,0,0,1}, bgcolor[4] = {1,1,1,1},
+			midx1, midx2, midx3, midy1, midy2, midy3;
+	int fontsize = 256, w2 = width/2, h2=height/2;
+	FW tw1={MonoTypeface, 0, fontsize}, tw2={SansTypeface, 0, fontsize}, tw3={SerifTypeface,0, fontsize};
+
 	Start(width, height, bgcolor);
+
+	// colored squares in the corners
 	setfill(llc); Rect(0,0,100,100);
 	setfill(ulc); Rect(0,height-100,100,100);
 	setfill(lrc); Rect(width-100,0,100,100);
 	setfill(urc); Rect(width-100,height-100,100,100);
 	
-	int fontsize = 256;
-	tw = textwidth(s, SansTypeface, fontsize);
-	while (tw > width) {
-		fontsize -= 20;
-		tw = textwidth(s, SansTypeface, fontsize);
-	}
-	Text((width/2)-(tw/2),(height/2)-(fontsize/2), s, SansTypeface, fontsize, tc);
+	// for each font, (Sans, Serif, Mono), adjust the string to the width
+	fitwidth(width, 20, s, &tw1);
+	fitwidth(width, 20, s, &tw2);
+	fitwidth(width, 20, s, &tw3);
+
+	// Determine the midpoint
+	midx1 = w2-(tw1.tw/2);
+	midx2 = w2-(tw2.tw/2);
+	midx3 = w2-(tw3.tw/2);
+
+	// Adjust the baselines to be medial
+	midy1 = h2+20+(tw1.fontsize)/2;
+	midy2 = h2-(tw2.fontsize)/2;
+	midy3 = h2-20-tw2.fontsize-(tw3.fontsize)/2;
+
+	Text(midx1, midy1, s, tw1.font, tw1.fontsize, urc);
+	Text(midx2, midy2, s, tw2.font, tw2.fontsize, lrc);
+	Text(midx3, midy3, s, tw3.font, tw3.fontsize, tc);
 	End();
 }
+
+
 // refcard shows a reference card of shapes
 void refcard(int width, int height) {
 	char *shapenames[] = { 
@@ -128,11 +158,13 @@ void refcard(int width, int height) {
 }
 
 // rotext draws text, rotated around the center of the screen, progressively faded
-void rotext(VGfloat x, VGfloat y, int w, int h, int n, VGfloat deg, char *s) {
+void rotext(int w, int h, int n, char *s) {
 	int i;
 	VGfloat textcolor[4] = {1,1,1,1}, bgcolor[4] = {0,0,0,1};
 	VGfloat fade = (100.0/(VGfloat)n)/100.0;
-	
+	VGfloat deg = 360.0/n;
+
+	VGfloat x = w/2, y = h/2;
 	Start(w, h, bgcolor);
 	Translate(x,y);
 	for (i=0; i < n; i++) {
@@ -216,24 +248,34 @@ void rshapes(int width, int height, int n) {
 // Exit and clean up when you hit [RETURN].
 int main (int argc, char **argv) {
 	int w, h, nr;
-
+	char *usage = "%s test ...\n%s rand n\n%s rotate n ...\n";
+	char *progname = argv[0];
 	init(&w, &h);
 	switch (argc) {
-		case 2:
-			nr = atoi(argv[1]);
-			if (nr < 1 || nr > 1000) {
-				nr = 100;
-			}
-			rshapes(w, h, nr);
-			break;
 		case 3:
 			if (strncmp(argv[1], "test", 4) == 0) {
 				testpattern(w,h,argv[2]);
+			} else if (strncmp(argv[1], "rand", 4)  == 0) {
+				nr = atoi(argv[2]);
+				if (nr < 1 || nr > 1000) {
+					nr = 100;
+				}
+				rshapes(w, h, nr);
 			} else {
-				nr = atoi(argv[1]);
-				rotext(w/2, h/2, w, h, nr, 360.0/(VGfloat)nr, argv[2]);
+				fprintf(stderr, usage, progname, progname, progname); 
+				return 1;
 			}
 			break;
+
+		case 4:
+			if (strncmp(argv[1], "rotate", 6) == 0) {
+				rotext(w, h, atoi(argv[2]), argv[3]);
+			} else {
+				fprintf(stderr, usage, progname, progname, progname);
+				return 2;
+			}	
+			break;
+
 		default:
 			refcard(w,h);
 	}

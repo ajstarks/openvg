@@ -310,6 +310,7 @@ int main (int argc, char * const argv[])
 	fprintf (f,"};\n\n");
 
 	//print the bounding boxes
+/*
 	fprintf (f,"static const int %s_glyphBBoxes[%d] = {", argv[3],gbbox.size());
 	for(int i=0;i<gbbox.size();i++)
 	{
@@ -318,6 +319,7 @@ int main (int argc, char * const argv[])
 		fprintf (f,"%d%c",(int)(65536.0f*gbbox[i]),(i==(gbbox.size()-1))?' ':',');
 	}
 	fprintf (f,"};\n\n");
+*/
 #else
 	//print points
 	fprintf (f,"static const float %s_glyphPoints[%d*2] = {", argv[3],gpvec.size());
@@ -340,6 +342,7 @@ int main (int argc, char * const argv[])
 	fprintf (f,"};\n\n");
 
 	//print the bounding boxes
+/*
 	fprintf (f,"static const float %s_glyphBBoxes[%d] = {", argv[3],gbbox.size());
 	for(int i=0;i<gbbox.size();i++)
 	{
@@ -348,6 +351,7 @@ int main (int argc, char * const argv[])
 		fprintf (f,"%f%c",gbbox[i],(i==(gbbox.size()-1))?' ':',');
 	}
 	fprintf (f,"};\n\n");
+*/
 #endif
 
 

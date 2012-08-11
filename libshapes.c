@@ -14,6 +14,7 @@
 #include "GLES/gl.h"
 #include "DejaVuSans.inc"                         // font data
 #include "DejaVuSerif.inc"
+#include "DejaVuSansMono.inc"
 #include "eglstate.h"                             // data structures for graphics state
 #include "fontinfo.h"                             // font data structure
 #include "shapes.h"
@@ -53,12 +54,7 @@ Fontinfo loadfont(
             vgAppendPathData(path, ic, instructions, p);
         }
     }
-    f.Points = Points;
-    f.PointIndices = PointIndices;
-    f.Instructions = Instructions;
     f.CharacterMap = cmap;
-    f.InstructionIndices = InstructionIndices;
-    f.InstructionCounts = InstructionCounts;
     f.GlyphAdvances = adv;
     f.Count = ng;
     return f;
@@ -73,7 +69,7 @@ void unloadfont(VGPath *glyphs, int n) {
     }
 }
 
-
+// dumpscreen writes the raster to the standard output file
 void dumpscreen(int w, int h) {
     void *ScreenBuffer = malloc(w*h*4);
     vgReadPixels(ScreenBuffer, (w*4), VG_sABGR_8888, 0, 0, w, h);
@@ -104,6 +100,15 @@ void init(int *w, int *h) {
         DejaVuSerif_glyphAdvances,
         DejaVuSerif_characterMap,
         DejaVuSerif_glyphCount);
+
+	MonoTypeface = loadfont(DejaVuSansMono_glyphPoints,
+        DejaVuSansMono_glyphPointIndices,
+        DejaVuSansMono_glyphInstructions,
+        DejaVuSansMono_glyphInstructionIndices,
+        DejaVuSansMono_glyphInstructionCounts,
+        DejaVuSansMono_glyphAdvances,
+        DejaVuSansMono_characterMap,
+        DejaVuSansMono_glyphCount);
 
     *w = state->screen_width;
     *h = state->screen_height;
