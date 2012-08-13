@@ -82,6 +82,63 @@ void testpattern(int width, int height, char *s) {
 	End();
 }
 
+// textlines writes lines of text
+void textlines(VGfloat x, VGfloat y, char *s[], Fontinfo f, int fontsize, VGfloat leading, VGfloat fill[4]) {
+
+	int i;
+	for (i=0; ; i++) {
+		if (s[i] == NULL) {
+			break;
+		}
+		Text(x, y, s[i], f, fontsize, fill);
+		y -= leading;
+	}
+}
+
+// tb
+void tb(int w, int h) {
+
+	char *t1[] = {
+			"I am the resurrection and the life:",
+			"he that believeth in me though he were dead,",
+		   	"yet shall he live",
+			"and whosoever liveth and believeth in me shall never die.",
+			NULL,
+	};
+	
+	char *t2[] = {
+			"For lo, the winter is past,",
+		   	"the rain is over and gone",
+			"the flowers appear on the earth; the time for the singing",
+			"of birds is come, and the voice of the turtle is heard in our land",
+			NULL
+	};
+	
+	char *t3[] = {
+			"For since by man came death,",
+			"by man came also the resurrection of the dead,",
+			"for as in Adam all die", 
+			"even so in Christ shall all be made alive.",
+			NULL
+	};
+
+	VGfloat black[4] = {0,0,0,1}, white[4] = {1,1,1,1};
+	Start(w, h, white);
+	textlines(100, h-100, t1, SansTypeface, 24, 40, black);
+	textlines(100, h-300, t2, SerifTypeface, 24, 40, black);
+	textlines(100, h-500, t3, MonoTypeface, 24, 40, black);
+	End();
+}
+
+void imagetest(int w, int h) {
+		VGfloat bgcolor[4] = {0,0,0,1};
+		Start(w, h, bgcolor);
+		Image(100, 100, 400, 400, "test_img_violin.jpg");
+		Image(500, 100, 400, 400, "test_img_piano.jpg");
+		Image(100, 500, 400, 400, "test_img_sax.jpg");
+		Image(500, 500, 400, 400, "test_img_guitar.jpg");
+		End();
+}
 
 // refcard shows a reference card of shapes
 void refcard(int width, int height) {
@@ -252,9 +309,15 @@ int main (int argc, char **argv) {
 	char *progname = argv[0];
 	init(&w, &h);
 	switch (argc) {
+		case 2:
+				if (strncmp(argv[1], "image", 5) == 0) {
+						imagetest(w,h);
+				}
+				break;
 		case 3:
 			if (strncmp(argv[1], "test", 4) == 0) {
-				testpattern(w,h,argv[2]);
+//				testpattern(w,h,argv[2]);
+//				tb(w,h);
 			} else if (strncmp(argv[1], "rand", 4)  == 0) {
 				nr = atoi(argv[2]);
 				if (nr < 1 || nr > 1000) {
