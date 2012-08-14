@@ -142,7 +142,7 @@ void imagetest(int w, int h) {
 void refcard(int width, int height) {
 	char *shapenames[] = { 
 		"Circle", "Ellipse", "Rectangle", "Rounded Rectangle", 
-		"Line", "Polyline", "Polygon", "Arc", "Quadratic Bezier", "Cubic Bezier"
+		"Line", "Polyline", "Polygon", "Arc", "Quadratic Bezier", "Cubic Bezier", "Image"
 	};
 	VGfloat strokecolor[4] = {0.8,0.8,0.8,1}, 
 			shapecolor[4] = {202.0/255.0, 225.0/255.0,1,1}, 
@@ -150,7 +150,7 @@ void refcard(int width, int height) {
 			bgcolor[4] = {1,1,1,1};
 
 	VGfloat linewidth = 1;
-	VGfloat top=height-100, sx = 500, sy = top, sw=100, sh=50, dotsize=7, spacing=2.0;
+	VGfloat top=height-100, sx = 500, sy = top, sw=100, sh=45, dotsize=7, spacing=2.0;
 	int i, ns = sizeof(shapenames)/sizeof(char *), fontsize = 36;
 	Start(width, height, bgcolor);
 	setfill(textcolor);
@@ -208,6 +208,9 @@ void refcard(int width, int height) {
 	coordpoint(cx, cy, dotsize, shapecolor); 
 	coordpoint(cx, sy, dotsize, shapecolor);
 	coordpoint(ex, ey, dotsize, shapecolor);
+
+	sy -= (sh*spacing*1.5) ;
+	Image(sx, sy, 500, 500, "starx0.jpg");
 
 	End();
 }
