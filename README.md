@@ -7,6 +7,8 @@
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
 	./shapedemo                      # show a reference card
+	./shapedemo image                # show four test images
+	./shapedemo text                 # show blocks of text in serif, sans, and mono fonts
 	./shapedemo rand 10              # show 10 random shapes
 	./shapedemo rotate 10 a          # rotated and faded "a"
 	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
@@ -40,7 +42,7 @@ Set the stroke color
 	void strokeWidth(float width)
 Set the stroke width
 
-### Shapes and Text
+### Shapes, Text, Image
 
 	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
 draw a line between (x1, y1) and (x2, y2)
@@ -73,7 +75,10 @@ draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy
 draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
 	void Text(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize, VGfloat fillcolor[4])
-draw a the text srtring (s) at location (x,y), using pointsize, filled with fillcolor. 
+draw a the text srtring (s) at location (x,y), using pointsize, filled with fillcolor.
+
+	void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
+place a JPEG image with dimensions (w,h) at (x,y)
 
 	
 ### Transformations
@@ -124,7 +129,7 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-	pi@raspberrypi ~/vg $ make fonts shapedemo
+	pi@raspberrypi ~/vg $ make fonts test
 	g++ -I /usr/include/freetype2 font2openvg.cpp -o font2openvg -lfreetype
 	for f in /usr/share/fonts/truetype/ttf-dejavu/*.ttf; do fn=`basename $f .ttf`; ./font2openvg $f $fn.inc $fn; done
 	224 glyphs written
@@ -135,10 +140,5 @@ The unloadfont function releases the path information:
 	224 glyphs written
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2
-	go build raw2png.go
-	pi@raspberrypi ~/vg $ ./shapedemo # hit return when you are done looking at the awesomness
-
-	pi@raspberrypi ~/vg $ ./shapedemo 100 # show 100 random shapes
-
-	pi@raspberrypi ~/vg $ ./shapedemo 10 y # show the character "y" rotated 10 times, progressively faded
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+	./shapedemo ; ./shapedemo image ; ./shapedemo text ; ./shapedemo test hello ; ./shapedemo rand 50 ; ./shapedemo rotate 20 hello
