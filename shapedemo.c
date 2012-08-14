@@ -209,7 +209,7 @@ void refcard(int width, int height) {
 	coordpoint(cx, sy, dotsize, shapecolor);
 	coordpoint(ex, ey, dotsize, shapecolor);
 
-	sy -= (sh*spacing*1.5) ;
+	sy -= (sh*spacing*1.5);
 	Image(sx, sy, 500, 500, "starx0.jpg");
 
 	End();
@@ -233,7 +233,7 @@ void rotext(int w, int h, int n, char *s) {
 	End();
 }
 
-// rshapes draws shapes (rect and ellipse) with random colors, strokes, and sizes. 
+// rshapes draws shapes with random colors, strokes, and sizes. 
 void rshapes(int width, int height, int n) {
 	int np = 10;
 	VGfloat rcolor[4], scolor[4], bgcolor[4] = {1,1,1,1}, textcolor[4] = {0.5, 0, 0, 1};
@@ -311,12 +311,12 @@ int main (int argc, char **argv) {
 	init(&w, &h);
 	switch (argc) {
 		case 2:
-				if (strncmp(argv[1], "image", 5) == 0) {
-						imagetest(w,h);
-				} else if (strncmp(argv[1], "text", 4) == 0) {
-						tb(w, h);
-				}
-				break;
+			if (strncmp(argv[1], "image", 5) == 0) {
+					imagetest(w,h);
+			} else if (strncmp(argv[1], "text", 4) == 0) {
+					tb(w, h);
+			}
+			break;
 		case 3:
 			if (strncmp(argv[1], "test", 4) == 0) {
 				testpattern(w,h,argv[2]);
