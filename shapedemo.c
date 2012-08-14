@@ -48,7 +48,7 @@ void fitwidth(int width, int adj, char *s, FW *f) {
 // testpattern shows a test pattern 
 void testpattern(int width, int height, char *s) {
 	VGfloat llc[4] = {1,0,0,1}, ulc[4] = {0,1,0,1}, lrc[4] = {0,0,1,1}, 
-			urc[4] = {0.5,0.5,0.5,1}, tc[4]  = {0.5,0,0,1}, bgcolor[4] = {1,1,1,1},
+			urc[4] = {0.5,0.5,0.5,1}, tc[4] = {0.5,0,0,1}, bgcolor[4] = {1,1,1,1},
 			midx1, midx2, midx3, midy1, midy2, midy3;
 	int fontsize = 256, w2 = width/2, h2=height/2;
 	FW tw1={MonoTypeface, 0, fontsize}, tw2={SansTypeface, 0, fontsize}, tw3={SerifTypeface,0, fontsize};
@@ -95,48 +95,46 @@ void textlines(VGfloat x, VGfloat y, char *s[], Fontinfo f, int fontsize, VGfloa
 	}
 }
 
-// tb
+// tb draws a block of text
 void tb(int w, int h) {
 
-	char *t1[] = {
-			"I am the resurrection and the life:",
-			"he that believeth in me though he were dead,",
-		   	"yet shall he live",
-			"and whosoever liveth and believeth in me shall never die.",
-			NULL,
+	char *para[] = {
+		"For lo, the winter is past,",
+		"the rain is over and gone",
+		"the flowers appear on the earth;",
+		"the time for the singing of birds is come,",
+		"and the voice of the turtle is heard in our land",
+		NULL
 	};
-	
-	char *t2[] = {
-			"For lo, the winter is past,",
-		   	"the rain is over and gone",
-			"the flowers appear on the earth; the time for the singing",
-			"of birds is come, and the voice of the turtle is heard in our land",
-			NULL
-	};
-	
-	char *t3[] = {
-			"For since by man came death,",
-			"by man came also the resurrection of the dead,",
-			"for as in Adam all die", 
-			"even so in Christ shall all be made alive.",
+
+	char *labels[] = {
+			"Serif",
+			"Sans",
+			"Mono",
 			NULL
 	};
 
-	VGfloat black[4] = {0,0,0,1}, white[4] = {1,1,1,1};
-	Start(w, h, white);
-	textlines(100, h-100, t1, SansTypeface, 24, 40, black);
-	textlines(100, h-300, t2, SerifTypeface, 24, 40, black);
-	textlines(100, h-500, t3, MonoTypeface, 24, 40, black);
+	VGfloat bgcolor[4] = {1,228.0/255.0,225.0/255.0,1}, 
+			textcolor[4] = {49.0/255.0, 79.0/255.0, 79.0/255.0, 1}, 
+			tmargin = w*0.33, lmargin = w*0.10;
+
+	Start(w, h, bgcolor);
+	textlines(tmargin, h-100, para, SerifTypeface, 24, 40, textcolor);
+	textlines(tmargin, h-400, para, SansTypeface, 24, 40, textcolor);
+	textlines(tmargin, h-700, para, MonoTypeface, 24, 40, textcolor);
+	textlines(lmargin, h-100, labels, SansTypeface, 48, 300, textcolor);
 	End();
 }
 
+// imagtest displays four JPEG images, centered on the display
 void imagetest(int w, int h) {
 		VGfloat bgcolor[4] = {0,0,0,1};
+		int imgw = 400, imgh = 400, midx = w/2, midy = h/2;
 		Start(w, h, bgcolor);
-		Image(100, 100, 400, 400, "test_img_violin.jpg");
-		Image(500, 100, 400, 400, "test_img_piano.jpg");
-		Image(100, 500, 400, 400, "test_img_sax.jpg");
-		Image(500, 500, 400, 400, "test_img_guitar.jpg");
+		Image(midx-imgw, midy, imgw, imgh, "test_img_violin.jpg");
+		Image(midx, midy, imgw, imgh, "test_img_piano.jpg");
+		Image(midx-imgw, midy-imgh, imgw, imgh, "test_img_sax.jpg");
+		Image(midx, midy-imgh, imgw, imgh, "test_img_guitar.jpg");
 		End();
 }
 
@@ -312,13 +310,14 @@ int main (int argc, char **argv) {
 		case 2:
 				if (strncmp(argv[1], "image", 5) == 0) {
 						imagetest(w,h);
+				} else if (strncmp(argv[1], "text", 4) == 0) {
+						tb(w, h);
 				}
 				break;
 		case 3:
 			if (strncmp(argv[1], "test", 4) == 0) {
-//				testpattern(w,h,argv[2]);
-//				tb(w,h);
-			} else if (strncmp(argv[1], "rand", 4)  == 0) {
+				testpattern(w,h,argv[2]);
+			} else if (strncmp(argv[1], "rand", 4) == 0) {
 				nr = atoi(argv[2]);
 				if (nr < 1 || nr > 1000) {
 					nr = 100;

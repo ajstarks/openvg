@@ -71,6 +71,7 @@ void unloadfont(VGPath *glyphs, int n) {
 }
 
 // createImageFromJpeg decompresses a JPEG image to the standard image format
+// source: https://github.com/ileben/ShivaVG/blob/master/examples/test_image.c
 VGImage createImageFromJpeg(const char *filename) {
   FILE *infile;
   struct jpeg_decompress_struct jdc;
@@ -92,50 +93,50 @@ VGImage createImageFromJpeg(const char *filename) {
   unsigned int lilEndianTest = 1;
   VGImageFormat rgbaFormat;
 
-  /* Check for endianness */
+  // Check for endianness
   if (((unsigned char*)&lilEndianTest)[0] == 1)
     rgbaFormat = VG_lABGR_8888;
   else rgbaFormat = VG_lRGBA_8888;
   
-  /* Try to open image file */
+  // Try to open image file
   infile = fopen(filename, "rb");
   if (infile == NULL) {
     printf("Failed opening '%s' for reading!\n", filename);
     return VG_INVALID_HANDLE; }
   
-  /* Setup default error handling */
+  // Setup default error handling
   jdc.err = jpeg_std_error(&jerr);
   jpeg_create_decompress(&jdc);
   
-  /* Set input file */
+  // Set input file
   jpeg_stdio_src(&jdc, infile);
   
-  /* Read header and start */
+  // Read header and start
   jpeg_read_header(&jdc, TRUE);
   jpeg_start_decompress(&jdc);
   width = jdc.output_width;
   height = jdc.output_height;
   
-  /* Allocate buffer using jpeg allocator */
+  // Allocate buffer using jpeg allocator
   bbpp = jdc.output_components;
   bstride = width * bbpp;
   buffer = (*jdc.mem->alloc_sarray)
     ((j_common_ptr) &jdc, JPOOL_IMAGE, bstride, 1);
   
-  /* Allocate image data buffer */
+  // Allocate image data buffer
   dbpp = 4;
   dstride = width * dbpp;
   data = (VGubyte*)malloc(dstride * height);
   
-  /* Iterate until all scanlines processed */
+  // Iterate until all scanlines processed
   while (jdc.output_scanline < height) {
     
-    /* Read scanline into buffer */
+    // Read scanline into buffer
     jpeg_read_scanlines(&jdc, buffer, 1);    
     drow = data + (height-jdc.output_scanline) * dstride;
     brow = buffer[0];
     
-    /* Expand to RGBA */
+    // Expand to RGBA
     for (x=0; x<width; ++x, drow+=dbpp, brow+=bbpp) {
       switch (bbpp) {
       case 4:
@@ -153,12 +154,11 @@ VGImage createImageFromJpeg(const char *filename) {
     }
   }
   
-  /* Create VG image */
-
+  // Create VG image
   img = vgCreateImage(rgbaFormat, width, height, VG_IMAGE_QUALITY_BETTER);
   vgImageSubData(img, data, dstride, rgbaFormat, 0, 0, width, height);
   
-  /* Cleanup */
+  // Cleanup
   jpeg_destroy_decompress(&jdc);
   fclose(infile);
   free(data);
@@ -166,10 +166,12 @@ VGImage createImageFromJpeg(const char *filename) {
   return img;
 }
 
+// Image places an image at the specifed location
 void Image(VGfloat x, VGfloat y, int w, int h, char * filename) {
 	VGImage img = createImageFromJpeg(filename);
 	vgSetPixels(x, y, img, 0, 0, w, h);
 }
+
 // dumpscreen writes the raster to the standard output file
 void dumpscreen(int w, int h) {
     void *ScreenBuffer = malloc(w*h*4);
@@ -177,7 +179,6 @@ void dumpscreen(int w, int h) {
     fwrite(ScreenBuffer, 1, w*h*4, stdout);
     free(ScreenBuffer);
 }
-
 
 // init sets the system to its initial state
 void init(int *w, int *h) {
@@ -471,7 +472,7 @@ void End() {
     assert(eglGetError() == EGL_SUCCESS);
 }
 
-
+// SaveEnd dumps the raster before rendering to the display 
 void SaveEnd() {
     assert(vgGetError() == VG_NO_ERROR);
     dumpscreen(state->screen_width, state->screen_height);
