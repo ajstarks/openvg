@@ -169,6 +169,7 @@ VGImage createImageFromJpeg(const char *filename) {
 void Image(VGfloat x, VGfloat y, int w, int h, char * filename) {
 	VGImage img = createImageFromJpeg(filename);
 	vgSetPixels(x, y, img, 0, 0, w, h);
+	vgDestroyImage(img);
 }
 
 // dumpscreen writes the raster to the standard output file
