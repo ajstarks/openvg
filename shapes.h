@@ -23,4 +23,6 @@ extern void finish();
 extern void setfill(VGfloat [4]);
 extern void setstroke(VGfloat [4]);
 extern void strokeWidth(VGfloat);
+extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const int *, const int *, const int *, const short *, int); 
+extern void unloadfont(VGPath, int);
 extern VGfloat textwidth(char *, Fontinfo, VGfloat);

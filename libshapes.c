@@ -18,7 +18,6 @@
 #include "DejaVuSansMono.inc"
 #include "eglstate.h"                             // data structures for graphics state
 #include "fontinfo.h"                             // font data structure
-#include "shapes.h"
 static STATE_T _state, *state=&_state;            // global graphics state
 static const int MAXFONTPATH=256;
 
