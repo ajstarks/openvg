@@ -56,7 +56,7 @@ void testpattern(int width, int height, char *s) {
 	Start(width, height, bgcolor);
 
 	// colored squares in the corners
-	setfill(llc); Rect(0,0,100,100);
+	setfill(llc); Rect(0,0,100,100); 
 	setfill(ulc); Rect(0,height-100,100,100);
 	setfill(lrc); Rect(width-100,0,100,100);
 	setfill(urc); Rect(width-100,height-100,100,100);
@@ -108,13 +108,13 @@ void tb(int w, int h) {
 	};
 
 	char *labels[] = {
-			"Serif",
-			"Sans",
-			"Mono",
-			NULL
+		"Serif",
+		"Sans",
+		"Mono",
+		NULL
 	};
 
-	VGfloat bgcolor[4] = {1,228.0/255.0,225.0/255.0,1}, 
+	VGfloat bgcolor[4] = {.90,.90,.90,1}, 
 			textcolor[4] = {49.0/255.0, 79.0/255.0, 79.0/255.0, 1}, 
 			tmargin = w*0.33, lmargin = w*0.10;
 
@@ -122,20 +122,40 @@ void tb(int w, int h) {
 	textlines(tmargin, h-100, para, SerifTypeface, 24, 40, textcolor);
 	textlines(tmargin, h-400, para, SansTypeface, 24, 40, textcolor);
 	textlines(tmargin, h-700, para, MonoTypeface, 24, 40, textcolor);
-	textlines(lmargin, h-100, labels, SansTypeface, 48, 300, textcolor);
+	textlines(lmargin, h-180, labels, SansTypeface, 48, 300, textcolor);
 	End();
 }
 
+// cookie draws a cookie
+void cookie(int w, int h) {
+	int ew = 200, eh = 60, h2 = h/2, w2 = w/2;
+	VGfloat gray[4] = {.5,.5,.5,1}, white[4] = {1,1,1,1}, black[4] = {0,0,0,1}, bgcolor[4]={.75,.75,.75,1};
+
+	Start(w,h,bgcolor);
+	setfill(gray);
+	Ellipse(w2, h2, ew, eh);
+	Translate(0, 10);
+
+	setfill(white);
+	Ellipse(w2, h2, ew, eh);
+	Translate(0, 20);
+
+	setfill(black);
+	Ellipse(w2, h2, ew, eh);
+	End();
+}
+
+
 // imagtest displays four JPEG images, centered on the display
 void imagetest(int w, int h) {
-		VGfloat bgcolor[4] = {0,0,0,1};
-		int imgw = 400, imgh = 400, midx = w/2, midy = h/2;
-		Start(w, h, bgcolor);
-		Image(midx-imgw, midy, imgw, imgh, "test_img_violin.jpg");
-		Image(midx, midy, imgw, imgh, "test_img_piano.jpg");
-		Image(midx-imgw, midy-imgh, imgw, imgh, "test_img_sax.jpg");
-		Image(midx, midy-imgh, imgw, imgh, "test_img_guitar.jpg");
-		End();
+	VGfloat bgcolor[4] = {0,0,0,1};
+	int imgw = 400, imgh = 400, midx = w/2, midy = h/2;
+	Start(w, h, bgcolor);
+	Image(midx-imgw, midy, imgw, imgh, "test_img_violin.jpg");
+	Image(midx, midy, imgw, imgh, "test_img_piano.jpg");
+	Image(midx-imgw, midy-imgh, imgw, imgh, "test_img_sax.jpg");
+	Image(midx, midy-imgh, imgw, imgh, "test_img_guitar.jpg");
+	End();
 }
 
 // refcard shows a reference card of shapes
@@ -209,7 +229,7 @@ void refcard(int width, int height) {
 	coordpoint(cx, sy, dotsize, shapecolor);
 	coordpoint(ex, ey, dotsize, shapecolor);
 
-	sy -= (sh*spacing*1.5);
+	sy -= (sh*spacing*1.5) ;
 	Image(sx, sy, 500, 500, "starx0.jpg");
 
 	End();
@@ -225,15 +245,17 @@ void rotext(int w, int h, int n, char *s) {
 	VGfloat x = w/2, y = h/2;
 	Start(w, h, bgcolor);
 	Translate(x,y);
+	int size = 256;
 	for (i=0; i < n; i++) {
-		Text(0,0, s, SerifTypeface, 256, textcolor);
+		Text(0,0, s, SerifTypeface, size, textcolor);
 		textcolor[3] -= fade;
+		size += n; 
 		Rotate(deg);
 	}
 	End();
 }
 
-// rshapes draws shapes with random colors, strokes, and sizes. 
+// rshapes draws shapes (rect and ellipse) with random colors, strokes, and sizes. 
 void rshapes(int width, int height, int n) {
 	int np = 10;
 	VGfloat rcolor[4], scolor[4], bgcolor[4] = {1,1,1,1}, textcolor[4] = {0.5, 0, 0, 1};
@@ -302,21 +324,33 @@ void rshapes(int width, int height, int n) {
 	End();
 }
 
+void play(int w, int h) {
+	VGfloat bgcolor[4] = {0,0,0,1};
+	Start(w, h, bgcolor);
+	// Image(100, 0, 504, 986, "gill.jpg"); 		
+	End();
+}
 // main initializes the system and shows the picture. 
 // Exit and clean up when you hit [RETURN].
 int main (int argc, char **argv) {
 	int w, h, nr;
-	char *usage = "%s test ...\n%s rand n\n%s rotate n ...\n";
+	char *usage = "%s [command]\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n";
 	char *progname = argv[0];
 	init(&w, &h);
 	switch (argc) {
 		case 2:
-			if (strncmp(argv[1], "image", 5) == 0) {
-					imagetest(w,h);
-			} else if (strncmp(argv[1], "text", 4) == 0) {
-					tb(w, h);
-			}
-			break;
+				if (strncmp(argv[1], "image", 5) == 0) {
+						imagetest(w,h);
+				} else if (strncmp(argv[1], "text", 4) == 0) {
+						tb(w, h);
+				} else if (strncmp(argv[1], "play", 5) == 0) {
+						play(w, h);
+
+				} else {
+						fprintf(stderr, usage, progname);
+						return 1;
+				}
+				break;
 		case 3:
 			if (strncmp(argv[1], "test", 4) == 0) {
 				testpattern(w,h,argv[2]);
@@ -327,7 +361,7 @@ int main (int argc, char **argv) {
 				}
 				rshapes(w, h, nr);
 			} else {
-				fprintf(stderr, usage, progname, progname, progname); 
+				fprintf(stderr, usage, progname); 
 				return 1;
 			}
 			break;
@@ -336,8 +370,8 @@ int main (int argc, char **argv) {
 			if (strncmp(argv[1], "rotate", 6) == 0) {
 				rotext(w, h, atoi(argv[2]), argv[3]);
 			} else {
-				fprintf(stderr, usage, progname, progname, progname);
-				return 2;
+				fprintf(stderr, usage, progname);
+				return 1;
 			}	
 			break;
 

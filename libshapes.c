@@ -95,9 +95,9 @@ VGImage createImageFromJpeg(const char *filename) {
 
   // Check for endianness
   if (((unsigned char*)&lilEndianTest)[0] == 1)
-    rgbaFormat = VG_lABGR_8888;
-  else rgbaFormat = VG_lRGBA_8888;
-  
+    rgbaFormat = VG_sABGR_8888;
+  else rgbaFormat = VG_sRGBA_8888;
+
   // Try to open image file
   infile = fopen(filename, "rb");
   if (infile == NULL) {
@@ -135,7 +135,6 @@ VGImage createImageFromJpeg(const char *filename) {
     jpeg_read_scanlines(&jdc, buffer, 1);    
     drow = data + (height-jdc.output_scanline) * dstride;
     brow = buffer[0];
-    
     // Expand to RGBA
     for (x=0; x<width; ++x, drow+=dbpp, brow+=bbpp) {
       switch (bbpp) {
