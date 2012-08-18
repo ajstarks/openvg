@@ -12,6 +12,7 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	./shapedemo rand 10              # show 10 random shapes
 	./shapedemo rotate 10 a          # rotated and faded "a"
 	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
+	./shapedemo demo 10              # run through the demo, sleeping 10 sec between each
 
 ## API
 

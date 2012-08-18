@@ -4,6 +4,7 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <time.h>
 
@@ -230,7 +231,7 @@ void refcard(int width, int height) {
 	coordpoint(ex, ey, dotsize, shapecolor);
 
 	sy -= (sh*spacing*1.5) ;
-	Image(sx, sy, 500, 500, "starx0.jpg");
+	Image(sx, sy, 100, 100, "starx0.jpg");
 
 	End();
 }
@@ -324,12 +325,41 @@ void rshapes(int width, int height, int n) {
 	End();
 }
 
+// grid draws a grid
+void grid(VGfloat x, VGfloat y, int n, int w, int h) {
+		VGfloat ix, iy;
+		VGfloat gray[4] = {.5,.5,.5,.5};
+		setstroke(gray);
+		strokeWidth(2);
+		for (ix = x; ix <= x+w; ix += n) {
+			Line(ix, y, ix, y+h);
+		}
+
+		for (iy = y; iy <= y+h; iy += n) {
+			Line(x, iy, x+w, iy);
+		}
+}
+// play is a place for experimental code
 void play(int w, int h) {
-	VGfloat bgcolor[4] = {0,0,0,1};
+
+	VGfloat y = (6*h)/10; 
+	int fontsize = 84;
+	char *s = "github.com/ajstarks/openvg";
+	char *a = "ajstarks@gmail.com";
+	int imw = 110, imh = 110;
+	VGfloat tw = textwidth(s, SansTypeface, fontsize);
+	VGfloat textcolor[4] = {0.5,0,0,1}, bgcolor[4] = {1,1,1,1};
+	
 	Start(w, h, bgcolor);
-	// Image(100, 0, 504, 986, "gill.jpg"); 		
+	Text(w/2-(tw/2), y-(fontsize/4), s, SansTypeface, fontsize, textcolor); y -= 150;
+	tw = textwidth(a, SansTypeface, fontsize/3);
+	textcolor[1] = 0.5;
+	textcolor[2] = 0.5;
+	Text(w/2-(tw/2), y, a, SansTypeface, fontsize/3, textcolor); 
+	Image((w/2)-(imw/2), y-(imh*2), imw, imh, "starx.jpg");
 	End();
 }
+
 // main initializes the system and shows the picture. 
 // Exit and clean up when you hit [RETURN].
 int main (int argc, char **argv) {
@@ -339,21 +369,31 @@ int main (int argc, char **argv) {
 	init(&w, &h);
 	switch (argc) {
 		case 2:
-				if (strncmp(argv[1], "image", 5) == 0) {
-						imagetest(w,h);
-				} else if (strncmp(argv[1], "text", 4) == 0) {
-						tb(w, h);
-				} else if (strncmp(argv[1], "play", 5) == 0) {
-						play(w, h);
-
-				} else {
-						fprintf(stderr, usage, progname);
-						return 1;
-				}
-				break;
+			if (strncmp(argv[1], "image", 5) == 0) {
+				imagetest(w,h);
+			} else if (strncmp(argv[1], "text", 4) == 0) {
+				tb(w, h);
+			} else if (strncmp(argv[1], "play", 5) == 0) {
+				play(w, h);
+			} else {
+				fprintf(stderr, usage, progname);
+				return 1;
+			}
+			break;
 		case 3:
 			if (strncmp(argv[1], "test", 4) == 0) {
 				testpattern(w,h,argv[2]);
+			} else if (strncmp(argv[1], "demo", 4) == 0) {
+				nr = atoi(argv[2]);
+				if (nr < 1 || nr > 30) {
+						nr = 5;
+				}
+				refcard(w,h); sleep(nr);
+				rshapes(w,h,30); sleep(nr);
+				testpattern(w,h,"abc"); sleep(nr);
+				imagetest(w,h); sleep(nr);
+				tb(w,h); sleep(nr);
+				play(w,h);
 			} else if (strncmp(argv[1], "rand", 4) == 0) {
 				nr = atoi(argv[2]);
 				if (nr < 1 || nr > 1000) {

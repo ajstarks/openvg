@@ -16,7 +16,7 @@ fonts: font2openvg
 	for f in /usr/share/fonts/truetype/ttf-dejavu/*.ttf; do fn=`basename $$f .ttf`; ./font2openvg $$f $$fn.inc $$fn; done
 
 test:	shapedemo
-		./shapedemo ; ./shapedemo image ; ./shapedemo text ; ./shapedemo test hello ; ./shapedemo rand 50 ; ./shapedemo rotate 20 hello
+		./shapedemo ; ./shapedemo rand 50 ; ./shapedemo test hello ; ./shapedemo image ; ./shapedemo text ; ./shapedemo rotate 20 hello; ./shapedemo play
 
 raw2png:	raw2png.go
 	go build raw2png.go
