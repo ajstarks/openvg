@@ -1,7 +1,7 @@
 #Testbed for exploring OpenVG on the Raspberry Pi.
 
 
-<a href="http://www.flickr.com/photos/ajstarks/7717370084/" title="OpenVG rotext by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8424/7717370084_1aec68fc90.jpg" width="500" height="281" alt="OpenVG rotext"></a>
+<a href="http://www.flickr.com/photos/ajstarks/7811750326/" title="rotext by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg" width="500" height="281" alt="rotext"></a>
 
 
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
@@ -16,11 +16,10 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 
 ## API
 
-<a href="http://www.flickr.com/photos/ajstarks/7717370238/" title="OpenVG refcard by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7256/7717370238_6f30d38f12.jpg" width="500" height="281" alt="OpenVG refcard"></a>
+<a href="http://www.flickr.com/photos/ajstarks/7811750466/" title="refcard by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8307/7811750466_55288b3c45.jpg" width="500" height="281" alt="refcard"></a>
 
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
 Colors are specified with a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0.
-
 
 	void Start(int width, int height, float fill[4])
 Begin the picture, clear the screen with the specified color
