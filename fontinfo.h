@@ -1,7 +1,7 @@
 typedef struct {
 	const short *CharacterMap;
 	const int *GlyphAdvances;
-	int Count; 
+	int Count;
 	VGPath Glyphs[256];
 } Fontinfo;
 
