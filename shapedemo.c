@@ -397,24 +397,43 @@ void rshapes(int width, int height, int n) {
 	End();
 }
 
-// play is a place for experimental code
-void play(int w, int h) {
+void sunearth(int w, int h) {
+	VGfloat bgcolor[4], sun, earth, x, y;
+	int i;
 
+	rseed();
+	RGB(0,0,0,bgcolor);
+	Start(w,h,bgcolor);
+	Fill(255,255,255,1);
+	for (i = 0; i < w/4; i++) {
+		x = randf(w);
+		y = randf(h);
+		Circle(x, y, 2);
+	}
+	earth = 20;
+	sun = earth * 109;
+	Fill(0,0,255,1);	Circle(w/3, h-(h/10), earth);
+	Fill(255,255,224,1);Circle(w, 0, sun);
+	//SaveRaw("sunearth.raw");
+    End();
+}
+// advert is an ad for the package 
+void advert(int w, int h) {
 	VGfloat y = (6 * h) / 10;
 	int fontsize = 84;
 	char *s = "github.com/ajstarks/openvg";
 	char *a = "ajstarks@gmail.com";
 	int imw = 110, imh = 110;
 	VGfloat tw = textwidth(s, SansTypeface, fontsize);
-	VGfloat textcolor[4] = { 0.5, 0, 0, 1 }, bgcolor[4] = {
-	1, 1, 1, 1};
+	VGfloat textcolor[4], bgcolor[4];
 
+	RGB(255,255,255,bgcolor);
+	RGB(128,0,0,textcolor);
 	Start(w, h, bgcolor);
 	Text(w / 2 - (tw / 2), y - (fontsize / 4), s, SansTypeface, fontsize, textcolor);
 	y -= 150;
 	tw = textwidth(a, SansTypeface, fontsize / 3);
-	textcolor[1] = 0.5;
-	textcolor[2] = 0.5;
+	RGB(128,128,128,textcolor);
 	Text(w / 2 - (tw / 2), y, a, SansTypeface, fontsize / 3, textcolor);
 	Image((w / 2) - (imw / 2), y - (imh * 2), imw, imh, "starx.jpg");
 	End();
@@ -424,7 +443,7 @@ void play(int w, int h) {
 // Exit and clean up when you hit [RETURN].
 int main(int argc, char **argv) {
 	int w, h, nr;
-	char *usage = "%s [command]\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n";
+	char *usage = "%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n";
 	char *progname = argv[0];
 	init(&w, &h);
 	switch (argc) {
@@ -433,8 +452,8 @@ int main(int argc, char **argv) {
 			imagetest(w, h);
 		} else if (strncmp(argv[1], "text", 4) == 0) {
 			tb(w, h);
-		} else if (strncmp(argv[1], "play", 5) == 0) {
-			play(w, h);
+		} else if (strncmp(argv[1], "astro", 5) == 0) {
+			sunearth(w,h);
 		} else {
 			fprintf(stderr, usage, progname);
 			return 1;
@@ -452,7 +471,7 @@ int main(int argc, char **argv) {
 			sleep(nr);
 			rshapes(w, h, 50);
 			sleep(nr);
-			testpattern(w, h, "abc");
+			testpattern(w, h, "OpenVG on RasPi");
 			sleep(nr);
 			imagetest(w, h);
 			sleep(nr);
@@ -460,7 +479,9 @@ int main(int argc, char **argv) {
 			sleep(nr);
 			tb(w, h);
 			sleep(nr);
-			play(w, h);
+			sunearth(w,h);
+			sleep(nr);
+			advert(w, h);
 		} else if (strncmp(argv[1], "rand", 4) == 0) {
 			nr = atoi(argv[2]);
 			if (nr < 1 || nr > 1000) {
