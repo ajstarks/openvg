@@ -174,9 +174,6 @@ void dumpscreen(int w, int h, FILE * fp) {
 	void *ScreenBuffer = malloc(w * h * 4);
 	vgReadPixels(ScreenBuffer, (w * 4), VG_sABGR_8888, 0, 0, w, h);
 	fwrite(ScreenBuffer, 1, w * h * 4, fp);
-	if (fp != stdout) {
-		fclose(fp);
-	}
 	free(ScreenBuffer);
 }
 
@@ -495,9 +492,10 @@ void SaveEnd() {
 void SaveRaw(char *filename) {
 	FILE *fp;
 	assert(vgGetError() == VG_NO_ERROR);
-	fp = fopen(filename, "w");
+	fp = fopen(filename, "wb");
 	if (fp != NULL) {
 		dumpscreen(state->screen_width, state->screen_height, fp);
+		fclose(fp);
 	}
 	eglSwapBuffers(state->display, state->surface);
 	assert(eglGetError() == EGL_SUCCESS);
