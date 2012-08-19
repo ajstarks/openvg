@@ -6,29 +6,41 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
-#include <time.h>
-
+#include <fcntl.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "fontinfo.h"
 #include "shapes.h"
 
-// randcolor returns a fraction of 255
-VGfloat randcolor() {
-	return (VGfloat)(rand() % 256) / 255.0;
+// randcolor returns a random number 0..255
+unsigned int randcolor() {
+	return (unsigned int)(drand48() * 255.0);  
 }
 
 // randf returns a floating point number bounded by n
-VGfloat randf(n) {
-	return (VGfloat)(rand() % n);
+VGfloat randf(int n) {
+	return drand48() * n;
 }
 
 // coordpoint marks a coordinate, preserving a previous color
 void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
-	VGfloat dotcolor[4] = {0.3, 0.3, 0.3, 1};
-	setfill(dotcolor);
+	Fill(128,0,0,0.3);
 	Circle(x, y, size);
 	setfill(pcolor);
+}
+
+// grid draws a grid
+void grid(VGfloat x, VGfloat y, int n, int w, int h) {
+	VGfloat ix, iy;
+	Stroke(128,128,128,0.5);
+	strokeWidth(2);
+	for (ix = x; ix <= x+w; ix += n) {
+		Line(ix, y, ix, y+h);
+	}
+
+	for (iy = y; iy <= y+h; iy += n) {
+		Line(x, iy, x+w, iy);
+	}
 }
 
 typedef struct {
@@ -48,19 +60,19 @@ void fitwidth(int width, int adj, char *s, FW *f) {
 
 // testpattern shows a test pattern 
 void testpattern(int width, int height, char *s) {
-	VGfloat llc[4] = {1,0,0,1}, ulc[4] = {0,1,0,1}, lrc[4] = {0,0,1,1}, 
-			urc[4] = {0.5,0.5,0.5,1}, tc[4] = {0.5,0,0,1}, bgcolor[4] = {1,1,1,1},
-			midx1, midx2, midx3, midy1, midy2, midy3;
+
+	VGfloat midx1, midx2, midx3, midy1, midy2, midy3, bgcolor[4], tc[4];
 	int fontsize = 256, w2 = width/2, h2=height/2;
 	FW tw1={MonoTypeface, 0, fontsize}, tw2={SansTypeface, 0, fontsize}, tw3={SerifTypeface,0, fontsize};
 
+	RGB(255,255,255, bgcolor);	
 	Start(width, height, bgcolor);
 
 	// colored squares in the corners
-	setfill(llc); Rect(0,0,100,100); 
-	setfill(ulc); Rect(0,height-100,100,100);
-	setfill(lrc); Rect(width-100,0,100,100);
-	setfill(urc); Rect(width-100,height-100,100,100);
+	Fill(255,0,0,1); Rect(0,0,100,100); 
+	Fill(0,255,0,1); Rect(0,height-100,100,100);
+	Fill(0,0,255,1); Rect(width-100,0,100,100);
+	Fill(128,128,128,1); Rect(width-100,height-100,100,100);
 	
 	// for each font, (Sans, Serif, Mono), adjust the string to the width
 	fitwidth(width, 20, s, &tw1);
@@ -77,9 +89,10 @@ void testpattern(int width, int height, char *s) {
 	midy2 = h2-(tw2.fontsize)/2;
 	midy3 = h2-20-tw2.fontsize-(tw3.fontsize)/2;
 
-	Text(midx1, midy1, s, tw1.font, tw1.fontsize, urc);
-	Text(midx2, midy2, s, tw2.font, tw2.fontsize, lrc);
-	Text(midx3, midy3, s, tw3.font, tw3.fontsize, tc);
+	RGB(128,128,128,tc);	Text(midx1, midy1, s, tw1.font, tw1.fontsize, tc);
+	RGB(128,0,0,tc);		Text(midx2, midy2, s, tw2.font, tw2.fontsize, tc);
+	RGB(0,0,128,tc);		Text(midx3, midy3, s, tw3.font, tw3.fontsize, tc);
+	//SaveRaw("testpattern.raw");
 	End();
 }
 
@@ -115,15 +128,16 @@ void tb(int w, int h) {
 		NULL
 	};
 
-	VGfloat bgcolor[4] = {.90,.90,.90,1}, 
-			textcolor[4] = {49.0/255.0, 79.0/255.0, 79.0/255.0, 1}, 
-			tmargin = w*0.33, lmargin = w*0.10;
+	VGfloat bgcolor[4], textcolor[4], tmargin = w*0.33, lmargin = w*0.10;
 
+	RGB(240, 240, 240, bgcolor);
+	RGB(49, 79, 79, textcolor);
 	Start(w, h, bgcolor);
 	textlines(tmargin, h-100, para, SerifTypeface, 24, 40, textcolor);
 	textlines(tmargin, h-400, para, SansTypeface, 24, 40, textcolor);
 	textlines(tmargin, h-700, para, MonoTypeface, 24, 40, textcolor);
 	textlines(lmargin, h-180, labels, SansTypeface, 48, 300, textcolor);
+	//SaveRaw("tb.raw");
 	End();
 }
 
@@ -146,32 +160,46 @@ void cookie(int w, int h) {
 	End();
 }
 
-
 // imagtest displays four JPEG images, centered on the display
 void imagetest(int w, int h) {
 	VGfloat bgcolor[4] = {0,0,0,1};
-	int imgw = 400, imgh = 400, midx = w/2, midy = h/2;
+	int imgw = 400, imgh = 400;
+	VGfloat cx = (w/2)-(imgw/2),	cy = (h/2)-(imgh/2);
+	VGfloat ulx = 0,		uly = h-imgh;
+	VGfloat urx = w-imgw,		ury = uly;
+	VGfloat llx = 0,		lly = 0;
+	VGfloat lrx = urx,		lry = lly;
 	Start(w, h, bgcolor);
-	Image(midx-imgw, midy, imgw, imgh, "test_img_violin.jpg");
-	Image(midx, midy, imgw, imgh, "test_img_piano.jpg");
-	Image(midx-imgw, midy-imgh, imgw, imgh, "test_img_sax.jpg");
-	Image(midx, midy-imgh, imgw, imgh, "test_img_guitar.jpg");
+	Image(cx, cy,   imgw, imgh, "test_img_violin.jpg");
+	Image(ulx, uly, imgw, imgh, "test_img_piano.jpg");
+	Image(urx, ury, imgw, imgh, "test_img_sax.jpg");
+	Image(llx, lly, imgw, imgh, "test_img_guitar.jpg");
+	Image(lrx, lry, imgw, imgh, "test_img_flute.jpg");
+	//SaveRaw("image.raw");
 	End();
 }
 
 // refcard shows a reference card of shapes
 void refcard(int width, int height) {
 	char *shapenames[] = { 
-		"Circle", "Ellipse", "Rectangle", "Rounded Rectangle", 
-		"Line", "Polyline", "Polygon", "Arc", "Quadratic Bezier", "Cubic Bezier", "Image"
+		"Circle", 
+		"Ellipse", 
+		"Rectangle", 
+		"Rounded Rectangle", 
+		"Line",
+		"Polyline",
+		"Polygon",
+		"Arc",
+		"Quadratic Bezier", 
+		"Cubic Bezier", 
+		"Image"
 	};
-	VGfloat strokecolor[4] = {0.8,0.8,0.8,1}, 
-			shapecolor[4] = {202.0/255.0, 225.0/255.0,1,1}, 
-			textcolor[4] = {0,0,0,1}, 
-			bgcolor[4] = {1,1,1,1};
-
-	VGfloat linewidth = 1;
+	VGfloat shapecolor[4], textcolor[4], bgcolor[4];
+	RGB(202,225,255,shapecolor);
+	RGB(0,0,0,textcolor);
+	RGB(255,255,255,bgcolor);
 	VGfloat top=height-100, sx = 500, sy = top, sw=100, sh=45, dotsize=7, spacing=2.0;
+
 	int i, ns = sizeof(shapenames)/sizeof(char *), fontsize = 36;
 	Start(width, height, bgcolor);
 	setfill(textcolor);
@@ -191,8 +219,8 @@ void refcard(int width, int height) {
 	Rect(sx, sy, sw, sh); coordpoint(sx, sy, dotsize, shapecolor); sy -= sh*spacing;
 	Roundrect(sx, sy, sw, sh, 20, 20); coordpoint(sx, sy, dotsize, shapecolor); sy -= sh*spacing;
 
-	strokeWidth(linewidth);
-	setstroke(strokecolor); 
+	strokeWidth(1);
+	Stroke(204,204,204,1); 
 	Line(sx, sy, ex, sy); coordpoint(sx, sy, dotsize, shapecolor); coordpoint(ex, sy, dotsize, shapecolor); sy -= sh;
 
 	VGfloat px[5] = {sx, sx+(sw/4), sx+(sw/2), sx+((sw*3)/4), sx+sw}; 
@@ -233,17 +261,20 @@ void refcard(int width, int height) {
 	sy -= (sh*spacing*1.5) ;
 	Image(sx, sy, 100, 100, "starx0.jpg");
 
-	End();
+//	SaveRaw("refcard.raw");
+  	End();
 }
 
 // rotext draws text, rotated around the center of the screen, progressively faded
 void rotext(int w, int h, int n, char *s) {
 	int i;
-	VGfloat textcolor[4] = {1,1,1,1}, bgcolor[4] = {0,0,0,1};
+	VGfloat textcolor[4], bgcolor[4];
 	VGfloat fade = (100.0/(VGfloat)n)/100.0;
 	VGfloat deg = 360.0/n;
-
 	VGfloat x = w/2, y = h/2;
+	
+	RGBA(255,255,255,1,textcolor);
+	RGB(0,0,0,bgcolor);
 	Start(w, h, bgcolor);
 	Translate(x,y);
 	int size = 256;
@@ -253,31 +284,44 @@ void rotext(int w, int h, int n, char *s) {
 		size += n; 
 		Rotate(deg);
 	}
+	//  SaveRaw("rotext.raw");
 	End();
 }
 
-// rshapes draws shapes (rect and ellipse) with random colors, strokes, and sizes. 
+// rseed seeds the random number generator from the random device
+void rseed(void) {
+	unsigned char d[sizeof(long int)];
+	long int s;
+	int fd; 
+
+	// read bytes from the random device,
+	// pack them into a long int.
+	fd = open("/dev/urandom", O_RDONLY);
+	if (fd < 0) {
+		srand48(1);
+		return;
+	}
+	read(fd, (void *)d, (size_t)sizeof(long int));
+	s = d[3] | (d[2] << 8) | (d[1] << 16) | (d[0] << 24);
+	srand48(s);
+	close(fd);
+}
+
+// rshapes draws shapes with random colors, strokes, and sizes. 
 void rshapes(int width, int height, int n) {
 	int np = 10;
-	VGfloat rcolor[4], scolor[4], bgcolor[4] = {1,1,1,1}, textcolor[4] = {0.5, 0, 0, 1};
-	scolor[3] = 1; // strokes are solid
+	VGfloat bgcolor[4], textcolor[4];
 	VGfloat sx, sy, cx, cy, px, py, ex, ey, pox, poy;
 	VGfloat polyx[np], polyy[np];
 	int i,j;
-	srand ( time(NULL) );
+	RGB(255,255,255, bgcolor);
+	RGB(128,0,0, textcolor);	
+	rseed();
 	Start(width, height, bgcolor);
 	for (i=0; i < n; i++) {
-		rcolor[0] = randcolor();
-		rcolor[1] = randcolor();
-		rcolor[2] = randcolor();
-		rcolor[3] = randcolor();
-
-		scolor[1] = randcolor();
-		scolor[2] = randcolor();
-		scolor[3] = randcolor();
-		setfill(rcolor);
-		setstroke(scolor);
-		strokeWidth(randf(10));
+		Fill(randcolor(), randcolor(), randcolor(), drand48());
+		//Stroke(randcolor(), randcolor(), randcolor(), drand48());
+		//strokeWidth(randf(5));
 		Ellipse(randf(width), randf(height), randf(200), randf(100));
 		Circle(randf(width), randf(height), randf(100));
 		Rect(randf(width), randf(height), randf(200), randf(100));
@@ -321,24 +365,11 @@ void rshapes(int width, int height, int n) {
 		}
 		Polyline(polyx, polyy, np);
 	}
-	Text(50, 100, "OpenVG on the Raspberry Pi", SansTypeface, 64, textcolor);
+	Text(20, 20, "OpenVG on the Raspberry Pi", SansTypeface, 32, textcolor);
+	// SaveRaw("rand.raw");
 	End();
 }
 
-// grid draws a grid
-void grid(VGfloat x, VGfloat y, int n, int w, int h) {
-		VGfloat ix, iy;
-		VGfloat gray[4] = {.5,.5,.5,.5};
-		setstroke(gray);
-		strokeWidth(2);
-		for (ix = x; ix <= x+w; ix += n) {
-			Line(ix, y, ix, y+h);
-		}
-
-		for (iy = y; iy <= y+h; iy += n) {
-			Line(x, iy, x+w, iy);
-		}
-}
 // play is a place for experimental code
 void play(int w, int h) {
 
@@ -389,9 +420,10 @@ int main (int argc, char **argv) {
 						nr = 5;
 				}
 				refcard(w,h); sleep(nr);
-				rshapes(w,h,30); sleep(nr);
+				rshapes(w,h,50); sleep(nr);
 				testpattern(w,h,"abc"); sleep(nr);
 				imagetest(w,h); sleep(nr);
+				rotext(w,h,30,"Raspi"); sleep(nr);
 				tb(w,h); sleep(nr);
 				play(w,h);
 			} else if (strncmp(argv[1], "rand", 4) == 0) {

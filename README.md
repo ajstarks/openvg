@@ -25,12 +25,16 @@ Colors are specified with a VGfloat array containing red, green, blue, alpha val
 	void Start(int width, int height, float fill[4])
 Begin the picture, clear the screen with the specified color
 
-	End()
+	void End()
 end the picture, rendering to the screen.
 
-	SaveEnd()
+	void SaveEnd()
 end the picture, rendering to the screen, save the raster to the standard output file as 4-byte RGBA words, with a stride of
 width*4 bytes.  The program raw2png converts the "raw" raster to png.
+
+	void SaveRaw(char *filename)
+end the picture, rendering to the screen, save the raster to the named file file as 4-byte RGBA words, with a stride of
+width*4 bytes.
 
 ### Attributes
 
@@ -42,6 +46,18 @@ Set the stroke color
 
 	void strokeWidth(float width)
 Set the stroke width
+
+	void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4])
+fill a color vector from RGBA values
+
+	void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4])
+fill a color vector from RGB values
+
+	void Stroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
+Set the Stroke color using RGBA values
+
+	void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
+Set the Fill color using RGBA values
 
 ### Shapes, Text, Image
 

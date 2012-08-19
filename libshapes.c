@@ -21,6 +21,7 @@
 static STATE_T _state, *state=&_state;            // global graphics state
 static const int MAXFONTPATH=256;
 
+
 //
 // Font functions
 //
@@ -172,10 +173,13 @@ void Image(VGfloat x, VGfloat y, int w, int h, char * filename) {
 }
 
 // dumpscreen writes the raster to the standard output file
-void dumpscreen(int w, int h) {
+void dumpscreen(int w, int h, FILE *fp) {
     void *ScreenBuffer = malloc(w*h*4);
     vgReadPixels(ScreenBuffer, (w*4), VG_sABGR_8888, 0, 0, w, h);
-    fwrite(ScreenBuffer, 1, w*h*4, stdout);
+    fwrite(ScreenBuffer, 1, w*h*4, fp);
+	if (fp != stdout) {
+		fclose(fp);
+	}
     free(ScreenBuffer);
 }
 
@@ -286,6 +290,50 @@ void strokeWidth(VGfloat width) {
     vgSetf(VG_STROKE_LINE_WIDTH, width);
     vgSeti(VG_STROKE_CAP_STYLE, VG_CAP_BUTT);
     vgSeti(VG_STROKE_JOIN_STYLE, VG_JOIN_MITER);
+}
+
+//
+// Color functions
+//
+//
+
+// RGBA fills a color vectors from a RGBA quad.
+void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4]) {
+	if (r > 255) {
+		r = 0;
+	} 
+	if (g > 255) {
+		g = 0;
+	}
+	if (b > 255) {
+		b = 0;
+	}
+	if (a < 0.0 || a > 1.0) {
+		a = 1.0;
+	}
+       	color[0]=(VGfloat)r/255.0f;
+       	color[1]=(VGfloat)g/255.0f;
+       	color[2]=(VGfloat)b/255.0f;
+	color[3]=a;
+}
+
+// RGB returns a solid color from a RGB triple
+void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4]) {
+	RGBA(r,g,b,1.0f,color);
+}
+
+// Stroke sets the stroke color 
+void Stroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
+	VGfloat color[4];
+	RGBA(r,g,b,a, color);
+	setstroke(color);
+}
+
+// Fill sets the fillcolor
+void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
+	VGfloat color[4];
+	RGBA(r,g,b,a, color);
+	setfill(color);
 }
 
 
@@ -474,7 +522,18 @@ void End() {
 // SaveEnd dumps the raster before rendering to the display 
 void SaveEnd() {
     assert(vgGetError() == VG_NO_ERROR);
-    dumpscreen(state->screen_width, state->screen_height);
+    dumpscreen(state->screen_width, state->screen_height, stdout);
+    eglSwapBuffers(state->display, state->surface);
+    assert(eglGetError() == EGL_SUCCESS);
+}
+
+void SaveRaw(char *filename) {
+	FILE *fp;
+    assert(vgGetError() == VG_NO_ERROR);
+	fp = fopen(filename, "w");
+	if (fp != NULL) {
+    	dumpscreen(state->screen_width, state->screen_height, fp);
+	}
     eglSwapBuffers(state->display, state->surface);
     assert(eglGetError() == EGL_SUCCESS);
 }

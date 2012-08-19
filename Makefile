@@ -1,13 +1,13 @@
 all: shapedemo
 
 libshapes.o:	libshapes.c shapes.h fontinfo.h
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+	cc  -Wall  -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
 
 shapedemo:	shapedemo.c libshapes.o oglinit.o
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+	cc  -Wall  -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
 
 oglinit.o:	oglinit.c
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+	cc -Wall  -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
 
 font2openvg:	font2openvg.cpp
 	g++ -I /usr/include/freetype2 font2openvg.cpp -o font2openvg -lfreetype
