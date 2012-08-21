@@ -12,104 +12,109 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	./shapedemo rand 10              # show 10 random shapes
 	./shapedemo rotate 10 a          # rotated and faded "a"
 	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
-	./shapedemo demo 10              # run through the demo, sleeping 10 sec between each
+	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
 
 ## API
 
 <a href="http://www.flickr.com/photos/ajstarks/7811750466/" title="refcard by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8307/7811750466_55288b3c45.jpg" width="500" height="281" alt="refcard"></a>
 
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
-Colors are specified with a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0.
+OpenVG specifies colors as a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0, but typically colors are specified as RGBA (0-255 for RGB, A from 0.0 to 1.0)
 
-	void Start(int width, int height, float fill[4])
-Begin the picture, clear the screen with the specified color
+	void Start(int width, int height)
+Begin the picture, clear the screen with a default white, set the stroke and fill to black.
 
 	void End()
-end the picture, rendering to the screen.
+End the picture, rendering to the screen.
 
-	void SaveEnd()
-end the picture, rendering to the screen, save the raster to the standard output file as 4-byte RGBA words, with a stride of
-width*4 bytes.  The program raw2png converts the "raw" raster to png.
-
-	void SaveRaw(char *filename)
-end the picture, rendering to the screen, save the raster to the named file file as 4-byte RGBA words, with a stride of
-width*4 bytes.
+	void SaveEnd(char *filename)
+End the picture, rendering to the screen, save the raster to the named file as 4-byte RGBA words, with a stride of
+width*4 bytes. The program raw2png converts the "raw" raster to png.
 
 ### Attributes
 
 	void setfill(float color[4])
 Set the fill color
 
-	void setstroke(float color[4])
-Set the stroke color
+	void Background(unsigned int r, unsigned int g, unsigned int b)
+Fill the screen with the background color defined from RGB values.
 
-	void strokeWidth(float width)
-Set the stroke width
+	void StrokeWidth(float width)
+Set the stroke width.
 
 	void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4])
-fill a color vector from RGBA values
+fill a color vector from RGBA values.
 
 	void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4])
-fill a color vector from RGB values
+fill a color vector from RGB values.
 
 	void Stroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
-Set the Stroke color using RGBA values
+Set the Stroke color using RGBA values.
 
 	void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
-Set the Fill color using RGBA values
+Set the Fill color using RGBA values.
 
-### Shapes, Text, Image
+### Shapes, Image
 
 	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
-draw a line between (x1, y1) and (x2, y2)
+Draw a line between (x1, y1) and (x2, y2).
 
 	void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-draw a rectangle with its origin (lower left) at (x,y), and size is (width,height)
+Draw a rectangle with its origin (lower left) at (x,y), and size is (width,height).
 
 	void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
-draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).  The width and height of the corners are specified with (rw,rh)
+Draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).  
+The width and height of the corners are specified with (rw,rh).
 
 	void Polygon(VGfloat *x, VGfloat *y, VGint n)
-draw a polygon using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
+Draw a polygon using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
 
 	void Polyline(VGfloat *x, VGfloat *y, VGint n)
-draw a polyline using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
+Draw a polyline using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
 
 	void Circle(VGfloat x, VGfloat y, VGfloat r)
-draw a circle centered at (x,y) with radius r.
+Draw a circle centered at (x,y) with radius r.
 
 	void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-draw an ellipse centered at (x,y) with radii (w, h).
+Draw an ellipse centered at (x,y) with radii (w, h).
 
 	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
-draw a quadratic bezier curve beginning at (sx, sy), using control points at (cx, cy), ending at (ex, ey)
+Draw a quadratic bezier curve beginning at (sx, sy), using control points at (cx, cy), ending at (ex, ey).
 
 	void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
-draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey)
+Draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey).
 
 	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
-draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
+Draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
-	void Text(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize, VGfloat fillcolor[4])
-draw a the text srtring (s) at location (x,y), using pointsize, filled with fillcolor.
+### Text and Images
+
+	void Text(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize)
+Draw a the text srtring (s) at location (x,y), using pointsize.
+
+	void TextMiddle(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize)
+Draw a the text srtring (s) at centered at location (x,y), using pointsize.
+
+	void TextEnd(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize)
+Draw a the text srtring (s) at with its lend aligned to location (x,y), using pointsize
 
 	void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
-place a JPEG image with dimensions (w,h) at (x,y)
+place a JPEG image with dimensions (w,h) at (x,y).
 
 	
 ### Transformations
 
 	void Translate(VGfloat x, VGfloat y)
-Translate the coordinate system to (x,y)
+Translate the coordinate system to (x,y).
 
 	void Rotate(VGfloat r)
-Rotate the coordinate system around angle r
+Rotate the coordinate system around angle r (degrees).
 
 	void Scale(VGfloat x, VGfloat y)
-Scale by x,y
+Scale by x,y.
 
 	void Shear(VGfloat x, VGfloat y)
-Shear by the angles x,y
+Shear by the angles x,y.
 
 
 ## Using fonts
@@ -145,16 +150,11 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-	pi@raspberrypi ~/vg $ make fonts test
-	g++ -I /usr/include/freetype2 font2openvg.cpp -o font2openvg -lfreetype
-	for f in /usr/share/fonts/truetype/ttf-dejavu/*.ttf; do fn=`basename $f .ttf`; ./font2openvg $f $fn.inc $fn; done
-	224 glyphs written
-	224 glyphs written
-	224 glyphs written
-	224 glyphs written
-	224 glyphs written
-	224 glyphs written
+	pi@raspberrypi ~/vg $ git clone git://github.com/ajstarks/openvg
+	pi@raspberrypi ~/vg $ cd openvg
+	pi@raspberrypi ~/vg $ make test
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
-	./shapedemo ; ./shapedemo image ; ./shapedemo text ; ./shapedemo test hello ; ./shapedemo rand 50 ; ./shapedemo rotate 20 hello
+	./shapedemo demo 5
+
