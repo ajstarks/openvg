@@ -14,6 +14,48 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
 	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
 
+## First program
+
+Here is the graphics equivalent of "hello, world"
+
+	//
+	// first OpenVG program
+	// Anthony Starks (ajstarks@gmail.com)
+	//
+	// compile and run on the Raspberry Pi:
+	// cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o hellovg hellovg.c -L/opt/vc/lib -lGLESv2 -ljpeg && ./hellovg
+	//
+	//
+	#include <stdio.h>
+	#include <stdlib.h>
+	#include <unistd.h>
+
+	#include "VG/openvg.h"
+	#include "VG/vgu.h"
+	#include "fontinfo.h"
+	#include "shapes.h"
+
+	int main() {
+		int width, height;
+		init(&width, &height);     // OpenGL, etc initialization
+
+		Start(width, height);                     // Start the picture
+		Background(0,0,0);                        // Black background
+		Fill(44,77,232,1);                        // Big blue marble
+		Circle(width/2, 0, width);                // The "world"
+		Fill(255,255,255,1);                      // White text
+		TextMiddle(width/2, height/2, 
+		"hello, world", SerifTypeface, width/10); // Greetings 
+		End();                                    // End the picture
+
+		while (getchar() != '\n')  // look at the pic, end with [RETURN]
+			;
+
+		finish();                 // Graphics cleanup
+		exit(0);
+	}
+
+
 ## API
 
 <a href="http://www.flickr.com/photos/ajstarks/7811750466/" title="refcard by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8307/7811750466_55288b3c45.jpg" width="500" height="281" alt="refcard"></a>

@@ -18,6 +18,9 @@ fonts: font2openvg
 test:	shapedemo
 	./shapedemo demo 5
 
+hellovg:	hellovg.c libshapes.o oglinit.o
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o hellovg hellovg.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+
 raw2png:	raw2png.go
 	go build raw2png.go
 indent:
