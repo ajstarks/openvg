@@ -265,8 +265,8 @@ void setstroke(VGfloat color[4]) {
 	vgDestroyPaint(strokePaint);
 }
 
-// strokeWidth sets the stroke width
-void strokeWidth(VGfloat width) {
+// StrokeWidth sets the stroke width
+void StrokeWidth(VGfloat width) {
 	vgSetf(VG_STROKE_LINE_WIDTH, width);
 	vgSeti(VG_STROKE_CAP_STYLE, VG_CAP_BUTT);
 	vgSeti(VG_STROKE_JOIN_STYLE, VG_JOIN_MITER);
@@ -302,29 +302,27 @@ void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4]) {
 	RGBA(r, g, b, 1.0f, color);
 }
 
-// Stroke sets the stroke color 
+// Stroke sets the stroke color, defined as a RGB triple.
 void Stroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
 	VGfloat color[4];
 	RGBA(r, g, b, a, color);
 	setstroke(color);
 }
 
-// Fill sets the fillcolor
+// Fill sets the fillcolor, defined as a RGBA quad.
 void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
 	VGfloat color[4];
 	RGBA(r, g, b, a, color);
 	setfill(color);
 }
 
-// Text renders a string of text at a specified location, size, and fill, using the specified font glyphs
+// Text renders a string of text at a specified location, size, using the specified font glyphs
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
-void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize, VGfloat fillcolor[4]) {
-	float size = (float)pointsize;
-	float xx = x;
-	float mm[9];
+void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
+	VGfloat size = (VGfloat) pointsize, xx = x, mm[9];
 	int i;
+
 	vgGetMatrix(mm);
-	setfill(fillcolor);
 	for (i = 0; i < (int)strlen(s); i++) {
 		unsigned int character = (unsigned int)s[i];
 		int glyph = f.CharacterMap[character];
@@ -338,13 +336,13 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize, VGfloat fill
 		};
 		vgLoadMatrix(mm);
 		vgMultMatrix(mat);
-		vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH);
+		vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH | VG_STROKE_PATH);
 		xx += size * f.GlyphAdvances[glyph] / 65536.0f;
 	}
 	vgLoadMatrix(mm);
 }
 
-// textwidth returns the width of a text string in a font
+// textwidth returns the width of a text string at the specified font and size.
 VGfloat textwidth(char *s, Fontinfo f, VGfloat size) {
 	int i;
 	VGfloat tw = 0.0;
@@ -357,6 +355,18 @@ VGfloat textwidth(char *s, Fontinfo f, VGfloat size) {
 		tw += size * f.GlyphAdvances[glyph] / 65536.0f;
 	}
 	return tw;
+}
+
+// TextMiddle draws text, centered on (x,y)
+void TextMiddle(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
+	VGfloat tw = textwidth(s, f, pointsize);
+	Text(x - (tw / 2.0), y, s, f, pointsize);
+}
+
+// TextEnd draws text, with its end aligned to (x,y)
+void TextEnd(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
+	VGfloat tw = textwidth(s, f, pointsize);
+	Text(x - tw, y, s, f, pointsize);
 }
 
 //
@@ -464,13 +474,14 @@ void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
 }
 
 // Start begins the picture, clearing a rectangular region with a specified color
-void Start(int width, int height, float fill[4]) {
-	vgSetfv(VG_CLEAR_COLOR, 4, fill);
+void Start(int width, int height) {
+	VGfloat color[4] = { 255, 255, 255, 1 };
+	vgSetfv(VG_CLEAR_COLOR, 4, color);
 	vgClear(0, 0, width, height);
-	VGfloat black[4] = { 0, 0, 0, 1 };
-	setfill(black);
-	setstroke(black);
-	strokeWidth(0);
+	color[0] = 0, color[1] = 0, color[2] = 0;
+	setfill(color);
+	setstroke(color);
+	StrokeWidth(0);
 	vgLoadIdentity();
 }
 
@@ -482,27 +493,24 @@ void End() {
 }
 
 // SaveEnd dumps the raster before rendering to the display 
-void SaveEnd() {
-	assert(vgGetError() == VG_NO_ERROR);
-	dumpscreen(state->screen_width, state->screen_height, stdout);
-	eglSwapBuffers(state->display, state->surface);
-	assert(eglGetError() == EGL_SUCCESS);
-}
-
-void SaveRaw(char *filename) {
+void SaveEnd(char *filename) {
 	FILE *fp;
 	assert(vgGetError() == VG_NO_ERROR);
-	fp = fopen(filename, "wb");
-	if (fp != NULL) {
-		dumpscreen(state->screen_width, state->screen_height, fp);
-		fclose(fp);
+	if (strlen(filename) == 0) {
+		dumpscreen(state->screen_width, state->screen_height, stdout);
+	} else {
+		fp = fopen(filename, "wb");
+		if (fp != NULL) {
+			dumpscreen(state->screen_width, state->screen_height, fp);
+			fclose(fp);
+		}
 	}
 	eglSwapBuffers(state->display, state->surface);
 	assert(eglGetError() == EGL_SUCCESS);
 }
 
 // clear the screen to a background color
-void Background(int w, int h, VGfloat fill[4]) {
-	vgSetfv(VG_CLEAR_COLOR, 4, fill);
-	vgClear(0, 0, w, h);
+void Background(unsigned int r, unsigned int g, unsigned int b) {
+	Fill(r, g, b, 1);
+	Rect(0, 0, state->screen_width, state->screen_height);
 }

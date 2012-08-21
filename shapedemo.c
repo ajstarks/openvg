@@ -33,7 +33,7 @@ void coordpoint(VGfloat x, VGfloat y, VGfloat size, VGfloat pcolor[4]) {
 void grid(VGfloat x, VGfloat y, int n, int w, int h) {
 	VGfloat ix, iy;
 	Stroke(128, 128, 128, 0.5);
-	strokeWidth(2);
+	StrokeWidth(2);
 	for (ix = x; ix <= x + w; ix += n) {
 		Line(ix, y, ix, y + h);
 	}
@@ -59,68 +59,60 @@ void fitwidth(int width, int adj, char *s, FW * f) {
 }
 
 // testpattern shows a test pattern 
-void testpattern(int width, int height, char *s) {
+void testpattern(int w, int h, char *s) {
+	VGfloat midx, midy1, midy2, midy3;
+	int fontsize = 256, h2 = h / 2;
+	FW tw1 = { MonoTypeface, 0, fontsize };
+	FW tw2 = { SansTypeface, 0, fontsize };
+	FW tw3 = { SerifTypeface, 0, fontsize };
 
-	VGfloat midx1, midx2, midx3, midy1, midy2, midy3, bgcolor[4], tc[4];
-	int fontsize = 256, w2 = width / 2, h2 = height / 2;
-	FW tw1 = { MonoTypeface, 0, fontsize }, tw2 = {
-	SansTypeface, 0, fontsize}, tw3 = {
-	SerifTypeface, 0, fontsize};
-
-	RGB(255, 255, 255, bgcolor);
-	Start(width, height, bgcolor);
+	Start(w, h);
 
 	// colored squares in the corners
 	Fill(255, 0, 0, 1);
 	Rect(0, 0, 100, 100);
 	Fill(0, 255, 0, 1);
-	Rect(0, height - 100, 100, 100);
+	Rect(0, h - 100, 100, 100);
 	Fill(0, 0, 255, 1);
-	Rect(width - 100, 0, 100, 100);
+	Rect(w - 100, 0, 100, 100);
 	Fill(128, 128, 128, 1);
-	Rect(width - 100, height - 100, 100, 100);
+	Rect(w - 100, h - 100, 100, 100);
 
-	// for each font, (Sans, Serif, Mono), adjust the string to the width
-	fitwidth(width, 20, s, &tw1);
-	fitwidth(width, 20, s, &tw2);
-	fitwidth(width, 20, s, &tw3);
+	// for each font, (Sans, Serif, Mono), adjust the string to the w
+	fitwidth(w, 20, s, &tw1);
+	fitwidth(w, 20, s, &tw2);
+	fitwidth(w, 20, s, &tw3);
 
-	// Determine the midpoint
-	midx1 = w2 - (tw1.tw / 2);
-	midx2 = w2 - (tw2.tw / 2);
-	midx3 = w2 - (tw3.tw / 2);
+	midx = w / 2;
 
 	// Adjust the baselines to be medial
 	midy1 = h2 + 20 + (tw1.fontsize) / 2;
 	midy2 = h2 - (tw2.fontsize) / 2;
 	midy3 = h2 - 20 - tw2.fontsize - (tw3.fontsize) / 2;
 
-	RGB(128, 128, 128, tc);
-	Text(midx1, midy1, s, tw1.font, tw1.fontsize, tc);
-	RGB(128, 0, 0, tc);
-	Text(midx2, midy2, s, tw2.font, tw2.fontsize, tc);
-	RGB(0, 0, 128, tc);
-	Text(midx3, midy3, s, tw3.font, tw3.fontsize, tc);
-	//SaveRaw("testpattern.raw");
+	Fill(128, 128, 128, 1);
+	TextMiddle(midx, midy1, s, tw1.font, tw1.fontsize);
+	Fill(128, 0, 0, 1);
+	TextMiddle(midx, midy2, s, tw2.font, tw2.fontsize);
+	Fill(0, 0, 128, 1);
+	TextMiddle(midx, midy3, s, tw3.font, tw3.fontsize);
 	End();
 }
 
 // textlines writes lines of text
-void textlines(VGfloat x, VGfloat y, char *s[], Fontinfo f, int fontsize, VGfloat leading, VGfloat fill[4]) {
-
+void textlines(VGfloat x, VGfloat y, char *s[], Fontinfo f, int fontsize, VGfloat leading) {
 	int i;
 	for (i = 0;; i++) {
 		if (s[i] == NULL) {
 			break;
 		}
-		Text(x, y, s[i], f, fontsize, fill);
+		Text(x, y, s[i], f, fontsize);
 		y -= leading;
 	}
 }
 
 // tb draws a block of text
 void tb(int w, int h) {
-
 	char *para[] = {
 		"For lo, the winter is past,",
 		"the rain is over and gone",
@@ -137,57 +129,50 @@ void tb(int w, int h) {
 		NULL
 	};
 
-	VGfloat bgcolor[4], textcolor[4], tmargin = w * 0.33, lmargin = w * 0.10;
+	VGfloat tmargin = w * 0.33, lmargin = w * 0.10;
 
-	RGB(240, 240, 240, bgcolor);
-	RGB(49, 79, 79, textcolor);
-	Start(w, h, bgcolor);
-	textlines(tmargin, h - 100, para, SerifTypeface, 24, 40, textcolor);
-	textlines(tmargin, h - 400, para, SansTypeface, 24, 40, textcolor);
-	textlines(tmargin, h - 700, para, MonoTypeface, 24, 40, textcolor);
-	textlines(lmargin, h - 180, labels, SansTypeface, 48, 300, textcolor);
-	//SaveRaw("tb.raw");
+	Start(w, h);
+	Fill(49, 79, 79, 1);
+	textlines(tmargin, h - 100, para, SerifTypeface, 24, 40);
+	textlines(tmargin, h - 400, para, SansTypeface, 24, 40);
+	textlines(tmargin, h - 700, para, MonoTypeface, 24, 40);
+	textlines(lmargin, h - 180, labels, SansTypeface, 48, 300);
 	End();
 }
 
 // cookie draws a cookie
 void cookie(int w, int h) {
 	int ew = 200, eh = 60, h2 = h / 2, w2 = w / 2;
-	VGfloat gray[4] = { .5, .5, .5, 1 }, white[4] = {
-	1, 1, 1, 1}, black[4] = {
-	0, 0, 0, 1}, bgcolor[4] = {
-	.75, .75, .75, 1};
 
-	Start(w, h, bgcolor);
-	setfill(gray);
+	Start(w, h);
+	Fill(128, 128, 128, 1);
 	Ellipse(w2, h2, ew, eh);
 	Translate(0, 10);
 
-	setfill(white);
+	Fill(255, 255, 255, 1);
 	Ellipse(w2, h2, ew, eh);
 	Translate(0, 20);
 
-	setfill(black);
+	Fill(0, 0, 0, 1);
 	Ellipse(w2, h2, ew, eh);
 	End();
 }
 
 // imagtest displays four JPEG images, centered on the display
 void imagetest(int w, int h) {
-	VGfloat bgcolor[4] = { 0, 0, 0, 1 };
 	int imgw = 400, imgh = 400;
 	VGfloat cx = (w / 2) - (imgw / 2), cy = (h / 2) - (imgh / 2);
 	VGfloat ulx = 0, uly = h - imgh;
 	VGfloat urx = w - imgw, ury = uly;
 	VGfloat llx = 0, lly = 0;
 	VGfloat lrx = urx, lry = lly;
-	Start(w, h, bgcolor);
+	Start(w, h);
+	Background(0, 0, 0);
 	Image(cx, cy, imgw, imgh, "test_img_violin.jpg");
 	Image(ulx, uly, imgw, imgh, "test_img_piano.jpg");
 	Image(urx, ury, imgw, imgh, "test_img_sax.jpg");
 	Image(llx, lly, imgw, imgh, "test_img_guitar.jpg");
 	Image(lrx, lry, imgw, imgh, "test_img_flute.jpg");
-	//SaveRaw("image.raw");
 	End();
 }
 
@@ -206,21 +191,19 @@ void refcard(int width, int height) {
 		"Cubic Bezier",
 		"Image"
 	};
-	VGfloat shapecolor[4], textcolor[4], bgcolor[4];
+	VGfloat shapecolor[4];
 	RGB(202, 225, 255, shapecolor);
-	RGB(0, 0, 0, textcolor);
-	RGB(255, 255, 255, bgcolor);
 	VGfloat top = height - 100, sx = 500, sy = top, sw = 100, sh = 45, dotsize = 7, spacing = 2.0;
 
 	int i, ns = sizeof(shapenames) / sizeof(char *), fontsize = 36;
-	Start(width, height, bgcolor);
-	setfill(textcolor);
+	Start(width, height);
 	sx = width * 0.10;
-	textcolor[0] = 0.5;
-	Text(width * .45, height / 2, "OpenVG on the Raspberry Pi", SansTypeface, 48, textcolor);
-	textcolor[0] = 0;
+
+	Fill(128, 0, 0, 1);
+	Text(width * .45, height / 2, "OpenVG on the Raspberry Pi", SansTypeface, 48);
+	Fill(0, 0, 0, 1);
 	for (i = 0; i < ns; i++) {
-		Text(sx + sw + sw / 2, sy, shapenames[i], SansTypeface, fontsize, textcolor);
+		Text(sx + sw + sw / 2, sy, shapenames[i], SansTypeface, fontsize);
 		sy -= sh * spacing;
 	}
 	sy = top;
@@ -239,7 +222,7 @@ void refcard(int width, int height) {
 	coordpoint(sx, sy, dotsize, shapecolor);
 	sy -= sh * spacing;
 
-	strokeWidth(1);
+	StrokeWidth(1);
 	Stroke(204, 204, 204, 1);
 	Line(sx, sy, ex, sy);
 	coordpoint(sx, sy, dotsize, shapecolor);
@@ -285,32 +268,29 @@ void refcard(int width, int height) {
 	coordpoint(ex, ey, dotsize, shapecolor);
 
 	sy -= (sh * spacing * 1.5);
-	Image(sx, sy, 100, 100, "starx0.jpg");
+	Image(sx, sy, 100, 100, "starx.jpg");
 
-	//SaveRaw("refcard.raw");
 	End();
 }
 
 // rotext draws text, rotated around the center of the screen, progressively faded
 void rotext(int w, int h, int n, char *s) {
-	int i;
-	VGfloat textcolor[4], bgcolor[4];
 	VGfloat fade = (100.0 / (VGfloat) n) / 100.0;
 	VGfloat deg = 360.0 / n;
 	VGfloat x = w / 2, y = h / 2;
+	VGfloat alpha = 1.0;	// start solid
+	int i, size = 256;
 
-	RGBA(255, 255, 255, 1, textcolor);
-	RGB(0, 0, 0, bgcolor);
-	Start(w, h, bgcolor);
+	Start(w, h);
+	Background(0, 0, 0);
 	Translate(x, y);
-	int size = 256;
 	for (i = 0; i < n; i++) {
-		Text(0, 0, s, SerifTypeface, size, textcolor);
-		textcolor[3] -= fade;
-		size += n;
+		Fill(255, 255, 255, alpha);
+		Text(0, 0, s, SerifTypeface, size);
+		alpha -= fade;	// fade
+		size += n;	// enlarge
 		Rotate(deg);
 	}
-	//  SaveRaw("rotext.raw");
 	End();
 }
 
@@ -336,14 +316,11 @@ void rseed(void) {
 // rshapes draws shapes with random colors, strokes, and sizes. 
 void rshapes(int width, int height, int n) {
 	int np = 10;
-	VGfloat bgcolor[4], textcolor[4];
 	VGfloat sx, sy, cx, cy, px, py, ex, ey, pox, poy;
 	VGfloat polyx[np], polyy[np];
 	int i, j;
-	RGB(255, 255, 255, bgcolor);
-	RGB(128, 0, 0, textcolor);
 	rseed();
-	Start(width, height, bgcolor);
+	Start(width, height);
 	for (i = 0; i < n; i++) {
 		Fill(randcolor(), randcolor(), randcolor(), drand48());
 		Ellipse(randf(width), randf(height), randf(200), randf(100));
@@ -354,9 +331,9 @@ void rshapes(int width, int height, int n) {
 		sx = randf(width);
 		sy = randf(height);
 		Stroke(randcolor(), randcolor(), randcolor(), 1);
-		strokeWidth(randf(5));
+		StrokeWidth(randf(5));
 		Line(sx, sy, sx + randf(200), sy + randf(100));
-		strokeWidth(0);
+		StrokeWidth(0);
 
 		sx = randf(width);
 		sy = randf(height);
@@ -392,31 +369,33 @@ void rshapes(int width, int height, int n) {
 		}
 		Polyline(polyx, polyy, np);
 	}
-	Text(20, 20, "OpenVG on the Raspberry Pi", SansTypeface, 32, textcolor);
-	//SaveRaw("rand.raw");
+	Fill(128, 0, 0, 1);
+	Text(20, 20, "OpenVG on the Raspberry Pi", SansTypeface, 32);
 	End();
 }
 
 void sunearth(int w, int h) {
-	VGfloat bgcolor[4], sun, earth, x, y;
+	VGfloat sun, earth, x, y;
 	int i;
 
 	rseed();
-	RGB(0,0,0,bgcolor);
-	Start(w,h,bgcolor);
-	Fill(255,255,255,1);
-	for (i = 0; i < w/4; i++) {
+	Start(w, h);
+	Background(0, 0, 0);
+	Fill(255, 255, 255, 1);
+	for (i = 0; i < w / 4; i++) {
 		x = randf(w);
 		y = randf(h);
 		Circle(x, y, 2);
 	}
 	earth = 20;
 	sun = earth * 109;
-	Fill(0,0,255,1);	Circle(w/3, h-(h/10), earth);
-	Fill(255,255,224,1);Circle(w, 0, sun);
-	//SaveRaw("sunearth.raw");
-    End();
+	Fill(0, 0, 255, 1);
+	Circle(w / 3, h - (h / 10), earth);
+	Fill(255, 255, 224, 1);
+	Circle(w, 0, sun);
+	End();
 }
+
 // advert is an ad for the package 
 void advert(int w, int h) {
 	VGfloat y = (6 * h) / 10;
@@ -425,16 +404,14 @@ void advert(int w, int h) {
 	char *a = "ajstarks@gmail.com";
 	int imw = 110, imh = 110;
 	VGfloat tw = textwidth(s, SansTypeface, fontsize);
-	VGfloat textcolor[4], bgcolor[4];
 
-	RGB(255,255,255,bgcolor);
-	RGB(128,0,0,textcolor);
-	Start(w, h, bgcolor);
-	Text(w / 2 - (tw / 2), y - (fontsize / 4), s, SansTypeface, fontsize, textcolor);
+	Start(w, h);
+	Fill(128, 0, 0, 1);
+	Text(w / 2 - (tw / 2), y - (fontsize / 4), s, SansTypeface, fontsize);
 	y -= 150;
 	tw = textwidth(a, SansTypeface, fontsize / 3);
-	RGB(128,128,128,textcolor);
-	Text(w / 2 - (tw / 2), y, a, SansTypeface, fontsize / 3, textcolor);
+	Fill(128, 128, 128, 1);
+	Text(w / 2 - (tw / 2), y, a, SansTypeface, fontsize / 3);
 	Image((w / 2) - (imw / 2), y - (imh * 2), imw, imh, "starx.jpg");
 	End();
 }
@@ -453,7 +430,7 @@ int main(int argc, char **argv) {
 		} else if (strncmp(argv[1], "text", 4) == 0) {
 			tb(w, h);
 		} else if (strncmp(argv[1], "astro", 5) == 0) {
-			sunearth(w,h);
+			sunearth(w, h);
 		} else {
 			fprintf(stderr, usage, progname);
 			return 1;
@@ -479,7 +456,7 @@ int main(int argc, char **argv) {
 			sleep(nr);
 			tb(w, h);
 			sleep(nr);
-			sunearth(w,h);
+			sunearth(w, h);
 			sleep(nr);
 			advert(w, h);
 		} else if (strncmp(argv[1], "rand", 4) == 0) {
