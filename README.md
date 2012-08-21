@@ -3,17 +3,6 @@
 
 <a href="http://www.flickr.com/photos/ajstarks/7811750326/" title="rotext by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg" width="500" height="281" alt="rotext"></a>
 
-
-The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
-
-	./shapedemo                      # show a reference card
-	./shapedemo image                # show four test images
-	./shapedemo text                 # show blocks of text in serif, sans, and mono fonts
-	./shapedemo rand 10              # show 10 random shapes
-	./shapedemo rotate 10 a          # rotated and faded "a"
-	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
-	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
-
 ## First program
 
 Here is the graphics equivalent of "hello, world"
@@ -55,6 +44,7 @@ Here is the graphics equivalent of "hello, world"
 		exit(0);
 	}
 
+<a href="http://www.flickr.com/photos/ajstarks/7828969180/" title="hellovg by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8436/7828969180_b73db3bf19.jpg" width="500" height="281" alt="hellovg"></a>
 
 ## API
 
@@ -96,7 +86,7 @@ Set the Stroke color using RGBA values.
 	void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
 Set the Fill color using RGBA values.
 
-### Shapes, Image
+### Shapes
 
 	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
 Draw a line between (x1, y1) and (x2, y2).
@@ -199,4 +189,15 @@ The unloadfont function releases the path information:
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
 	./shapedemo demo 5
+
+
+	The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
+
+	./shapedemo                      # show a reference card
+	./shapedemo image                # show four test images
+	./shapedemo text                 # show blocks of text in serif, sans, and mono fonts
+	./shapedemo rand 10              # show 10 random shapes
+	./shapedemo rotate 10 a          # rotated and faded "a"
+	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
+	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
 
