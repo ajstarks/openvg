@@ -48,7 +48,7 @@ Here is the graphics equivalent of "hello, world"
 
 ## API
 
-<a href="http://www.flickr.com/photos/ajstarks/7811750466/" title="refcard by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8307/7811750466_55288b3c45.jpg" width="500" height="281" alt="refcard"></a>
+<a href="http://www.flickr.com/photos/ajstarks/7717370238/" title="OpenVG refcard by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7256/7717370238_1d632cb179.jpg" width="500" height="281" alt="OpenVG refcard"></a>
 
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
 OpenVG specifies colors as a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0, but typically colors are specified as RGBA (0-255 for RGB, A from 0.0 to 1.0)
@@ -182,9 +182,9 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-	pi@raspberrypi ~/vg $ git clone git://github.com/ajstarks/openvg
-	pi@raspberrypi ~/vg $ cd openvg
-	pi@raspberrypi ~/vg $ make test
+	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
+	pi@raspberrypi ~ $ cd openvg
+	pi@raspberrypi ~/openvg $ make test
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c libshapes.o oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
