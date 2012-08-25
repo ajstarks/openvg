@@ -122,21 +122,18 @@ void tb(int w, int h) {
 		NULL
 	};
 
-	char *labels[] = {
-		"Serif",
-		"Sans",
-		"Mono",
-		NULL
-	};
+	VGfloat tmargin = w * 0.25, lmargin = w * 0.10, top = h * .9, mid = h * .6, bot = h * .3;
 
-	VGfloat tmargin = w * 0.33, lmargin = w * 0.10;
+	int fontsize = 24, leading = 40, lfontsize = fontsize * 2, midb = ((leading * 2) + (leading / 2)) - (lfontsize / 2);
 
 	Start(w, h);
 	Fill(49, 79, 79, 1);
-	textlines(tmargin, h - 100, para, SerifTypeface, 24, 40);
-	textlines(tmargin, h - 400, para, SansTypeface, 24, 40);
-	textlines(tmargin, h - 700, para, MonoTypeface, 24, 40);
-	textlines(lmargin, h - 180, labels, SansTypeface, 48, 300);
+	textlines(tmargin, top, para, SerifTypeface, fontsize, leading);
+	textlines(tmargin, mid, para, SansTypeface, fontsize, leading);
+	textlines(tmargin, bot, para, MonoTypeface, fontsize, leading);
+	Text(lmargin, top - midb, "Serif", SansTypeface, lfontsize);
+	Text(lmargin, mid - midb, "Sans", SansTypeface, lfontsize);
+	Text(lmargin, bot - midb, "Mono", SansTypeface, lfontsize);
 	End();
 }
 
@@ -176,6 +173,31 @@ void imagetest(int w, int h) {
 	End();
 }
 
+// fontrange shows a range of fonts
+void fontrange(VGfloat x, VGfloat y, int w, int h) {
+	int i, sizes[] = { 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 21, 24, 36, 48, 60, 72, 96, 0 };
+	VGfloat spacing = 100, xs = x, s2 = spacing / 2, lx = xs - sizes[0];
+	char num[4];
+
+	Start(w, h);
+	Background(255, 255, 255);
+	for (i = 0; sizes[i] != 0; i++) {
+		Fill(128, 0, 0, 1);
+		TextMiddle(x, y, "a", SerifTypeface, sizes[i]);
+		Fill(128, 128, 128, 1);
+		sprintf(num, "%d", sizes[i]);
+		TextMiddle(x, y - spacing, num, SansTypeface, 16);
+		x += sizes[i] + 50;
+	}
+	x -= sizes[i - 1];
+	Stroke(150, 150, 150, 0.5);
+	Fill(255, 255, 255, 1);
+	StrokeWidth(2);
+	Line(lx, y - s2, x, y - s2);
+	Qbezier(lx, y + s2, x, y + s2, x, y + (spacing * 2));
+	End();
+}
+
 // refcard shows a reference card of shapes
 void refcard(int width, int height) {
 	char *shapenames[] = {
@@ -193,14 +215,14 @@ void refcard(int width, int height) {
 	};
 	VGfloat shapecolor[4];
 	RGB(202, 225, 255, shapecolor);
-	VGfloat top = height - 100, sx = 500, sy = top, sw = 100, sh = 45, dotsize = 7, spacing = 2.0;
+	VGfloat top = height * .95, sx = 500, sy = top, sw = width * .05, sh = height * .045, dotsize = 7, spacing = 2.0;
 
-	int i, ns = sizeof(shapenames) / sizeof(char *), fontsize = 36;
+	int i, ns = sizeof(shapenames) / sizeof(char *), fontsize = height * .033;
 	Start(width, height);
 	sx = width * 0.10;
 
 	Fill(128, 0, 0, 1);
-	Text(width * .45, height / 2, "OpenVG on the Raspberry Pi", SansTypeface, 48);
+	TextEnd(width - 20, height / 2, "OpenVG on the Raspberry Pi", SansTypeface, fontsize + (fontsize / 2));
 	Fill(0, 0, 0, 1);
 	for (i = 0; i < ns; i++) {
 		Text(sx + sw + sw / 2, sy, shapenames[i], SansTypeface, fontsize);
@@ -279,7 +301,7 @@ void rotext(int w, int h, int n, char *s) {
 	VGfloat deg = 360.0 / n;
 	VGfloat x = w / 2, y = h / 2;
 	VGfloat alpha = 1.0;	// start solid
-	int i, size = 256;
+	int i, size = w / 8;
 
 	Start(w, h);
 	Background(0, 0, 0);
@@ -315,10 +337,9 @@ void rseed(void) {
 
 // rshapes draws shapes with random colors, strokes, and sizes. 
 void rshapes(int width, int height, int n) {
-	int np = 10;
+	int i, j, np = 10;
 	VGfloat sx, sy, cx, cy, px, py, ex, ey, pox, poy;
 	VGfloat polyx[np], polyy[np];
-	int i, j;
 	rseed();
 	Start(width, height);
 	for (i = 0; i < n; i++) {
@@ -387,7 +408,7 @@ void sunearth(int w, int h) {
 		y = randf(h);
 		Circle(x, y, 2);
 	}
-	earth = 20;
+	earth = (VGfloat) w *0.010;
 	sun = earth * 109;
 	Fill(0, 0, 255, 1);
 	Circle(w / 3, h - (h / 10), earth);
@@ -399,7 +420,7 @@ void sunearth(int w, int h) {
 // advert is an ad for the package 
 void advert(int w, int h) {
 	VGfloat y = (6 * h) / 10;
-	int fontsize = 84;
+	int fontsize = w * 0.04;
 	char *s = "github.com/ajstarks/openvg";
 	char *a = "ajstarks@gmail.com";
 	int imw = 110, imh = 110;
@@ -431,16 +452,16 @@ int main(int argc, char **argv) {
 			tb(w, h);
 		} else if (strncmp(argv[1], "astro", 5) == 0) {
 			sunearth(w, h);
+		} else if (strncmp(argv[1], "fr", 2) == 0) {
+			fontrange(100, h / 2, w, h);
 		} else {
 			fprintf(stderr, usage, progname);
 			return 1;
 		}
 		break;
 	case 3:
-		if (strncmp(argv[1], "test", 4) == 0) {
-			testpattern(w, h, argv[2]);
-		} else if (strncmp(argv[1], "demo", 4) == 0) {
-			nr = atoi(argv[2]);
+		nr = atoi(argv[2]);
+		if (strncmp(argv[1], "demo", 4) == 0) {
 			if (nr < 1 || nr > 30) {
 				nr = 5;
 			}
@@ -456,15 +477,18 @@ int main(int argc, char **argv) {
 			sleep(nr);
 			tb(w, h);
 			sleep(nr);
+			fontrange(100, h / 2, w, h);
+			sleep(nr);
 			sunearth(w, h);
 			sleep(nr);
 			advert(w, h);
 		} else if (strncmp(argv[1], "rand", 4) == 0) {
-			nr = atoi(argv[2]);
 			if (nr < 1 || nr > 1000) {
 				nr = 100;
 			}
 			rshapes(w, h, nr);
+		} else if (strncmp(argv[1], "test", 4) == 0) {
+			testpattern(w, h, argv[2]);
 		} else {
 			fprintf(stderr, usage, progname);
 			return 1;
