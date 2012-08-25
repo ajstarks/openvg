@@ -395,6 +395,7 @@ void rshapes(int width, int height, int n) {
 	End();
 }
 
+// sunearth shows the relative sizes of the sun and the earth
 void sunearth(int w, int h) {
 	VGfloat sun, earth, x, y;
 	int i;
@@ -441,7 +442,7 @@ void advert(int w, int h) {
 // Exit and clean up when you hit [RETURN].
 int main(int argc, char **argv) {
 	int w, h, nr;
-	char *usage = "%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n";
+	char *usage = "%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfr\n";
 	char *progname = argv[0];
 	init(&w, &h);
 	switch (argc) {
