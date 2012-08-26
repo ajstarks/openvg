@@ -174,27 +174,37 @@ void imagetest(int w, int h) {
 }
 
 // fontrange shows a range of fonts
-void fontrange(VGfloat x, VGfloat y, int w, int h) {
-	int i, sizes[] = { 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 21, 24, 36, 48, 60, 72, 96, 0 };
-	VGfloat spacing = 100, xs = x, s2 = spacing / 2, lx = xs - sizes[0];
+void fontrange(int w, int h) {
+	int *s, sizes[] = { 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 21, 24, 36, 48, 60, 72, 96, 0 };
+	VGfloat x, y = h / 2, spacing = 50, s2 = spacing / 2, len, lx;
 	char num[4];
 
 	Start(w, h);
 	Background(255, 255, 255);
-	for (i = 0; sizes[i] != 0; i++) {
-		Fill(128, 0, 0, 1);
-		TextMiddle(x, y, "a", SerifTypeface, sizes[i]);
-		Fill(128, 128, 128, 1);
-		sprintf(num, "%d", sizes[i]);
-		TextMiddle(x, y - spacing, num, SansTypeface, 16);
-		x += sizes[i] + 50;
+
+	// compute the length so we can center
+	for (len = 0, s = sizes; *s; s++) {
+		len += *s + spacing;
 	}
-	x -= sizes[i - 1];
+	len -= spacing;
+	lx = (w / 2) - (len / 2); // center point
+
+	// for each size, display a character and label
+	for (x = lx, s = sizes; *s; s++) {
+		Fill(128, 0, 0, 1);
+		TextMiddle(x, y, "a", SerifTypeface, *s);
+		Fill(128, 128, 128, 1);
+		snprintf(num, 3, "%d", *s);
+		TextMiddle(x, y - spacing, num, SansTypeface, 16);
+		x += *s + spacing;
+	}
+	// draw a line below the characters, a curve above
+	x -= spacing;
 	Stroke(150, 150, 150, 0.5);
-	Fill(255, 255, 255, 1);
 	StrokeWidth(2);
 	Line(lx, y - s2, x, y - s2);
-	Qbezier(lx, y + s2, x, y + s2, x, y + (spacing * 2));
+	Fill(255, 255, 255, 1);
+	Qbezier(lx, y + s2, x, y + s2, x, y + (spacing * 3));
 	End();
 }
 
@@ -454,7 +464,7 @@ int main(int argc, char **argv) {
 		} else if (strncmp(argv[1], "astro", 5) == 0) {
 			sunearth(w, h);
 		} else if (strncmp(argv[1], "fr", 2) == 0) {
-			fontrange(100, h / 2, w, h);
+			fontrange(w, h);
 		} else {
 			fprintf(stderr, usage, progname);
 			return 1;
@@ -478,7 +488,7 @@ int main(int argc, char **argv) {
 			sleep(nr);
 			tb(w, h);
 			sleep(nr);
-			fontrange(100, h / 2, w, h);
+			fontrange(w, h);
 			sleep(nr);
 			sunearth(w, h);
 			sleep(nr);
