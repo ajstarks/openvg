@@ -1,6 +1,5 @@
 #Testbed for exploring OpenVG on the Raspberry Pi.
 
-
 <a href="http://www.flickr.com/photos/ajstarks/7811750326/" title="rotext by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg" width="500" height="281" alt="rotext"></a>
 
 ## First program
@@ -26,7 +25,7 @@ Here is the graphics equivalent of "hello, world"
 
 	int main() {
 		int width, height;
-		init(&width, &height);     // OpenGL, etc initialization
+		init(&width, &height);                    // OpenGL, etc initialization
 
 		Start(width, height);                     // Start the picture
 		Background(0,0,0);                        // Black background
@@ -37,10 +36,10 @@ Here is the graphics equivalent of "hello, world"
 		"hello, world", SerifTypeface, width/10); // Greetings 
 		End();                                    // End the picture
 
-		while (getchar() != '\n')  // look at the pic, end with [RETURN]
+		while (getchar() != '\n')                 // look at the pic, end with [RETURN]
 			;
 
-		finish();                 // Graphics cleanup
+		finish();                                 // Graphics cleanup
 		exit(0);
 	}
 
@@ -182,6 +181,8 @@ The unloadfont function releases the path information:
 
 # Build and run
 
+<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>
+
 	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
 	pi@raspberrypi ~ $ cd openvg
 	pi@raspberrypi ~/openvg $ make test
@@ -191,13 +192,18 @@ The unloadfont function releases the path information:
 	./shapedemo demo 5
 
 
-	The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
+The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
 	./shapedemo                      # show a reference card
+	./shapedemo raspi                # show a self-portrait
 	./shapedemo image                # show four test images
+	./shapedemo astro                # the sun and the earth, to scale
 	./shapedemo text                 # show blocks of text in serif, sans, and mono fonts
 	./shapedemo rand 10              # show 10 random shapes
 	./shapedemo rotate 10 a          # rotated and faded "a"
 	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
+	./shapedemo fontsize             # show a range of font sizes (per <https://speakerdeck.com/u/idangazit/p/better-products-through-typography>)
 	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
+
+<a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
 

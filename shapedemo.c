@@ -43,6 +43,65 @@ void grid(VGfloat x, VGfloat y, int n, int w, int h) {
 	}
 }
 
+// makepi draws the Raspberry Pi
+void makepi(VGfloat x, VGfloat y, int w, int h) {
+	// dimensions
+	VGfloat socw = h / 5,
+	    compw = h / 5,
+	    cjw = h / 10,
+	    cjh = h / 8,
+	    audw = h / 5,
+	    aujw = h / 10,
+	    aujh = cjh / 2,
+	    hdw = w / 6,
+	    hdh = w / 10,
+	    gpw = w / 3,
+	    gph = h / 8,
+	    pw = h / 10,
+	    usw = w / 5,
+	    ush = h / 5,
+	    etw = w / 5,
+	    eth = h / 5,
+	    sdw = w / 6, sdh = w / 4, offset = (w / 2) / 10, w34 = (w * 3) / 4, w2 = w / 2, h2 = h / 2, h40 = (h * 2) / 5;
+
+	Fill(0, 128, 0, 1);
+	Rect(x, y, w, h);	// board
+
+	Fill(255, 255, 0, 1);
+	Rect(x + w2, (y + h) - compw, compw, compw);	// composite
+	Fill(192, 192, 192, 1);
+	Rect(x + w2 + (cjw / 2), y + h, cjw, cjh);	// composite jack
+
+	Fill(0, 0, 0, 1);
+	Rect(x + w34, y + h - audw, audw, audw);	// audio
+	Rect(x + w34 + (aujw / 2), y + h, aujw, aujh);	// audio jack
+
+	Fill(192, 192, 192, 1);
+	Rect(x + w2, y, hdw, hdh);	// HDMI
+	Rect((x + w) - etw, y, etw, eth);	// Ethernet
+	Rect((x + w + offset) - usw, y + h40, usw, ush);	// USB
+	Rect(x, y, pw, pw);	// Power
+
+	Fill(0, 0, 0, 1);
+	Rect(x + (w * 2) / 5, y + h40, socw, socw);	// SoC
+	Rect(x, (y + h) - gph, gpw, gph);	// GPIO
+	Fill(0, 0, 255, 1);
+	Rect(x - sdw, (y + h2) - (sdh / 2), sdw, sdh);	// SD card
+}
+
+// raspi draws the raspberry pi, scaled to the screen dimensions
+void raspi(int w, int h, char *s) {
+	VGfloat midx = w / 2, midy = h / 2;
+	int rw = midx, rh = (rw * 2) / 3, fontsize = w * 0.03;
+
+	Start(w, h);
+	Background(255, 255, 255);
+	makepi(midx - (rw / 2), midy - (rh / 2), rw, rh);
+	Fill(128, 0, 0, 1);
+	TextMiddle(midx, midy - (rh / 2) - (fontsize * 2), s, SansTypeface, fontsize);
+	End();
+}
+
 typedef struct {
 	Fontinfo font;
 	VGfloat tw;
@@ -187,7 +246,7 @@ void fontrange(int w, int h) {
 		len += *s + spacing;
 	}
 	len -= spacing;
-	lx = (w / 2) - (len / 2); // center point
+	lx = (w / 2) - (len / 2);	// center point
 
 	// for each size, display a character and label
 	for (x = lx, s = sizes; *s; s++) {
@@ -448,11 +507,35 @@ void advert(int w, int h) {
 	End();
 }
 
+// demo shows a timed demonstration
+void demo(int w, int h, int sec) {
+	refcard(w, h);
+	sleep(sec);
+	rshapes(w, h, 50);
+	sleep(sec);
+	testpattern(w, h, "OpenVG on RasPi");
+	sleep(sec);
+	imagetest(w, h);
+	sleep(sec);
+	rotext(w, h, 30, "Raspi");
+	sleep(sec);
+	tb(w, h);
+	sleep(sec);
+	fontrange(w, h);
+	sleep(sec);
+	sunearth(w, h);
+	sleep(sec);
+	raspi(w, h, "The Raspberry Pi");
+	sleep(sec);
+	advert(w, h);
+}
+
 // main initializes the system and shows the picture. 
 // Exit and clean up when you hit [RETURN].
 int main(int argc, char **argv) {
-	int w, h, nr;
-	char *usage = "%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfr\n";
+	int w, h, n;
+	char *usage =
+	    "%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfontsize\n\traspi\n";
 	char *progname = argv[0];
 	init(&w, &h);
 	switch (argc) {
@@ -463,41 +546,27 @@ int main(int argc, char **argv) {
 			tb(w, h);
 		} else if (strncmp(argv[1], "astro", 5) == 0) {
 			sunearth(w, h);
-		} else if (strncmp(argv[1], "fr", 2) == 0) {
+		} else if (strncmp(argv[1], "fontsize", 8) == 0) {
 			fontrange(w, h);
+		} else if (strncmp(argv[1], "raspi", 5) == 0) {
+			raspi(w, h, "The Raspberry Pi");
 		} else {
 			fprintf(stderr, usage, progname);
 			return 1;
 		}
 		break;
 	case 3:
-		nr = atoi(argv[2]);
+		n = atoi(argv[2]);
 		if (strncmp(argv[1], "demo", 4) == 0) {
-			if (nr < 1 || nr > 30) {
-				nr = 5;
+			if (n < 1 || n > 30) {
+				n = 5;
 			}
-			refcard(w, h);
-			sleep(nr);
-			rshapes(w, h, 50);
-			sleep(nr);
-			testpattern(w, h, "OpenVG on RasPi");
-			sleep(nr);
-			imagetest(w, h);
-			sleep(nr);
-			rotext(w, h, 30, "Raspi");
-			sleep(nr);
-			tb(w, h);
-			sleep(nr);
-			fontrange(w, h);
-			sleep(nr);
-			sunearth(w, h);
-			sleep(nr);
-			advert(w, h);
+			demo(w, h, n);
 		} else if (strncmp(argv[1], "rand", 4) == 0) {
-			if (nr < 1 || nr > 1000) {
-				nr = 100;
+			if (n < 1 || n > 1000) {
+				n = 100;
 			}
-			rshapes(w, h, nr);
+			rshapes(w, h, n);
 		} else if (strncmp(argv[1], "test", 4) == 0) {
 			testpattern(w, h, argv[2]);
 		} else {
