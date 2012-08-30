@@ -3,7 +3,9 @@
 // Anthony Starks (ajstarks@gmail.com)
 //
 // compile and run on the Raspberry Pi:
-// cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o hellovg hellovg.c -L/opt/vc/lib -lGLESv2 -ljpeg && ./hellovg
+// cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+// cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+// cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o hellovg hellovg.c libshapes.o -L/opt/vc/lib -lGLESv2 -ljpeg && ./hellovg
 //
 //
 #include <stdio.h>
