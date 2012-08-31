@@ -185,7 +185,7 @@ The unloadfont function releases the path information:
 
 <i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg library.  Install it via:
 
-	pi@raspberrypi ~ $ apt-get install libjpeg8-dev
+	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev
 
 Next, build the library and test:
 
