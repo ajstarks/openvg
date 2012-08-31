@@ -183,10 +183,12 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>,  you will also need the jpeg library.  Install it via:
+<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg library.  Install it via:
 
 	pi@raspberrypi ~ $ apt-get install libjpeg8-dev
-	...
+
+Next, build the library and test:
+
 	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
 	pi@raspberrypi ~ $ cd openvg
 	pi@raspberrypi ~/openvg $ make test
