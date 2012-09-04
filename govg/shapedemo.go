@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ajstarks/openvg"
 	"fmt"
+	"github.com/ajstarks/openvg"
 	"math/rand"
 	"os"
 	"strconv"

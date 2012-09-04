@@ -1,16 +1,16 @@
 package main
 
 import (
-	"os"
 	"bufio"
 	"github.com/ajstarks/openvg"
 	"math/rand"
+	"os"
 	"time"
 )
 
 func WaitEnd() {
 	openvg.End()
-bufio.NewReader(os.Stdin).ReadLine()	
+	bufio.NewReader(os.Stdin).ReadLine()
 	openvg.Finish()
 }
 
