@@ -5,10 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <string.h>
-#include <time.h>
 #include <jpeglib.h>
-
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"

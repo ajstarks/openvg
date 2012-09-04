@@ -6,14 +6,13 @@ package openvg
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <string.h>
-#include <time.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "DejaVuSans.inc"               // font data
 #include "DejaVuSerif.inc"
+#include "DejaVuSansMono.inc"
 #include "eglstate.h"                   // data structures for graphics state
 #include "fontinfo.h"                   // font data structure
 #include "shapes.h"
