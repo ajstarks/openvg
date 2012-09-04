@@ -210,6 +210,37 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
 	./shapedemo fontsize             # show a range of font sizes (per <https://speakerdeck.com/u/idangazit/p/better-products-through-typography>)
 	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
-
+	
+	
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
+
+## Go wrapper
+
+A Go programming language wrapper for the library is found in openvg.go. Sample clients are in the directory govg.  The API closely follows the C API; here is the "hello, world" program in Go:
+
+	package main
+
+	import (
+		"bufio"
+		"github.com/ajstarks/openvg"
+		"os"
+	)
+
+	func main() {
+		width, height := openvg.Init() // OpenGL, etc initialization
+	
+		w2 := float64(width / 2)
+		h2 := float64(height / 2)
+		w := float64(width)
+	
+		openvg.Start(width, height)                               // Start the picture
+		openvg.Background(0, 0, 0)                                // Black background
+		openvg.Fill(44, 77, 232, 1)                               // Big blue marble
+		openvg.Circle(w2, 0, w)                                   // The "world"
+		openvg.Fill(255, 255, 255, 1)                             // White text
+		openvg.TextMid(w2, h2, "hello, world", "serif", width/10) // Greetings 
+		openvg.End()                                              // End the picture
+		bufio.NewReader(os.Stdin).ReadLine()                      // Pause until [RETURN]
+		openvg.Finish()                                           // Graphics cleanup
+	}
 
