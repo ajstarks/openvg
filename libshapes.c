@@ -354,8 +354,8 @@ VGfloat textwidth(char *s, Fontinfo f, VGfloat size) {
 	return tw;
 }
 
-// TextMiddle draws text, centered on (x,y)
-void TextMiddle(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
+// TextMid draws text, centered on (x,y)
+void TextMid(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 	VGfloat tw = textwidth(s, f, pointsize);
 	Text(x - (tw / 2.0), y, s, f, pointsize);
 }

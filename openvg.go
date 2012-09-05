@@ -3,17 +3,10 @@ package openvg
 /*
 #cgo CFLAGS:   -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads 
 #cgo LDFLAGS:  -L/opt/vc/lib -lGLESv2 -ljpeg
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"
 #include "GLES/gl.h"
-#include "DejaVuSans.inc"               // font data
-#include "DejaVuSerif.inc"
-#include "DejaVuSansMono.inc"
-#include "eglstate.h"                   // data structures for graphics state
 #include "fontinfo.h"                   // font data structure
 #include "shapes.h"
 */
@@ -127,7 +120,7 @@ func Text(x, y float64, s string, font string, size int, style ...string) {
 }
 
 func TextMid(x, y float64, s string, font string, size int, style ...string) {
-	C.TextMiddle(C.VGfloat(x), C.VGfloat(y), C.CString(s), selectfont(font), C.int(size))
+	C.TextMid(C.VGfloat(x), C.VGfloat(y), C.CString(s), selectfont(font), C.int(size))
 }
 
 func TextEnd(x, y float64, s string, font string, size int, style ...string) {
