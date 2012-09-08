@@ -1,7 +1,9 @@
-all:	libshapes.o oglinit.o
+all:	libshapes.o oglinit.o gopenvg
 
 libshapes.o:	libshapes.c shapes.h fontinfo.h
 	gcc   -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+
+gopenvg:	openvg.go
 	go install .
 
 oglinit.o:	oglinit.c

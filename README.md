@@ -31,7 +31,7 @@ Here is the graphics equivalent of "hello, world"
 		End();						   			// End the picture
 	
 		fgets(s, 2, stdin);				   		// look at the pic, end with [RETURN]
-		finish();					   // Graphics cleanup
+		finish();					            // Graphics cleanup
 		exit(0);
 	}
 
@@ -208,7 +208,7 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 
 ## Go wrapper
 
-A Go programming language wrapper for the library is found in openvg.go. Sample clients are in the directory govg.  The API closely follows the C API; here is the "hello, world" program in Go:
+A Go programming language wrapper for the library is found in openvg.go. Sample clients are in the directory go-client.  The API closely follows the C API; here is the "hello, world" program in Go:
 
 	package main
 
@@ -220,21 +220,22 @@ A Go programming language wrapper for the library is found in openvg.go. Sample 
 
 	func main() {
 		width, height := openvg.Init() // OpenGL, etc initialization
-	
+
 		w2 := float64(width / 2)
 		h2 := float64(height / 2)
 		w := float64(width)
-	
+
 		openvg.Start(width, height)                               // Start the picture
-		openvg.Background(0, 0, 0)                                // Black background
-		openvg.Fill(44, 77, 232, 1)                               // Big blue marble
+		openvg.BackgroundColor("black")                           // Black background
+		openvg.FillRGB(44, 77, 232, 1)                            // Big blue marble
 		openvg.Circle(w2, 0, w)                                   // The "world"
-		openvg.Fill(255, 255, 255, 1)                             // White text
+		openvg.FillColor("white")                                 // White text
 		openvg.TextMid(w2, h2, "hello, world", "serif", width/10) // Greetings 
 		openvg.End()                                              // End the picture
-		bufio.NewReader(os.Stdin).ReadLine()                      // Pause until [RETURN]
+		bufio.NewReader(os.Stdin).ReadBytes('\n')                 // Pause until [RETURN]
 		openvg.Finish()                                           // Graphics cleanup
 	}
+
 	
 To build the wrapper: (make sure GOPATH is set)
 

@@ -159,6 +159,24 @@ VGImage createImageFromJpeg(const char *filename) {
 	return img;
 }
 
+// makeimage makes an image from a raw raster
+void makeimage(VGfloat x, VGfloat y, int w, int h, void *data, VGImageFormat rgbaFormat) {
+	unsigned int dstride = w * 4;
+	/*
+	VGubyte *p;
+	int n;
+	n = w*h*4;
+	for (p = (VGubyte *)data; n-- ; p++) {
+			printf("%x\n", *p);
+	}
+*/
+	rgbaFormat = VG_sABGR_8888;;
+	VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
+	vgImageSubData(img, data, dstride, rgbaFormat, 0, 0, w, h);
+	vgSetPixels(x, y, img, 0, 0, w, h);
+	vgDestroyImage(img);
+}
+
 // Image places an image at the specifed location
 void Image(VGfloat x, VGfloat y, int w, int h, char *filename) {
 	VGImage img = createImageFromJpeg(filename);
@@ -506,8 +524,14 @@ void SaveEnd(char *filename) {
 	assert(eglGetError() == EGL_SUCCESS);
 }
 
-// clear the screen to a background color
+// clear the screen to a solid background color
 void Background(unsigned int r, unsigned int g, unsigned int b) {
 	Fill(r, g, b, 1);
+	Rect(0, 0, state->screen_width, state->screen_height);
+}
+
+// clear the screen to a background color with alpha
+void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
+	Fill(r, g, b, a);
 	Rect(0, 0, state->screen_width, state->screen_height);
 }
