@@ -234,7 +234,7 @@ void Simage(VGfloat x, VGfloat y, int w, int h, VGfloat scale, char *filename) {
 }
 */
 void imagetest(int w, int h) {
-	int imgw = 400, imgh = 400;
+	int imgw = 422, imgh = 238;
 	VGfloat cx = (w / 2) - (imgw / 2), cy = (h / 2) - (imgh / 2);
 	VGfloat ulx = 0, uly = h - imgh;
 	VGfloat urx = w - imgw, ury = uly;
@@ -242,11 +242,11 @@ void imagetest(int w, int h) {
 	VGfloat lrx = urx, lry = lly;
 	Start(w, h);
 	Background(0, 0, 0);
-	Image(cx, cy, imgw, imgh, "test_img_violin.jpg");
-	Image(ulx, uly, imgw, imgh, "test_img_piano.jpg");
-	Image(urx, ury, imgw, imgh, "test_img_sax.jpg");
-	Image(llx, lly, imgw, imgh, "test_img_guitar.jpg");
-	Image(lrx, lry, imgw, imgh, "test_img_flute.jpg");
+	Image(cx, cy, imgw, imgh, "test_img_1.jpg");
+	Image(ulx, uly, imgw, imgh, "test_img_2.jpg");
+	Image(urx, ury, imgw, imgh, "test_img_3.jpg");
+	Image(llx, lly, imgw, imgh, "test_img_4.jpg");
+	Image(lrx, lry, imgw, imgh, "test_img_5.jpg");
 	End();
 }
 
