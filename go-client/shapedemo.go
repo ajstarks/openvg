@@ -235,8 +235,8 @@ func cookie(w, h int) {
 }
 
 func imagetest(w, h int) {
-	imgw := 400
-	imgh := 400
+	imgw := 422
+	imgh := 238
 	fiw := float64(imgw)
 	fih := float64(imgh)
 	fw := float64(w)
@@ -253,11 +253,11 @@ func imagetest(w, h int) {
 	lry := lly
 	openvg.Start(w, h)
 	openvg.Background(0, 0, 0)
-	openvg.Image(cx, cy, imgw, imgh, "test_img_violin.jpg")
-	openvg.Image(ulx, uly, imgw, imgh, "test_img_piano.jpg")
-	openvg.Image(urx, ury, imgw, imgh, "test_img_sax.jpg")
-	openvg.Image(llx, lly, imgw, imgh, "test_img_guitar.jpg")
-	openvg.Image(lrx, lry, imgw, imgh, "test_img_flute.jpg")
+	openvg.Image(cx, cy, imgw, imgh, "test_img_1.jpg")
+	openvg.Image(ulx, uly, imgw, imgh, "test_img_2.jpg")
+	openvg.Image(urx, ury, imgw, imgh, "test_img_3.jpg")
+	openvg.Image(llx, lly, imgw, imgh, "test_img_4.jpg")
+	openvg.Image(lrx, lry, imgw, imgh, "test_img_5.jpg")
 	openvg.End()
 }
 
