@@ -250,6 +250,39 @@ void imagetest(int w, int h) {
 	End();
 }
 
+void imagetable(int w, int h) {
+	int imgw = 422, imgh = 238;
+	char *itable[] = {
+		"test_img_0.jpg", 
+		"test_img_1.jpg", 
+		"test_img_2.jpg", 
+		"test_img_3.jpg", 
+		"test_img_4.jpg", 
+		"test_img_5.jpg", 
+		"test_img_6.jpg", 
+		"test_img_7.jpg",
+		NULL
+	};
+	VGfloat left = 50.0;
+	VGfloat bot = h - imgh - 50.0;
+	VGfloat gutter = 50.0;
+
+	VGfloat x = left;
+	VGfloat y = bot;
+	int i;
+	Start(w,h);
+	Background(0,0,0);
+	for (i=0; itable[i] != NULL; i++) {
+		Image(x, y, imgw, imgh, itable[i]);
+		x += imgw + gutter;
+		if (x > w) {
+			x = left;
+			y -= imgh + gutter;
+		}
+	}
+	End();
+}
+
 // fontrange shows a range of fonts
 void fontrange(int w, int h) {
 	int *s, sizes[] = { 6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 21, 24, 36, 48, 60, 72, 96, 0 };
@@ -533,7 +566,7 @@ void demo(int w, int h, int sec) {
 	sleep(sec);
 	testpattern(w, h, "OpenVG on RasPi");
 	sleep(sec);
-	imagetest(w, h);
+	imagetable(w, h);
 	sleep(sec);
 	rotext(w, h, 30, "Raspi");
 	sleep(sec);
@@ -565,7 +598,7 @@ int main(int argc, char **argv) {
 	switch (argc) {
 	case 2:
 		if (strncmp(argv[1], "image", 5) == 0) {
-			imagetest(w, h);
+			imagetable(w, h);
 		} else if (strncmp(argv[1], "text", 4) == 0) {
 			tb(w, h);
 		} else if (strncmp(argv[1], "astro", 5) == 0) {
