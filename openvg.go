@@ -12,10 +12,11 @@ package openvg
 #include "shapes.h"   // C API
 */
 import "C"
+import "unsafe"
 
 // RGB triple
 type RGB struct {
-	red, green, blue uint8
+	Red, Green, Blue uint8
 }
 
 // colornames maps SVG color names to RGB triples
@@ -195,9 +196,9 @@ func BackgroundRGB(r, g, b uint8, alpha float64) {
 func BackgroundColor(s string, alpha ...float64) {
 	c := colorlookup(s)
 	if len(alpha) == 0 {
-		BackgroundRGB(c.red, c.green, c.blue, 1)
+		BackgroundRGB(c.Red, c.Green, c.Blue, 1)
 	} else {
-		BackgroundRGB(c.red, c.green, c.blue, alpha[0])
+		BackgroundRGB(c.Red, c.Green, c.Blue, alpha[0])
 	}
 }
 
@@ -231,9 +232,9 @@ func colorlookup(s string) RGB {
 func FillColor(s string, alpha ...float64) {
 	c := colorlookup(s)
 	if len(alpha) == 0 {
-		FillRGB(c.red, c.green, c.blue, 1)
+		FillRGB(c.Red, c.Green, c.Blue, 1)
 	} else {
-		FillRGB(c.red, c.green, c.blue, alpha[0])
+		FillRGB(c.Red, c.Green, c.Blue, alpha[0])
 	}
 }
 
@@ -241,9 +242,9 @@ func FillColor(s string, alpha ...float64) {
 func StrokeColor(s string, alpha ...float64) {
 	c := colorlookup(s)
 	if len(alpha) == 0 {
-		StrokeRGB(c.red, c.green, c.blue, 1)
+		StrokeRGB(c.Red, c.Green, c.Blue, 1)
 	} else {
-		StrokeRGB(c.red, c.green, c.blue, alpha[0])
+		StrokeRGB(c.Red, c.Green, c.Blue, alpha[0])
 	}
 }
 
@@ -251,7 +252,7 @@ func StrokeColor(s string, alpha ...float64) {
 func Start(w, h int, color ...uint8) {
 	C.Start(C.int(w), C.int(h))
 	if len(color) == 3 {
-			Background(color[0], color[1], color[2])
+		Background(color[0], color[1], color[2])
 	}
 }
 
@@ -291,7 +292,7 @@ func Ellipse(x, y, w, h float64, style ...string) {
 	C.Ellipse(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
-// Circle draws a circle centered at (x,y), with radius r
+// Circle draws a circle centeRed at (x,y), with radius r
 func Circle(x, y, r float64, style ...string) {
 	C.Circle(C.VGfloat(x), C.VGfloat(y), C.VGfloat(r))
 }
@@ -316,12 +317,19 @@ func Arc(x, y, w, h, sa, aext float64, style ...string) {
 
 // Polyline draws a polyline with coordinates in x, y
 func Polyline(x, y []float64, n int, style ...string) {
-	/*
-		if len(x) != len(y) {
-				return
-		}
-		C.Polyline(&x[0], &y[0], C.VGint(len(x)))
-	*/
+/*
+	if len(x) != len(y) {
+		return
+	}
+	//px := uintptr(unsafe.Pointer(&x[0]))
+	//py := uintptr(unsafe.Pointer(&y[0]))
+
+	px := &x[0]
+	py := &y[0]
+	println(px, py)
+	C.Polyline((*C.VGfloat)(px), (*C.VGfloat)(py), C.VGint(len(x)))
+*/
+
 }
 
 // Polyline draws a polygon with coordinates in x, y
@@ -349,22 +357,30 @@ func selectfont(s string) C.Fontinfo {
 
 // Text draws text whose aligment begins (x,y)
 func Text(x, y float64, s string, font string, size int, style ...string) {
-	C.Text(C.VGfloat(x), C.VGfloat(y), C.CString(s), selectfont(font), C.int(size))
+	t := C.CString(s)
+	defer C.free(unsafe.Pointer(t))
+	C.Text(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 }
 
-// TextMid draws text centered at (x,y)
+// TextMid draws text centeRed at (x,y)
 func TextMid(x, y float64, s string, font string, size int, style ...string) {
-	C.TextMid(C.VGfloat(x), C.VGfloat(y), C.CString(s), selectfont(font), C.int(size))
+	t := C.CString(s)
+	defer C.free(unsafe.Pointer(t))
+	C.TextMid(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 }
 
 // TextEnd draws text end-aligned at (x,y)
 func TextEnd(x, y float64, s string, font string, size int, style ...string) {
-	C.TextEnd(C.VGfloat(x), C.VGfloat(y), C.CString(s), selectfont(font), C.int(size))
+	t := C.CString(s)
+	defer C.free(unsafe.Pointer(t))
+	C.TextEnd(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 }
 
 // TextWidth returns the length of text at a specified font and size
 func TextWidth(s string, font string, size float64) float64 {
-	return float64(C.textwidth(C.CString(s), selectfont(font), C.VGfloat(size)))
+	t := C.CString(s)
+	defer C.free(unsafe.Pointer(t))
+	return float64(C.textwidth(t, selectfont(font), C.VGfloat(size)))
 }
 
 // Translate translates the coordinate system to (x,y)
