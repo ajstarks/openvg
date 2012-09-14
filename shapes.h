@@ -30,7 +30,8 @@ extern void Stroke(unsigned int, unsigned int, unsigned int, VGfloat);
 extern void Fill(unsigned int, unsigned int, unsigned int, VGfloat);
 extern void RGBA(unsigned int, unsigned int, unsigned int, VGfloat, VGfloat[4]);
 extern void RGB(unsigned int, unsigned int, unsigned int, VGfloat[4]);
-extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const int *, const int *, const int *, const short *, int);
+extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const int *, const int *, const int *, const short *,
+			 int);
 extern void unloadfont(VGPath *, int);
 extern VGfloat textwidth(char *, Fontinfo, VGfloat);
-extern void makeimage(VGfloat, VGfloat, int, int, void *, VGImageFormat);
+extern void makeimage(VGfloat, VGfloat, int, int, VGubyte *);

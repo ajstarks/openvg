@@ -159,20 +159,12 @@ VGImage createImageFromJpeg(const char *filename) {
 	return img;
 }
 
-// makeimage makes an image from a raw raster
-void makeimage(VGfloat x, VGfloat y, int w, int h, void *data, VGImageFormat rgbaFormat) {
+// makeimage makes an image from a raw raster of red, green, blue, alpha values
+void makeimage(VGfloat x, VGfloat y, int w, int h, VGubyte *data) {
 	unsigned int dstride = w * 4;
-	/*
-	VGubyte *p;
-	int n;
-	n = w*h*4;
-	for (p = (VGubyte *)data; n-- ; p++) {
-			printf("%x\n", *p);
-	}
-*/
-	rgbaFormat = VG_sABGR_8888;;
+	VGImageFormat rgbaFormat = VG_sABGR_8888;;
 	VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
-	vgImageSubData(img, data, dstride, rgbaFormat, 0, 0, w, h);
+	vgImageSubData(img, (void *)data, dstride, rgbaFormat, 0, 0, w, h);
 	vgSetPixels(x, y, img, 0, 0, w, h);
 	vgDestroyImage(img);
 }

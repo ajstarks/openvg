@@ -13,6 +13,10 @@ package openvg
 */
 import "C"
 import "unsafe"
+import "image"
+import "os"
+import _ "image/jpeg"
+import _ "image/png"
 
 // RGB triple
 type RGB struct {
@@ -267,19 +271,42 @@ func End() {
 	C.End()
 }
 
-// Image places an image with dimensions (w,h) at (x,y)
+// Image places the image in s image at (x,y) with dimensions (w,h)
 func Image(x, y float64, w, h int, s string) {
-	fw := float64(w)
-	fh := float64(h)
-	FillColor("lightgray")
-	Rect(x, y, fw, fh)
-	StrokeColor("white")
-	StrokeWidth(1)
-	Line(x, y, x+fw, y+fh)
-	Line(x+fw, y, x, y+fh)
-	FillColor("maroon")
-	StrokeWidth(0)
-	TextMid(x+fw/2, y+fh/2, s, "sans", w/25)
+	f, ferr := os.Open(s)
+	if ferr != nil {
+		//log.Fatal(ferr)
+		return
+	}
+	defer f.Close()
+	img, _, err := image.Decode(f)
+	if err != nil {
+		//log.Fatal(err)
+		return
+	}
+	bounds := img.Bounds()
+	minx := bounds.Min.X
+	maxx := bounds.Max.X
+	miny := bounds.Min.Y
+	maxy := bounds.Max.Y
+	width := maxx - minx
+	height := maxy - miny
+	data := make([]C.VGubyte, width*height*4)
+	n := 0
+	for y := maxy; y > 0; y-- { // OpenVG has origin at lower left, y increasing up
+		for x := minx; x < maxx; x++ {
+			r, g, b, a := img.At(x, y).RGBA()
+			data[n] = C.VGubyte(r)
+			n++
+			data[n] = C.VGubyte(g)
+			n++
+			data[n] = C.VGubyte(b)
+			n++
+			data[n] = C.VGubyte(a)
+			n++
+		}
+	}
+	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(w), C.int(h), &data[0])
 }
 
 // Line draws a line between two points
@@ -341,7 +368,6 @@ func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
 	return &px[0], &py[0], C.VGint(size)
 }
 
-// Polygon draws a polygon with coordinates in x, y
 func Polygon(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
@@ -349,7 +375,7 @@ func Polygon(x, y []float64, style ...string) {
 	}
 }
 
-// Polyline draws a polyline with coordinates in x, y
+// Polyline draws a polygon with coordinates in x, y
 func Polyline(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {

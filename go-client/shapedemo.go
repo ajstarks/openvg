@@ -282,12 +282,19 @@ func imagetable(w, h int) {
 	openvg.Start(w, h)
 	for _, iname := range itable {
 		openvg.Image(x, y, imgw, imgh, iname)
+		openvg.FillRGB(255, 255, 255, 0.3)
+		openvg.Rect(x, y, float64(imgw), 32)
+		openvg.FillRGB(0, 0, 0, 1)
+		openvg.TextMid(x+float64(imgw/2), y+10, iname, "sans", 16)
 		x += float64(imgw) + gutter
 		if x > float64(w) {
 			x = left
 			y -= float64(imgh) + gutter
 		}
 	}
+	y = float64(h) * 0.1
+	openvg.FillRGB(128, 128, 128, 1)
+	openvg.TextMid(float64(w/2), 100, "Joshua Tree National Park", "sans", 48)
 	openvg.End()
 }
 
@@ -428,7 +435,7 @@ func refcard(width, height int) {
 	coordpoint(ex, ey, dotsize, shapecolor)
 
 	sy -= (sh * spacing * 1.5)
-	openvg.Image(sx, sy, 100, 100, "starx.jpg")
+	openvg.Image(sx, sy, 110, 110, "starx.jpg")
 
 	openvg.End()
 }
@@ -551,8 +558,8 @@ func advert(w, h int) {
 	s := "github.com/ajstarks/openvg"
 	a := "ajstarks@gmail.com"
 
-	//imw := 110
-	// imh := 110
+	imw := 110
+	imh := 110
 	midx := float64(w / 2)
 
 	openvg.Start(w, h)
@@ -561,7 +568,7 @@ func advert(w, h int) {
 	y -= 150
 	openvg.FillRGB(128, 128, 128, 1)
 	openvg.TextMid(midx, y, a, "sans", int(f3))
-	// Image((w / 2) - (imw / 2), y - (imh * 2), imw, imh, "starx.jpg")
+	openvg.Image(float64(w / 2) - float64(imw / 2), y - float64(imh * 2), imw, imh, "starx.jpg")
 	openvg.End()
 }
 
