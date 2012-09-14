@@ -200,39 +200,6 @@ void tb(int w, int h) {
 	End();
 }
 
-// cookie draws a cookie
-void cookie(int w, int h) {
-	int ew = 200, eh = 60, h2 = h / 2, w2 = w / 2;
-
-	Start(w, h);
-	Fill(128, 128, 128, 1);
-	Ellipse(w2, h2, ew, eh);
-	Translate(0, 10);
-
-	Fill(255, 255, 255, 1);
-	Ellipse(w2, h2, ew, eh);
-	Translate(0, 20);
-
-	Fill(0, 0, 0, 1);
-	Ellipse(w2, h2, ew, eh);
-	End();
-}
-
-/*
-void Simage(VGfloat x, VGfloat y, int w, int h, VGfloat scale, char *filename) {
-	VGfloat mm[9], matrix[9];
-	VGImage img = createImageFromJpeg(filename);
-	vgGetMatrix(mm);
-	vguComputeWarpQuadToQuad(x, y, x + (w * scale), y, x + (w * scale), y - (h * scale), x, y - (h * scale), x, y, x + w, y,
-				 x + w, y - h, x, y - h, matrix);
-	vgSeti(VG_MATRIX_MODE, VG_MATRIX_IMAGE_USER_TO_SURFACE);
-	vgLoadMatrix(matrix);
-	vgDrawImage(img);
-	//vgSetPixels(0, 0, img, x, y, w*scale, h*scale);
-	vgDestroyImage(img);
-	vgLoadMatrix(mm);
-}
-*/
 void imagetest(int w, int h) {
 	int imgw = 422, imgh = 238;
 	VGfloat cx = (w / 2) - (imgw / 2), cy = (h / 2) - (imgh / 2);
@@ -242,25 +209,25 @@ void imagetest(int w, int h) {
 	VGfloat lrx = urx, lry = lly;
 	Start(w, h);
 	Background(0, 0, 0);
-	Image(cx, cy, imgw, imgh, "test_img_1.jpg");
-	Image(ulx, uly, imgw, imgh, "test_img_2.jpg");
-	Image(urx, ury, imgw, imgh, "test_img_3.jpg");
-	Image(llx, lly, imgw, imgh, "test_img_4.jpg");
-	Image(lrx, lry, imgw, imgh, "test_img_5.jpg");
+	Image(cx, cy, imgw, imgh, "desert1.jpg");
+	Image(ulx, uly, imgw, imgh, "desert2.jpg");
+	Image(urx, ury, imgw, imgh, "desert3.jpg");
+	Image(llx, lly, imgw, imgh, "desert4.jpg");
+	Image(lrx, lry, imgw, imgh, "desert5.jpg");
 	End();
 }
 
 void imagetable(int w, int h) {
 	int imgw = 422, imgh = 238;
 	char *itable[] = {
-		"test_img_0.jpg", 
-		"test_img_1.jpg", 
-		"test_img_2.jpg", 
-		"test_img_3.jpg", 
-		"test_img_4.jpg", 
-		"test_img_5.jpg", 
-		"test_img_6.jpg", 
-		"test_img_7.jpg",
+		"desert0.jpg",
+		"desert1.jpg",
+		"desert2.jpg",
+		"desert3.jpg",
+		"desert4.jpg",
+		"desert5.jpg",
+		"desert6.jpg",
+		"desert7.jpg",
 		NULL
 	};
 	VGfloat left = 50.0;
@@ -270,16 +237,24 @@ void imagetable(int w, int h) {
 	VGfloat x = left;
 	VGfloat y = bot;
 	int i;
-	Start(w,h);
-	Background(0,0,0);
-	for (i=0; itable[i] != NULL; i++) {
+	Start(w, h);
+	Background(0, 0, 0);
+	for (i = 0; itable[i] != NULL; i++) {
 		Image(x, y, imgw, imgh, itable[i]);
+		Fill(255, 255, 255, 0.3);
+		Rect(x, y, imgw, 32);
+		Fill(0, 0, 0, 1);
+		TextMid(x + (imgw / 2), y + 10, itable[i], SansTypeface, 16);
+
 		x += imgw + gutter;
 		if (x > w) {
 			x = left;
 			y -= imgh + gutter;
 		}
 	}
+	y = h * 0.1;
+	Fill(128, 128, 128, 1);
+	TextMid(w / 2, 100, "Joshua Tree National Park", SansTypeface, 48);
 	End();
 }
 

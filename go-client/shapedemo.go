@@ -235,6 +235,7 @@ func cookie(w, h int) {
 }
 
 func imagetest(w, h int) {
+	openvg.Start(w, h)
 	imgw := 422
 	imgh := 238
 	fiw := float64(imgw)
@@ -253,11 +254,40 @@ func imagetest(w, h int) {
 	lry := lly
 	openvg.Start(w, h)
 	openvg.Background(0, 0, 0)
-	openvg.Image(cx, cy, imgw, imgh, "test_img_1.jpg")
-	openvg.Image(ulx, uly, imgw, imgh, "test_img_2.jpg")
-	openvg.Image(urx, ury, imgw, imgh, "test_img_3.jpg")
-	openvg.Image(llx, lly, imgw, imgh, "test_img_4.jpg")
-	openvg.Image(lrx, lry, imgw, imgh, "test_img_5.jpg")
+	openvg.Image(cx, cy, imgw, imgh, "desert1.jpg")
+	openvg.Image(ulx, uly, imgw, imgh, "desert2.jpg")
+	openvg.Image(urx, ury, imgw, imgh, "desert3.jpg")
+	openvg.Image(llx, lly, imgw, imgh, "desert4.jpg")
+	openvg.Image(lrx, lry, imgw, imgh, "desert5.jpg")
+	openvg.End()
+}
+
+func imagetable(w, h int) {
+	imgw, imgh := 422, 238
+	itable := []string{
+		"desert0.jpg",
+		"desert1.jpg",
+		"desert2.jpg",
+		"desert3.jpg",
+		"desert4.jpg",
+		"desert5.jpg",
+		"desert6.jpg",
+		"desert7.jpg",
+	}
+	left := 50.0
+	bot := float64(h-imgh) - 50.0
+	gutter := 50.0
+	x := left
+	y := bot
+	openvg.Start(w, h)
+	for _, iname := range itable {
+		openvg.Image(x, y, imgw, imgh, iname)
+		x += float64(imgw) + gutter
+		if x > float64(w) {
+			x = left
+			y -= float64(imgh) + gutter
+		}
+	}
 	openvg.End()
 }
 
@@ -360,7 +390,7 @@ func refcard(width, height int) {
 	px := []float64{sx, sx + (sw / 4), sx + (sw / 2), sx + ((sw * 3) / 4), sx + sw}
 	py := []float64{sy, sy - sh, sy, sy - sh, sy}
 
-	openvg.Polyline(px, py, 5)
+	openvg.Polyline(px, py) // , 5)
 	coordpoint(px[0], py[0], dotsize, shapecolor)
 	coordpoint(px[1], py[1], dotsize, shapecolor)
 	coordpoint(px[2], py[2], dotsize, shapecolor)
@@ -373,7 +403,7 @@ func refcard(width, height int) {
 	py[2] = sy - (sh / 2)
 	py[3] = py[1] - (sh / 4)
 	py[4] = sy
-	openvg.Polygon(px, py, 5)
+	openvg.Polygon(px, py) // , 5)
 	sy -= (sh * spacing) + sh
 
 	openvg.Arc(sx+(sw/2), sy, sw, sh, 0, 180)
@@ -398,7 +428,7 @@ func refcard(width, height int) {
 	coordpoint(ex, ey, dotsize, shapecolor)
 
 	sy -= (sh * spacing * 1.5)
-	// Image(sx, sy, 100, 100, "starx.jpg")
+	openvg.Image(sx, sy, 100, 100, "starx.jpg")
 
 	openvg.End()
 }
@@ -477,7 +507,7 @@ func rshapes(width, height, n int) {
 			polyx[j] = pox + randf(200)
 			polyy[j] = poy + randf(100)
 		}
-		openvg.Polygon(polyx, polyy, np)
+		openvg.Polygon(polyx, polyy) // , np)
 
 		pox = randf(width)
 		poy = randf(height)
@@ -485,7 +515,7 @@ func rshapes(width, height, n int) {
 			polyx[j] = pox + randf(200)
 			polyy[j] = poy + randf(100)
 		}
-		openvg.Polyline(polyx, polyy, np)
+		openvg.Polyline(polyx, polyy) // , np)
 	}
 	openvg.FillRGB(128, 0, 0, 1)
 	openvg.Text(20, 20, "OpenVG on the Raspberry Pi", "sans", 32)
@@ -547,8 +577,8 @@ func demo(w, h, s int) {
 	testpattern(w, h, "OpenVG on RasPi")
 	time.Sleep(sec)
 
-	//imagetest(w, h)
-	//time.Sleep(sec)
+	imagetable(w, h)
+	time.Sleep(sec)
 
 	rotext(w, h, 30, "Raspi")
 	time.Sleep(sec)
@@ -583,17 +613,20 @@ func usage(s string) {
 // Exit and clean up when you hit [RETURN].
 func main() {
 	rseed()
-	n := 10
 	nargs := len(os.Args)
 	w, h := openvg.Init()
 	progname := os.Args[0]
+	n := 5
+	if nargs > 2 {
+		n, _ = strconv.Atoi(os.Args[2])
+	}
 	if nargs > 1 {
 		switch os.Args[1] {
 		case "help":
 			usage(progname)
 			os.Exit(1)
 		case "image":
-			imagetest(w, h)
+			imagetable(w, h)
 		case "text":
 			tb(w, h)
 		case "astro":
@@ -603,25 +636,13 @@ func main() {
 		case "raspi":
 			raspi(w, h, "The Raspberry Pi")
 		case "demo":
-			if nargs > 2 {
-				n, _ = strconv.Atoi(os.Args[2])
-				demo(w, h, n)
-			} else {
-				usage(progname)
-				os.Exit(1)
-			}
+			demo(w, h, n)
 		case "rand":
 			rshapes(w, h, n)
 		case "test":
-			testpattern(w, h, os.Args[2])
+			testpattern(w, h, "hello, world")
 		case "rotate":
-			if nargs > 3 {
-				n, _ = strconv.Atoi(os.Args[2])
-				rotext(w, h, n, os.Args[3])
-			} else {
-				usage(progname)
-				os.Exit(1)
-			}
+			rotext(w, h, n, "Raspi")
 		default:
 			refcard(w, h)
 		}

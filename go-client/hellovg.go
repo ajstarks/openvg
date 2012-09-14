@@ -16,7 +16,7 @@ func main() {
 
 	openvg.Start(width, height)                               // Start the picture
 	openvg.BackgroundColor("black")                           // Black background
-	openvg.FillRGB(44, 77, 232, 1)                               // Big blue marble
+	openvg.FillRGB(44, 77, 232, 1)                            // Big blue marble
 	openvg.Circle(w2, 0, w)                                   // The "world"
 	openvg.FillColor("white")                                 // White text
 	openvg.TextMid(w2, h2, "hello, world", "serif", width/10) // Greetings 

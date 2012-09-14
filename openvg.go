@@ -269,6 +269,17 @@ func End() {
 
 // Image places an image with dimensions (w,h) at (x,y)
 func Image(x, y float64, w, h int, s string) {
+	fw := float64(w)
+	fh := float64(h)
+	FillColor("lightgray")
+	Rect(x, y, fw, fh)
+	StrokeColor("white")
+	StrokeWidth(1)
+	Line(x, y, x+fw, y+fh)
+	Line(x+fw, y, x, y+fh)
+	FillColor("maroon")
+	StrokeWidth(0)
+	TextMid(x+fw/2, y+fh/2, s, "sans", w/25)
 }
 
 // Line draws a line between two points
@@ -292,7 +303,7 @@ func Ellipse(x, y, w, h float64, style ...string) {
 	C.Ellipse(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
-// Circle draws a circle centeRed at (x,y), with radius r
+// Circle draws a circle centered at (x,y), with radius r
 func Circle(x, y, r float64, style ...string) {
 	C.Circle(C.VGfloat(x), C.VGfloat(y), C.VGfloat(r))
 }
@@ -315,31 +326,34 @@ func Arc(x, y, w, h, sa, aext float64, style ...string) {
 	C.Arc(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(sa), C.VGfloat(aext))
 }
 
-// Polyline draws a polyline with coordinates in x, y
-func Polyline(x, y []float64, n int, style ...string) {
-/*
-	if len(x) != len(y) {
-		return
+// poly converts coordinate slices
+func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
+	size := len(x)
+	if size != len(y) {
+		return nil, nil, 0
 	}
-	//px := uintptr(unsafe.Pointer(&x[0]))
-	//py := uintptr(unsafe.Pointer(&y[0]))
+	px := make([]C.VGfloat, size)
+	py := make([]C.VGfloat, size)
+	for i := 0; i < size; i++ {
+		px[i] = C.VGfloat(x[i])
+		py[i] = C.VGfloat(y[i])
+	}
+	return &px[0], &py[0], C.VGint(size)
+}
 
-	px := &x[0]
-	py := &y[0]
-	println(px, py)
-	C.Polyline((*C.VGfloat)(px), (*C.VGfloat)(py), C.VGint(len(x)))
-*/
-
+func Polygon(x, y []float64, style ...string) {
+	px, py, np := poly(x, y)
+	if np > 0 {
+		C.Polygon(px, py, np)
+	}
 }
 
 // Polyline draws a polygon with coordinates in x, y
-func Polygon(x, y []float64, n int, style ...string) {
-	/*
-		if len(x) != len(y) {
-				return
-		}
-		C.Polygon(&x[0], &y[0], C.VGint(len(x)))
-	*/
+func Polyline(x, y []float64, style ...string) {
+	px, py, np := poly(x, y)
+	if np > 0 {
+		C.Polyline(px, py, np)
+	}
 }
 
 // select font specifies the font by generic name
