@@ -341,6 +341,7 @@ func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
 	return &px[0], &py[0], C.VGint(size)
 }
 
+// Polygon draws a polygon with coordinates in x, y
 func Polygon(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
@@ -348,7 +349,7 @@ func Polygon(x, y []float64, style ...string) {
 	}
 }
 
-// Polyline draws a polygon with coordinates in x, y
+// Polyline draws a polyline with coordinates in x, y
 func Polyline(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
