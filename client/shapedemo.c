@@ -114,10 +114,10 @@ void textbbox(char *s, Fontinfo f, int pointsize) {
 
 // adjust the font to fit within a width
 void fitwidth(int width, int adj, char *s, FW * f) {
-	f->tw = textwidth(s, f->font, f->fontsize);
+	f->tw = TextWidth(s, f->font, f->fontsize);
 	while (f->tw > width) {
 		f->fontsize -= adj;
-		f->tw = textwidth(s, f->font, f->fontsize);
+		f->tw = TextWidth(s, f->font, f->fontsize);
 	}
 }
 
@@ -169,7 +169,7 @@ void textlines(VGfloat x, VGfloat y, char *s[], Fontinfo f, int fontsize, VGfloa
 		if (s[i] == NULL) {
 			break;
 		}
-		Text(x, y, s[i], f, fontsize);
+		TextMid(x, y, s[i], f, fontsize);
 		y -= leading;
 	}
 }
@@ -177,7 +177,8 @@ void textlines(VGfloat x, VGfloat y, char *s[], Fontinfo f, int fontsize, VGfloa
 // tb draws a block of text
 void tb(int w, int h) {
 	char *para[] = {
-		"For lo, the winter is past,",
+		"For lo,",
+		"the winter is past,",
 		"the rain is over and gone",
 		"the flowers appear on the earth;",
 		"the time for the singing of birds is come,",
@@ -185,7 +186,7 @@ void tb(int w, int h) {
 		NULL
 	};
 
-	VGfloat tmargin = w * 0.25, lmargin = w * 0.10, top = h * .9, mid = h * .6, bot = h * .3;
+	VGfloat tmargin = w * 0.5, lmargin = w * 0.10, top = h * .9, mid = h * .6, bot = h * .3;
 
 	int fontsize = 24, leading = 40, lfontsize = fontsize * 2, midb = ((leading * 2) + (leading / 2)) - (lfontsize / 2);
 
@@ -516,17 +517,17 @@ void sunearth(int w, int h) {
 // advert is an ad for the package 
 void advert(int w, int h) {
 	VGfloat y = (6 * h) / 10;
-	int fontsize = w * 0.04;
+	int fontsize = (w * 4)/100;
 	char *s = "github.com/ajstarks/openvg";
 	char *a = "ajstarks@gmail.com";
 	int imw = 110, imh = 110;
-	VGfloat tw = textwidth(s, SansTypeface, fontsize);
+	VGfloat tw = TextWidth(s, SansTypeface, fontsize);
 
 	Start(w, h);
 	Fill(128, 0, 0, 1);
 	Text(w / 2 - (tw / 2), y - (fontsize / 4), s, SansTypeface, fontsize);
 	y -= 150;
-	tw = textwidth(a, SansTypeface, fontsize / 3);
+	tw = TextWidth(a, SansTypeface, fontsize / 3);
 	Fill(128, 128, 128, 1);
 	Text(w / 2 - (tw / 2), y, a, SansTypeface, fontsize / 3);
 	Image((w / 2) - (imw / 2), y - (imh * 2), imw, imh, "starx.jpg");

@@ -349,10 +349,11 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 	vgLoadMatrix(mm);
 }
 
-// textwidth returns the width of a text string at the specified font and size.
-VGfloat textwidth(char *s, Fontinfo f, VGfloat size) {
+// TextWidth returns the width of a text string at the specified font and size.
+VGfloat TextWidth(char *s, Fontinfo f, int pointsize) {
 	int i;
 	VGfloat tw = 0.0;
+	VGfloat size = (VGfloat) pointsize;
 	for (i = 0; i < (int)strlen(s); i++) {
 		unsigned int character = (unsigned int)s[i];
 		int glyph = f.CharacterMap[character];
@@ -366,13 +367,13 @@ VGfloat textwidth(char *s, Fontinfo f, VGfloat size) {
 
 // TextMid draws text, centered on (x,y)
 void TextMid(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
-	VGfloat tw = textwidth(s, f, pointsize);
+	VGfloat tw = TextWidth(s, f, pointsize);
 	Text(x - (tw / 2.0), y, s, f, pointsize);
 }
 
 // TextEnd draws text, with its end aligned to (x,y)
 void TextEnd(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
-	VGfloat tw = textwidth(s, f, pointsize);
+	VGfloat tw = TextWidth(s, f, pointsize);
 	Text(x - tw, y, s, f, pointsize);
 }
 

@@ -271,17 +271,31 @@ func End() {
 	C.End()
 }
 
+// fakeimage makes a placeholder for a missing image
+func fakeimage(x, y float64, w, h int, s string) {
+	fw := float64(w)
+	fh := float64(h)
+	FillColor("lightgray")
+	Rect(x, y, fw, fh)
+	StrokeWidth(1)
+	StrokeColor("gray")
+	Line(x, y, x+fw, y+fh)
+	Line(x, y+fh, x+fw, y)
+	FillColor("black")
+	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
+}
+
 // Image places the image in s image at (x,y) with dimensions (w,h)
 func Image(x, y float64, w, h int, s string) {
 	f, ferr := os.Open(s)
 	if ferr != nil {
-		//log.Fatal(ferr)
+		fakeimage(x, y, w, h, s)
 		return
 	}
 	defer f.Close()
 	img, _, err := image.Decode(f)
 	if err != nil {
-		//log.Fatal(err)
+		fakeimage(x, y, w, h, s)
 		return
 	}
 	bounds := img.Bounds()
@@ -289,11 +303,11 @@ func Image(x, y float64, w, h int, s string) {
 	maxx := bounds.Max.X
 	miny := bounds.Min.Y
 	maxy := bounds.Max.Y
-	width := maxx - minx
-	height := maxy - miny
-	data := make([]C.VGubyte, width*height*4)
+	//width := (maxx - minx) + 1
+	//height := (maxy - miny) + 1
+	data := make([]C.VGubyte, w*h*4)
 	n := 0
-	for y := maxy; y > 0; y-- { // OpenVG has origin at lower left, y increasing up
+	for y := maxy; y > miny; y-- { // OpenVG has origin at lower left, y increasing up
 		for x := minx; x < maxx; x++ {
 			r, g, b, a := img.At(x, y).RGBA()
 			data[n] = C.VGubyte(r)
@@ -418,10 +432,10 @@ func TextEnd(x, y float64, s string, font string, size int, style ...string) {
 }
 
 // TextWidth returns the length of text at a specified font and size
-func TextWidth(s string, font string, size float64) float64 {
+func TextWidth(s string, font string, size int) float64 {
 	t := C.CString(s)
 	defer C.free(unsafe.Pointer(t))
-	return float64(C.textwidth(t, selectfont(font), C.VGfloat(size)))
+	return float64(C.TextWidth(t, selectfont(font), C.int(size)))
 }
 
 // Translate translates the coordinate system to (x,y)

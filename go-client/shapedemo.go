@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -98,34 +99,54 @@ func raspi(w, h int, s string) {
 	openvg.End()
 }
 
-// grid draws a grid
-func grid(x, y float64, n, w, h int) {
-	width := float64(w)
-	height := float64(h)
-	gn := float64(n)
-	openvg.StrokeRGB(128, 128, 128, 0.5)
-	openvg.StrokeWidth(2)
-	for ix := x; ix <= x+width; ix += gn {
-		openvg.Line(ix, y, ix, y+height)
-	}
-
-	for iy := y; iy <= y+height; iy += gn {
-		openvg.Line(x, iy, x+width, iy)
-	}
-}
-
 type FW struct {
 	font     string
 	tw       float64
 	fontsize int
 }
 
+// textwrap draws text at location, wrapping at the specified width
+func textwrap(x, y, w float64, s string, font string, size int, leading, factor float64, color string) {
+	openvg.FillColor(color)
+	wordspacing := openvg.TextWidth("M", font, size)
+	words := strings.Split(s, " ")
+	xp := x
+	yp := y
+	edge := x + w
+	for i := 0; i < len(words); i++ {
+		tw := openvg.TextWidth(words[i], font, size)
+		openvg.Text(xp, yp, words[i], font, size)
+		xp += tw + (wordspacing * factor)
+		if xp > edge {
+			xp = x
+			yp -= leading
+		}
+
+	}
+}
+
+// textplay exercises text functions
+func textplay(w, h int) {
+	forlo := `For lo, the winter is past, the rain is over and gone. The flowers appear on the earth, the time for the singing of birds is come, and the voice of the turtle is heard in our land.`
+
+	// forsince := `For since by man came death, by man came also the resurrection of the dead, for as in Adam all die, even so in Christ shall all be made alive.`
+
+	openvg.Start(w, h)
+	tw := 300.0
+	for x, y := 50.0, float64(h)-100.0; x < float64(w/2); x += 400 {
+		textwrap(x, y, tw, forlo, "sans", 12, 24, 0.25, "black")
+		textwrap(x, y-400, tw, forlo, "sans", 12, 24, 0.5, "black")
+		tw -= 100
+	}
+	openvg.End()
+}
+
 // adjust the font to fit within a width
 func (f *FW) fitwidth(width, adj int, s string) {
-	f.tw = openvg.TextWidth(s, f.font, float64(f.fontsize))
+	f.tw = openvg.TextWidth(s, f.font, f.fontsize)
 	for f.tw > float64(width) {
 		f.fontsize -= adj
-		f.tw = openvg.TextWidth(s, f.font, float64(f.fontsize))
+		f.tw = openvg.TextWidth(s, f.font, f.fontsize)
 	}
 }
 
@@ -176,7 +197,7 @@ func testpattern(w, h int, s string) {
 // textlines writes openvg.Lines of text
 func textlines(x, y float64, text []string, f string, fontsize int, leading float64) {
 	for _, s := range text {
-		openvg.Text(x, y, s, f, fontsize)
+		openvg.TextMid(x, y, s, f, fontsize)
 		y -= leading
 	}
 }
@@ -184,14 +205,15 @@ func textlines(x, y float64, text []string, f string, fontsize int, leading floa
 // tb draws a block of text
 func tb(w, h int) {
 	para := []string{
-		"For lo, the winter is past,",
+		"For lo,",
+		"the winter is past,",
 		"the rain is over and gone",
 		"the flowers appear on the earth;",
 		"the time for the singing of birds is come,",
 		"and the voice of the turtle is heard in our land",
 	}
 
-	tmargin := float64(w) * 0.25
+	tmargin := float64(w) * 0.50
 	lmargin := float64(w) * 0.10
 	top := float64(h) * .9
 	mid := float64(h) * .6
@@ -213,27 +235,7 @@ func tb(w, h int) {
 	openvg.End()
 }
 
-// cookie draws a cookie
-func cookie(w, h int) {
-	ew := 200.0
-	eh := 60.0
-	h2 := float64(h) / 2.0
-	w2 := float64(w) / 2.0
-
-	openvg.Start(w, h)
-	openvg.FillRGB(128, 128, 128, 1)
-	openvg.Ellipse(w2, h2, ew, eh)
-	openvg.Translate(0, 10)
-
-	openvg.FillRGB(255, 255, 255, 1)
-	openvg.Ellipse(w2, h2, ew, eh)
-	openvg.Translate(0, 20)
-
-	openvg.FillRGB(0, 0, 0, 1)
-	openvg.Ellipse(w2, h2, ew, eh)
-	openvg.End()
-}
-
+// imgtest draws images at the corners and center
 func imagetest(w, h int) {
 	openvg.Start(w, h)
 	imgw := 422
@@ -364,7 +366,8 @@ func refcard(width, height int) {
 
 	openvg.Start(width, height)
 	openvg.FillRGB(128, 0, 0, 1)
-	openvg.TextEnd(float64(width-20), float64(height/2), "OpenVG on the Raspberry Pi", "sans", fontsize+(fontsize/2))
+	openvg.TextEnd(float64(width-20), float64(height/2),
+		"OpenVG on the Raspberry Pi", "sans", fontsize+(fontsize/2))
 	openvg.FillRGB(0, 0, 0, 1)
 	for _, s := range shapenames {
 		openvg.Text(sx+sw+sw/2, sy, s, "sans", fontsize)
@@ -553,8 +556,8 @@ func sunearth(w, h int) {
 // advert is an ad for the package 
 func advert(w, h int) {
 	y := (6 * float64(h)) / 10
-	fontsize := int(float64(w) * 0.04)
-	f3 := float64(fontsize) / 3.0
+	fontsize := (w * 4) / 100
+	f3 := fontsize / 3
 	s := "github.com/ajstarks/openvg"
 	a := "ajstarks@gmail.com"
 
@@ -567,8 +570,8 @@ func advert(w, h int) {
 	openvg.TextMid(midx, y-float64(fontsize/4), s, "sans", fontsize)
 	y -= 150
 	openvg.FillRGB(128, 128, 128, 1)
-	openvg.TextMid(midx, y, a, "sans", int(f3))
-	openvg.Image(float64(w / 2) - float64(imw / 2), y - float64(imh * 2), imw, imh, "starx.jpg")
+	openvg.TextMid(midx, y, a, "sans", f3)
+	openvg.Image(float64(w/2)-float64(imw/2), y-float64(imh*2), imw, imh, "starx.jpg")
 	openvg.End()
 }
 
@@ -591,6 +594,9 @@ func demo(w, h, s int) {
 	time.Sleep(sec)
 
 	tb(w, h)
+	time.Sleep(sec)
+
+	textplay(w, h)
 	time.Sleep(sec)
 
 	fontrange(w, h)
@@ -636,6 +642,8 @@ func main() {
 			imagetable(w, h)
 		case "text":
 			tb(w, h)
+		case "textplay":
+			textplay(w, h)
 		case "astro":
 			sunearth(w, h)
 		case "fontsize":

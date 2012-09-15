@@ -5,6 +5,7 @@ extern void Scale(VGfloat, VGfloat);
 extern void Text(VGfloat, VGfloat, char *, Fontinfo, int);
 extern void TextMid(VGfloat, VGfloat, char *, Fontinfo, int);
 extern void TextEnd(VGfloat, VGfloat, char *, Fontinfo, int);
+extern VGfloat TextWidth(char *, Fontinfo, int);
 extern void Cbezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 extern void Qbezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 extern void Polygon(VGfloat *, VGfloat *, VGint);
@@ -33,5 +34,4 @@ extern void RGB(unsigned int, unsigned int, unsigned int, VGfloat[4]);
 extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const int *, const int *, const int *, const short *,
 			 int);
 extern void unloadfont(VGPath *, int);
-extern VGfloat textwidth(char *, Fontinfo, VGfloat);
 extern void makeimage(VGfloat, VGfloat, int, int, VGubyte *);
