@@ -281,6 +281,7 @@ func fakeimage(x, y float64, w, h int, s string) {
 	StrokeColor("gray")
 	Line(x, y, x+fw, y+fh)
 	Line(x, y+fh, x+fw, y)
+	StrokeWidth(0)
 	FillColor("black")
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }

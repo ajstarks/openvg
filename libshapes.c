@@ -343,7 +343,7 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 		};
 		vgLoadMatrix(mm);
 		vgMultMatrix(mat);
-		vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH | VG_STROKE_PATH);
+		vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH);
 		xx += size * f.GlyphAdvances[glyph] / 65536.0f;
 	}
 	vgLoadMatrix(mm);

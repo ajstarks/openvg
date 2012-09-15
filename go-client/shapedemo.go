@@ -344,7 +344,7 @@ func fontrange(w, h int) {
 func refcard(width, height int) {
 	shapenames := []string{
 		"Circle",
-		"openvg.Ellipse",
+		"Ellipse",
 		"Rectangle",
 		"Rounded Rectangle",
 		"Line",
