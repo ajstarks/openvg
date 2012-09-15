@@ -303,13 +303,12 @@ func Image(x, y float64, w, h int, s string) {
 	maxx := bounds.Max.X
 	miny := bounds.Min.Y
 	maxy := bounds.Max.Y
-	//width := (maxx - minx) + 1
-	//height := (maxy - miny) + 1
 	data := make([]C.VGubyte, w*h*4)
 	n := 0
-	for y := maxy; y > miny; y-- { // OpenVG has origin at lower left, y increasing up
+	// println("minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
+	for y := miny; y < maxy; y++ { 
 		for x := minx; x < maxx; x++ {
-			r, g, b, a := img.At(x, y).RGBA()
+			r, g, b, a := img.At(x, (maxy-1)-y).RGBA() // OpenVG has origin at lower left, y increasing up
 			data[n] = C.VGubyte(r)
 			n++
 			data[n] = C.VGubyte(g)
@@ -417,7 +416,7 @@ func Text(x, y float64, s string, font string, size int, style ...string) {
 	C.Text(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 }
 
-// TextMid draws text centeRed at (x,y)
+// TextMid draws text centered at (x,y)
 func TextMid(x, y float64, s string, font string, size int, style ...string) {
 	t := C.CString(s)
 	defer C.free(unsafe.Pointer(t))

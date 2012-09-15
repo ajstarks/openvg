@@ -282,6 +282,7 @@ func imagetable(w, h int) {
 	x := left
 	y := bot
 	openvg.Start(w, h)
+	openvg.BackgroundColor("black")
 	for _, iname := range itable {
 		openvg.Image(x, y, imgw, imgh, iname)
 		openvg.FillRGB(255, 255, 255, 0.3)
