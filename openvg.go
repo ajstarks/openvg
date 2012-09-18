@@ -271,6 +271,13 @@ func End() {
 	C.End()
 }
 
+// SaveEnd ends the picture, saving the raw raster
+func SaveEnd(filename string) {
+	s := C.CString(filename)
+	defer C.free(unsafe.Pointer(s))
+	C.SaveEnd(s)
+}
+
 // fakeimage makes a placeholder for a missing image
 func fakeimage(x, y float64, w, h int, s string) {
 	fw := float64(w)
@@ -307,7 +314,7 @@ func Image(x, y float64, w, h int, s string) {
 	data := make([]C.VGubyte, w*h*4)
 	n := 0
 	// println("minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
-	for y := miny; y < maxy; y++ { 
+	for y := miny; y < maxy; y++ {
 		for x := minx; x < maxx; x++ {
 			r, g, b, a := img.At(x, (maxy-1)-y).RGBA() // OpenVG has origin at lower left, y increasing up
 			data[n] = C.VGubyte(r)
