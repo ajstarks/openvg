@@ -335,12 +335,12 @@ func Line(x1, y1, x2, y2 float64, style ...string) {
 	C.Line(C.VGfloat(x1), C.VGfloat(y1), C.VGfloat(x2), C.VGfloat(y2))
 }
 
-// Rect draws a rectangle at (x,y) with dimesions (w,h)
+// Rect draws a rectangle at (x,y) with dimensions (w,h)
 func Rect(x, y, w, h float64, style ...string) {
 	C.Rect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
-// Rect draws a rounded rectangle at (x,y) with dimesions (w,h).
+// Rect draws a rounded rectangle at (x,y) with dimensions (w,h).
 // the corner radii are at (rw, rh)
 func Roundrect(x, y, w, h, rw, rh float64, style ...string) {
 	C.Roundrect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(rw), C.VGfloat(rh))
@@ -389,6 +389,7 @@ func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
 	return &px[0], &py[0], C.VGint(size)
 }
 
+// Polygon draws a polygon using coordinates in x,y
 func Polygon(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
@@ -396,7 +397,7 @@ func Polygon(x, y []float64, style ...string) {
 	}
 }
 
-// Polyline draws a polygon with coordinates in x, y
+// Polyline draws a polygon using coordinates in x, y
 func Polyline(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
