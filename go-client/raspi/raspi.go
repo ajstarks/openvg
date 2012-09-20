@@ -1,3 +1,4 @@
+// raspberry pi self-portrait
 package main
 
 import (

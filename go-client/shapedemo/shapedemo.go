@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/ajstarks/openvg"
 	"math/rand"
@@ -576,6 +577,78 @@ func advert(w, h int) {
 	openvg.End()
 }
 
+// pause waits for user input
+func pause(r *bufio.Reader) bool {
+	line, err := r.ReadBytes('\n')
+	if err != nil {
+		return false
+	}
+	if len(line) > 1 {
+		return false
+	}
+	return true
+}
+
+// loop cycles through demo functions
+func loop(w, h int) {
+	in := bufio.NewReader(os.Stdin)
+	for {
+		refcard(w, h)
+		if !pause(in) {
+			return
+		}
+
+		rshapes(w, h, 50)
+		if !pause(in) {
+			return
+		}
+
+		testpattern(w, h, "OpenVG on RasPi")
+		if !pause(in) {
+			return
+		}
+
+		imagetable(w, h)
+		if !pause(in) {
+			return
+		}
+
+		rotext(w, h, 30, "Raspi")
+		if !pause(in) {
+			return
+		}
+
+		tb(w, h)
+		if !pause(in) {
+			return
+		}
+
+		textplay(w, h)
+		if !pause(in) {
+			return
+		}
+
+		fontrange(w, h)
+		if !pause(in) {
+			return
+		}
+
+		sunearth(w, h)
+		if !pause(in) {
+			return
+		}
+
+		raspi(w, h, "The Raspberry Pi")
+		if !pause(in) {
+			return
+		}
+		advert(w, h)
+		if !pause(in) {
+			return
+		}
+	}
+}
+
 // demo shows a timed demonstration
 func demo(w, h, s int) {
 	sec := time.Duration(s) * time.Second
@@ -651,6 +724,8 @@ func main() {
 			fontrange(w, h)
 		case "raspi":
 			raspi(w, h, "The Raspberry Pi")
+		case "loop":
+			loop(w, h)
 		case "demo":
 			demo(w, h, n)
 		case "rand":

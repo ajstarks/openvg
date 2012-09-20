@@ -1,11 +1,12 @@
+// randcircle --  random circles
 package main
 
 import (
-	"bufio"
 	"flag"
+	"os"
+	"bufio"
 	"github.com/ajstarks/openvg"
 	"math/rand"
-	"os"
 	"time"
 )
 
