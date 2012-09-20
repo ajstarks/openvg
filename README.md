@@ -112,14 +112,17 @@ Draw an elliptical arc centered at (x, y), with width and height at (w, h).  Sta
 
 ### Text and Images
 
-	void Text(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize)
+	void Text(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
 Draw a the text srtring (s) at location (x,y), using pointsize.
 
-	void TextMid(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize)
+	void TextMid(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
 Draw a the text srtring (s) at centered at location (x,y), using pointsize.
 
-	void TextEnd(VGfloat x, VGfloat y, const char* s, Fontinfo f, int pointsize)
+	void TextEnd(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
 Draw a the text srtring (s) at with its lend aligned to location (x,y), using pointsize
+
+	VGfloat TextWidth(char *s, Fontinfo f, int pointsize)
+Return the width of text
 
 	void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
 place a JPEG image with dimensions (w,h) at (x,y).
@@ -240,9 +243,10 @@ A Go programming language wrapper for the library is found in openvg.go. Sample 
 To build the wrapper: (make sure GOPATH is set)
 
 	pi@raspberrypi ~/openvg $ go install .
-	pi@raspberrypi ~/openvg $ cd go-client
-	pi@raspberrypi ~/openvg $ go build hellovg.go
-	pi@raspberrypi ~/openvg $ ./hellovg
+	pi@raspberrypi ~/openvg $ cd go-client/hellovg
+	pi@raspberrypi ~/openvg/go-client/hellovg $ go build .
+	pi@raspberrypi ~/openvg/go-client/hellovg $ ./hellovg 
+
 
 	
 
