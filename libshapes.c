@@ -160,7 +160,7 @@ VGImage createImageFromJpeg(const char *filename) {
 }
 
 // makeimage makes an image from a raw raster of red, green, blue, alpha values
-void makeimage(VGfloat x, VGfloat y, int w, int h, VGubyte *data) {
+void makeimage(VGfloat x, VGfloat y, int w, int h, VGubyte * data) {
 	unsigned int dstride = w * 4;
 	VGImageFormat rgbaFormat = VG_sABGR_8888;;
 	VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
@@ -218,6 +218,7 @@ void init(int *w, int *h) {
 void finish() {
 	unloadfont(SansTypeface.Glyphs, SansTypeface.Count);
 	unloadfont(SerifTypeface.Glyphs, SerifTypeface.Count);
+	unloadfont(MonoTypeface.Glyphs, MonoTypeface.Count);
 	glClear(GL_COLOR_BUFFER_BIT);
 	eglSwapBuffers(state->display, state->surface);
 	eglMakeCurrent(state->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
