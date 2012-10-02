@@ -31,6 +31,8 @@ extern void Stroke(unsigned int, unsigned int, unsigned int, VGfloat);
 extern void Fill(unsigned int, unsigned int, unsigned int, VGfloat);
 extern void RGBA(unsigned int, unsigned int, unsigned int, VGfloat, VGfloat[4]);
 extern void RGB(unsigned int, unsigned int, unsigned int, VGfloat[4]);
+extern void FillLinearGradient(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat *, int);
+extern void FillRadialGradient(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat *, int);
 extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const int *, const int *, const int *, const short *,
 			 int);
 extern void unloadfont(VGPath *, int);

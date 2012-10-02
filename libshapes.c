@@ -162,7 +162,7 @@ VGImage createImageFromJpeg(const char *filename) {
 // makeimage makes an image from a raw raster of red, green, blue, alpha values
 void makeimage(VGfloat x, VGfloat y, int w, int h, VGubyte * data) {
 	unsigned int dstride = w * 4;
-	VGImageFormat rgbaFormat = VG_sABGR_8888;;
+	VGImageFormat rgbaFormat = VG_sABGR_8888;
 	VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
 	vgImageSubData(img, (void *)data, dstride, rgbaFormat, 0, 0, w, h);
 	vgSetPixels(x, y, img, 0, 0, w, h);
@@ -176,7 +176,7 @@ void Image(VGfloat x, VGfloat y, int w, int h, char *filename) {
 	vgDestroyImage(img);
 }
 
-// dumpscreen writes the raster to the standard output file
+// dumpscreen writes the raster
 void dumpscreen(int w, int h, FILE * fp) {
 	void *ScreenBuffer = malloc(w * h * 4);
 	vgReadPixels(ScreenBuffer, (w * 4), VG_sABGR_8888, 0, 0, w, h);
@@ -285,6 +285,8 @@ void StrokeWidth(VGfloat width) {
 //
 //
 
+
+
 // RGBA fills a color vectors from a RGBA quad.
 void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4]) {
 	if (r > 255) {
@@ -322,6 +324,37 @@ void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
 	VGfloat color[4];
 	RGBA(r, g, b, a, color);
 	setfill(color);
+}
+
+
+// setstops sets color stops for gradients
+void setstop(VGPaint paint, VGfloat *stops, int n) {
+	VGboolean multmode = VG_FALSE;
+	VGColorRampSpreadMode spreadmode = VG_COLOR_RAMP_SPREAD_REPEAT;	
+	vgSetParameteri(paint, VG_PAINT_COLOR_RAMP_SPREAD_MODE, spreadmode);
+	vgSetParameteri(paint, VG_PAINT_COLOR_RAMP_PREMULTIPLIED, multmode);
+	vgSetParameterfv(paint, VG_PAINT_COLOR_RAMP_STOPS, 5*n, stops);
+	vgSetPaint(paint, VG_FILL_PATH);
+}
+
+// LinearGradient fills with a linear gradient
+void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat *stops, int ns) {
+	VGfloat lgcoord[4] = {x1, y1, x2, y2};
+	VGPaint paint = vgCreatePaint();
+	vgSetParameteri(paint, VG_PAINT_TYPE, VG_PAINT_TYPE_LINEAR_GRADIENT);
+	vgSetParameterfv(paint, VG_PAINT_LINEAR_GRADIENT, 4, lgcoord);
+	setstop(paint, stops, ns);
+	vgDestroyPaint(paint);	
+}
+
+// RadialGradient fills with a linear gradient
+void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx, VGfloat fy, VGfloat radius, VGfloat *stops, int ns) {
+	VGfloat radialcoord[5] = {cx, cy, fx, fy, radius};
+	VGPaint paint = vgCreatePaint();
+	vgSetParameteri(paint, VG_PAINT_TYPE, VG_PAINT_TYPE_RADIAL_GRADIENT);
+	vgSetParameterfv(paint, VG_PAINT_RADIAL_GRADIENT, 5, radialcoord);
+	setstop(paint, stops, ns);
+	vgDestroyPaint(paint);	
 }
 
 // Text renders a string of text at a specified location, size, using the specified font glyphs

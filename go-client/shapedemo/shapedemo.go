@@ -33,6 +33,52 @@ func coordpoint(x, y, size float64, c Color) {
 	openvg.FillRGB(c.red, c.green, c.blue, c.alpha)
 }
 
+// gradient shows linear and radial gradients
+
+func gradient(width, height int) {
+	w := float64(width)
+	h := float64(height)
+	stops := []openvg.Offcolor {
+		{0.0, openvg.RGB{255, 255, 255}, 1.0},
+		{0.5, openvg.RGB{128, 128, 128}, 1.0},
+		{1.0, openvg.RGB{0, 0, 0}, 1.0},
+	}
+					
+	x1 := w/8
+	x2 := (w*3)/8
+	y1 := h/3
+	y2 := (h*2)/3
+	cx := (w*3)/4
+	cy := (h/2)
+	r := (x2-x1)
+	fx := cx + (r/4)
+	fy := cy + (r/4)
+	openvg.Start(width, height)
+	openvg.BackgroundRGB(128, 128, 128, 1)
+	openvg.FillLinearGradient(x1, y1, x2, y2, stops)
+	openvg.Rect(x1, y1, x2-x1, y2-y1)
+	openvg.FillRadialGradient(cx, cy, fx, fy, r, stops)
+	openvg.Circle(cx, cy, r)
+	
+	openvg.FillRGB(0, 0, 0, 0.3)
+	openvg.Circle(x1, y1, 10);
+	openvg.Circle(x2, y2, 10);
+	openvg.Circle(cx, cy, 10);
+	openvg.Circle(cx+r/2, cy, 10);
+	openvg.Circle(fx, fy, 10);
+	
+	openvg.FillRGB(0,0,0,1.0)
+	SansTypeface := "sans"
+	openvg.TextMid(x1, y1-20, "(x1, y1)", SansTypeface, 18);
+	openvg.TextMid(x2, y2+10, "(x2, y2)", SansTypeface, 18);
+	openvg.TextMid(cx, cy, "(cx, cy)", SansTypeface, 18);
+	openvg.TextMid(fx, fy, "(fx, fy)", SansTypeface, 18);
+	openvg.TextEnd(cx+(r/2)+20, cy, "r", SansTypeface, 18);
+	
+	openvg.TextMid(x1+((x2-x1)/2), h/6, "Linear Gradient", SansTypeface, 36);
+	openvg.TextMid(cx, h/6, "Radial Gradient", SansTypeface, 36);
+	openvg.End()
+}
 // makepi draws the Raspberry Pi
 func makepi(x, y, w, h float64) {
 	// dimensions
@@ -557,7 +603,7 @@ func sunearth(w, h int) {
 
 // advert is an ad for the package 
 func advert(w, h int) {
-	y := (6 * float64(h)) / 10
+	y := float64(h) / 4
 	fontsize := (w * 4) / 100
 	f3 := fontsize / 3
 	s := "github.com/ajstarks/openvg"
@@ -565,15 +611,18 @@ func advert(w, h int) {
 
 	imw := 110
 	imh := 110
+	rw := float64(w / 4)
+	rh := (rw * 2) / 3
 	midx := float64(w / 2)
 
 	openvg.Start(w, h)
+	makepi(midx-float64(rw/2), float64(h/2), rw, rh)
 	openvg.FillRGB(128, 0, 0, 1)
 	openvg.TextMid(midx, y-float64(fontsize/4), s, "sans", fontsize)
-	y -= 150
+	y -= 100
 	openvg.FillRGB(128, 128, 128, 1)
 	openvg.TextMid(midx, y, a, "sans", f3)
-	openvg.Image(float64(w/2)-float64(imw/2), y-float64(imh*2), imw, imh, "starx.jpg")
+	openvg.Image(float64(w/2)-float64(imw/2), 20, imw, imh, "starx.jpg")
 	openvg.End()
 }
 
@@ -642,6 +691,12 @@ func loop(w, h int) {
 		if !pause(in) {
 			return
 		}
+		
+		gradient(w, h)
+		if !pause(in) {
+			return
+		}
+		
 		advert(w, h)
 		if !pause(in) {
 			return
@@ -681,6 +736,9 @@ func demo(w, h, s int) {
 
 	raspi(w, h, "The Raspberry Pi")
 	time.Sleep(sec)
+	
+	gradient(w, h)
+	time.Sleep(sec)
 
 	advert(w, h)
 }
@@ -693,7 +751,7 @@ func WaitEnd() {
 
 func usage(s string) {
 	fmt.Fprintf(os.Stderr,
-		"%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfontsize\n\traspi\n", s)
+		"%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfontsize\n\traspi\n\tgradient\n\tadvert\n", s)
 }
 
 // main initializes the system and shows the picture. 
@@ -712,6 +770,8 @@ func main() {
 		case "help":
 			usage(progname)
 			os.Exit(1)
+		case "advert":
+			advert(w, h)
 		case "image":
 			imagetable(w, h)
 		case "text":
@@ -734,6 +794,8 @@ func main() {
 			testpattern(w, h, "hello, world")
 		case "rotate":
 			rotext(w, h, n, "Raspi")
+		case "gradient":
+			gradient(w, h)
 		default:
 			refcard(w, h)
 		}

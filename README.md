@@ -77,6 +77,12 @@ Set the Stroke color using RGBA values.
 	void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
 Set the Fill color using RGBA values.
 
+	void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat *stops, int n)
+Set the fill to a linear gradient bounded by (x1, y1) and (x2, y2), using offsets and colors specified in n number of stops
+
+	void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx VGfloat fy, VGfloat r, VGfloat *stops, int n)
+Set the fill to a radial gradient centered at (cx, cy) with radius r, and focal point at (fx, ry), using offsets and colors specified in n number of stops
+
 ### Shapes
 
 	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
