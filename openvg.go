@@ -23,6 +23,12 @@ type RGB struct {
 	Red, Green, Blue uint8
 }
 
+type Offcolor struct {
+	Offset float64
+	RGB
+	Alpha float64
+}
+
 // colornames maps SVG color names to RGB triples
 var colornames = map[string]RGB{
 	"aliceblue":            {240, 248, 255},
@@ -206,6 +212,41 @@ func BackgroundColor(s string, alpha ...float64) {
 	}
 }
 
+// makestops prepares the color/stop vector
+func makeramp(r []Offcolor) (*C.VGfloat, C.int) {
+	lr := len(r)
+	nr := lr*5
+	cs := make([]C.VGfloat, nr)
+	j := 0
+	for i := 0; i < lr; i++ {
+		cs[j] = C.VGfloat(r[i].Offset)
+		j++
+		cs[j] = C.VGfloat(float64(r[i].Red)/255.0)
+		j++
+		cs[j] = C.VGfloat(float64(r[i].Green)/255.0)
+		j++
+		cs[j] = C.VGfloat(float64(r[i].Blue)/255.0)
+		j++
+		cs[j] = C.VGfloat(r[i].Alpha)
+		j++
+	}
+	return &cs[0], C.int(lr)
+}
+
+// FillLinearGradient sets up a linear gradient between (x1,y2) and (x2, y2)
+// using the specified offsets and colors
+func FillLinearGradient(x1, y1, x2, y2 float64, r []Offcolor) {
+	cr, nr := makeramp(r)
+	C.FillLinearGradient(C.VGfloat(x1), C.VGfloat(y1), C.VGfloat(x2), C.VGfloat(y2), cr, nr)
+}
+
+// FillRadialGradient sets up a radial gradient centered at (cx, cy), radius r,
+// with a focal point at (fx, fy) using the specified offsets and colors
+func FillRadialGradient(cx, cy, fx, fy, radius float64, r []Offcolor) {
+	cr, nr := makeramp(r)
+	C.FillRadialGradient(C.VGfloat(cx), C.VGfloat(cy), C.VGfloat(fx), C.VGfloat(fy), C.VGfloat(radius), cr, nr)
+}
+
 // FillRGB sets the fill color, using RGB triples
 func FillRGB(r, g, b uint8, alpha float64) {
 	C.Fill(C.uint(r), C.uint(g), C.uint(b), C.VGfloat(alpha))
@@ -225,30 +266,30 @@ func StrokeWidth(w float64) {
 // or black on error.
 func colorlookup(s string) RGB {
 	var black = RGB{0, 0, 0}
-	c, ok := colornames[s]
+	color, ok := colornames[s]
 	if ok {
-		return c
+		return color
 	}
 	return black
 }
 
 // FillColor sets the fill color using names to specify the color, optionally applying alpha.
 func FillColor(s string, alpha ...float64) {
-	c := colorlookup(s)
+	fc := colorlookup(s)
 	if len(alpha) == 0 {
-		FillRGB(c.Red, c.Green, c.Blue, 1)
+		FillRGB(fc.Red, fc.Green, fc.Blue, 1)
 	} else {
-		FillRGB(c.Red, c.Green, c.Blue, alpha[0])
+		FillRGB(fc.Red, fc.Green, fc.Blue, alpha[0])
 	}
 }
 
 // StrokeColor sets the fill color using names to specify the color, optionally applying alpha.
 func StrokeColor(s string, alpha ...float64) {
-	c := colorlookup(s)
+	fc := colorlookup(s)
 	if len(alpha) == 0 {
-		StrokeRGB(c.Red, c.Green, c.Blue, 1)
+		StrokeRGB(fc.Red, fc.Green, fc.Blue, 1)
 	} else {
-		StrokeRGB(c.Red, c.Green, c.Blue, alpha[0])
+		StrokeRGB(fc.Red, fc.Green, fc.Blue, alpha[0])
 	}
 }
 
@@ -314,7 +355,7 @@ func Image(x, y float64, w, h int, s string) {
 	data := make([]C.VGubyte, w*h*4)
 	n := 0
 	// println("minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
-	for y := miny; y < maxy; y++ {
+	for y := miny; y < maxy; y++ { 
 		for x := minx; x < maxx; x++ {
 			r, g, b, a := img.At(x, (maxy-1)-y).RGBA() // OpenVG has origin at lower left, y increasing up
 			data[n] = C.VGubyte(r)
@@ -335,12 +376,12 @@ func Line(x1, y1, x2, y2 float64, style ...string) {
 	C.Line(C.VGfloat(x1), C.VGfloat(y1), C.VGfloat(x2), C.VGfloat(y2))
 }
 
-// Rect draws a rectangle at (x,y) with dimensions (w,h)
+// Rect draws a rectangle at (x,y) with dimesions (w,h)
 func Rect(x, y, w, h float64, style ...string) {
 	C.Rect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
-// Rect draws a rounded rectangle at (x,y) with dimensions (w,h).
+// Rect draws a rounded rectangle at (x,y) with dimesions (w,h).
 // the corner radii are at (rw, rh)
 func Roundrect(x, y, w, h, rw, rh float64, style ...string) {
 	C.Roundrect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(rw), C.VGfloat(rh))
@@ -389,7 +430,6 @@ func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
 	return &px[0], &py[0], C.VGint(size)
 }
 
-// Polygon draws a polygon using coordinates in x,y
 func Polygon(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
@@ -397,7 +437,7 @@ func Polygon(x, y []float64, style ...string) {
 	}
 }
 
-// Polyline draws a polygon using coordinates in x, y
+// Polyline draws a polygon with coordinates in x, y
 func Polyline(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
