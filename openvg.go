@@ -12,24 +12,26 @@ package openvg
 #include "shapes.h"   // C API
 */
 import "C"
-import "unsafe"
 import "image"
-import "os"
 import _ "image/jpeg"
 import _ "image/png"
+import "os"
+import "unsafe"
 
-// RGB triple
+// RGB defines the red, green, blue triple that makes up colors.
 type RGB struct {
 	Red, Green, Blue uint8
 }
 
+// Offcolor defines the offset, color color used in gradients
+// the Offset ranges from 0..1
 type Offcolor struct {
 	Offset float64
 	RGB
 	Alpha float64
 }
 
-// colornames maps SVG color names to RGB triples
+// colornames maps SVG color names to RGB triples.
 var colornames = map[string]RGB{
 	"aliceblue":            {240, 248, 255},
 	"antiquewhite":         {250, 235, 215},
@@ -215,17 +217,17 @@ func BackgroundColor(s string, alpha ...float64) {
 // makestops prepares the color/stop vector
 func makeramp(r []Offcolor) (*C.VGfloat, C.int) {
 	lr := len(r)
-	nr := lr*5
+	nr := lr * 5
 	cs := make([]C.VGfloat, nr)
 	j := 0
 	for i := 0; i < lr; i++ {
 		cs[j] = C.VGfloat(r[i].Offset)
 		j++
-		cs[j] = C.VGfloat(float64(r[i].Red)/255.0)
+		cs[j] = C.VGfloat(float64(r[i].Red) / 255.0)
 		j++
-		cs[j] = C.VGfloat(float64(r[i].Green)/255.0)
+		cs[j] = C.VGfloat(float64(r[i].Green) / 255.0)
 		j++
-		cs[j] = C.VGfloat(float64(r[i].Blue)/255.0)
+		cs[j] = C.VGfloat(float64(r[i].Blue) / 255.0)
 		j++
 		cs[j] = C.VGfloat(r[i].Alpha)
 		j++
@@ -354,8 +356,7 @@ func Image(x, y float64, w, h int, s string) {
 	maxy := bounds.Max.Y
 	data := make([]C.VGubyte, w*h*4)
 	n := 0
-	// println("minx", minx, "maxx", maxx, "miny", miny, "maxy", maxy)
-	for y := miny; y < maxy; y++ { 
+	for y := miny; y < maxy; y++ {
 		for x := minx; x < maxx; x++ {
 			r, g, b, a := img.At(x, (maxy-1)-y).RGBA() // OpenVG has origin at lower left, y increasing up
 			data[n] = C.VGubyte(r)
@@ -430,6 +431,7 @@ func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
 	return &px[0], &py[0], C.VGint(size)
 }
 
+// Polygon draws a polygon with coordinate in x,y
 func Polygon(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
@@ -437,7 +439,7 @@ func Polygon(x, y []float64, style ...string) {
 	}
 }
 
-// Polyline draws a polygon with coordinates in x, y
+// Polyline draws a polyline with coordinates in x, y
 func Polyline(x, y []float64, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
@@ -445,7 +447,7 @@ func Polyline(x, y []float64, style ...string) {
 	}
 }
 
-// select font specifies the font by generic name
+// selectfont specifies the font by generic name
 func selectfont(s string) C.Fontinfo {
 	switch s {
 	case "sans":
@@ -461,22 +463,22 @@ func selectfont(s string) C.Fontinfo {
 // Text draws text whose aligment begins (x,y)
 func Text(x, y float64, s string, font string, size int, style ...string) {
 	t := C.CString(s)
-	defer C.free(unsafe.Pointer(t))
 	C.Text(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
+	C.free(unsafe.Pointer(t))
 }
 
 // TextMid draws text centered at (x,y)
 func TextMid(x, y float64, s string, font string, size int, style ...string) {
 	t := C.CString(s)
-	defer C.free(unsafe.Pointer(t))
 	C.TextMid(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
+	C.free(unsafe.Pointer(t))
 }
 
 // TextEnd draws text end-aligned at (x,y)
 func TextEnd(x, y float64, s string, font string, size int, style ...string) {
 	t := C.CString(s)
-	defer C.free(unsafe.Pointer(t))
 	C.TextEnd(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
+	C.free(unsafe.Pointer(t))
 }
 
 // TextWidth returns the length of text at a specified font and size

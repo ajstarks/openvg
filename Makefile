@@ -1,13 +1,14 @@
 all:	libshapes.o oglinit.o gopenvg
 
-libshapes.o:	libshapes.c shapes.h fontinfo.h
-	gcc   -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+
+libshapes.o:	libshapes.c shapes.h fontinfo.h oglinit.o
+	gcc -O2  -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
 
 gopenvg:	openvg.go
 	go install .
 
 oglinit.o:	oglinit.c
-	gcc   -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+	gcc  -O2  -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
 
 font2openvg:	font2openvg.cpp
 	g++ -I /usr/include/freetype2 font2openvg.cpp -o font2openvg -lfreetype

@@ -2,13 +2,17 @@
 package main
 
 import (
-	"flag"
-	"os"
 	"bufio"
+	"flag"
 	"github.com/ajstarks/openvg"
 	"math/rand"
+	"os"
 	"time"
 )
+
+func rseed() {
+	rand.Seed(int64(time.Now().Nanosecond()) % 1e9)
+}
 
 func main() {
 	var nr = flag.Int("n", 500, "number of objects")
@@ -17,7 +21,7 @@ func main() {
 	var fgcolor = flag.String("fg", "maroon", "text color")
 
 	flag.Parse()
-	rand.Seed(int64(time.Now().Nanosecond()) % 1e9)
+	rseed()
 
 	width, height := openvg.Init()
 	fw := float64(width)
@@ -41,7 +45,7 @@ func main() {
 	}
 	openvg.FillColor(*fgcolor)
 	openvg.TextMid(fw/2, fh/2, *message, "sans", width/25)
-	openvg.End()
+	openvg.SaveEnd("rand.raw")
 
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 	openvg.Finish()

@@ -1,3 +1,4 @@
+//shapedemo demonstrates the OpenVG library
 package main
 
 import (
@@ -38,47 +39,48 @@ func coordpoint(x, y, size float64, c Color) {
 func gradient(width, height int) {
 	w := float64(width)
 	h := float64(height)
-	stops := []openvg.Offcolor {
+	stops := []openvg.Offcolor{
 		{0.0, openvg.RGB{255, 255, 255}, 1.0},
 		{0.5, openvg.RGB{128, 128, 128}, 1.0},
 		{1.0, openvg.RGB{0, 0, 0}, 1.0},
 	}
-					
-	x1 := w/8
-	x2 := (w*3)/8
-	y1 := h/3
-	y2 := (h*2)/3
-	cx := (w*3)/4
-	cy := (h/2)
-	r := (x2-x1)
-	fx := cx + (r/4)
-	fy := cy + (r/4)
+
+	x1 := w / 8
+	x2 := (w * 3) / 8
+	y1 := h / 3
+	y2 := (h * 2) / 3
+	cx := (w * 3) / 4
+	cy := (h / 2)
+	r := (x2 - x1)
+	fx := cx + (r / 4)
+	fy := cy + (r / 4)
 	openvg.Start(width, height)
 	openvg.BackgroundRGB(128, 128, 128, 1)
 	openvg.FillLinearGradient(x1, y1, x2, y2, stops)
 	openvg.Rect(x1, y1, x2-x1, y2-y1)
 	openvg.FillRadialGradient(cx, cy, fx, fy, r, stops)
 	openvg.Circle(cx, cy, r)
-	
+
 	openvg.FillRGB(0, 0, 0, 0.3)
-	openvg.Circle(x1, y1, 10);
-	openvg.Circle(x2, y2, 10);
-	openvg.Circle(cx, cy, 10);
-	openvg.Circle(cx+r/2, cy, 10);
-	openvg.Circle(fx, fy, 10);
-	
-	openvg.FillRGB(0,0,0,1.0)
+	openvg.Circle(x1, y1, 10)
+	openvg.Circle(x2, y2, 10)
+	openvg.Circle(cx, cy, 10)
+	openvg.Circle(cx+r/2, cy, 10)
+	openvg.Circle(fx, fy, 10)
+
+	openvg.FillRGB(0, 0, 0, 1.0)
 	SansTypeface := "sans"
-	openvg.TextMid(x1, y1-20, "(x1, y1)", SansTypeface, 18);
-	openvg.TextMid(x2, y2+10, "(x2, y2)", SansTypeface, 18);
-	openvg.TextMid(cx, cy, "(cx, cy)", SansTypeface, 18);
-	openvg.TextMid(fx, fy, "(fx, fy)", SansTypeface, 18);
-	openvg.TextEnd(cx+(r/2)+20, cy, "r", SansTypeface, 18);
-	
-	openvg.TextMid(x1+((x2-x1)/2), h/6, "Linear Gradient", SansTypeface, 36);
-	openvg.TextMid(cx, h/6, "Radial Gradient", SansTypeface, 36);
-	openvg.End()
+	openvg.TextMid(x1, y1-20, "(x1, y1)", SansTypeface, 18)
+	openvg.TextMid(x2, y2+10, "(x2, y2)", SansTypeface, 18)
+	openvg.TextMid(cx, cy, "(cx, cy)", SansTypeface, 18)
+	openvg.TextMid(fx, fy, "(fx, fy)", SansTypeface, 18)
+	openvg.TextEnd(cx+(r/2)+20, cy, "r", SansTypeface, 18)
+
+	openvg.TextMid(x1+((x2-x1)/2), h/6, "Linear Gradient", SansTypeface, 36)
+	openvg.TextMid(cx, h/6, "Radial Gradient", SansTypeface, 36)
+	openvg.SaveEnd("gradient.raw")
 }
+
 // makepi draws the Raspberry Pi
 func makepi(x, y, w, h float64) {
 	// dimensions
@@ -691,12 +693,12 @@ func loop(w, h int) {
 		if !pause(in) {
 			return
 		}
-		
+
 		gradient(w, h)
 		if !pause(in) {
 			return
 		}
-		
+
 		advert(w, h)
 		if !pause(in) {
 			return
@@ -736,7 +738,7 @@ func demo(w, h, s int) {
 
 	raspi(w, h, "The Raspberry Pi")
 	time.Sleep(sec)
-	
+
 	gradient(w, h)
 	time.Sleep(sec)
 
