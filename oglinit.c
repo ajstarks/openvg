@@ -78,11 +78,15 @@ extern void oglinit(STATE_T * state) {
 	state->surface = eglCreateWindowSurface(state->display, config, &nativewindow, NULL);
 	assert(state->surface != EGL_NO_SURFACE);
 
+	// preserve the buffers on swap
+	result = eglSurfaceAttrib(state->display, state->surface, EGL_SWAP_BEHAVIOR, EGL_BUFFER_PRESERVED);
+	assert(EGL_FALSE != result);
+
 	// connect the context to the surface
 	result = eglMakeCurrent(state->display, state->surface, state->surface, state->context);
 	assert(EGL_FALSE != result);
 
-	//DAVE - Set up screen ratio
+	// set up screen ratio
 	glViewport(0, 0, (GLsizei) state->screen_width, (GLsizei) state->screen_height);
 
 	glMatrixMode(GL_PROJECTION);
