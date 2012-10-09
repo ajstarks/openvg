@@ -16,15 +16,19 @@ import "image"
 import _ "image/jpeg"
 import _ "image/png"
 import "os"
+import "fmt"
 import "unsafe"
+
+//import "net/http"
+import "strings"
 
 // RGB defines the red, green, blue triple that makes up colors.
 type RGB struct {
 	Red, Green, Blue uint8
 }
 
-// Offcolor defines the offset, color color used in gradients
-// the Offset ranges from 0..1
+// Offcolor defines the offset, color and alpha values used in gradients
+// the Offset ranges from 0..1, colors as RGB triples, alpha ranges from 0..1
 type Offcolor struct {
 	Offset float64
 	RGB
@@ -236,20 +240,20 @@ func makeramp(r []Offcolor) (*C.VGfloat, C.int) {
 }
 
 // FillLinearGradient sets up a linear gradient between (x1,y2) and (x2, y2)
-// using the specified offsets and colors
-func FillLinearGradient(x1, y1, x2, y2 float64, r []Offcolor) {
-	cr, nr := makeramp(r)
+// using the specified offsets and colors in ramp
+func FillLinearGradient(x1, y1, x2, y2 float64, ramp []Offcolor) {
+	cr, nr := makeramp(ramp)
 	C.FillLinearGradient(C.VGfloat(x1), C.VGfloat(y1), C.VGfloat(x2), C.VGfloat(y2), cr, nr)
 }
 
 // FillRadialGradient sets up a radial gradient centered at (cx, cy), radius r,
-// with a focal point at (fx, fy) using the specified offsets and colors
-func FillRadialGradient(cx, cy, fx, fy, radius float64, r []Offcolor) {
-	cr, nr := makeramp(r)
+// with a focal point at (fx, fy) using the specified offsets and colors in ramp
+func FillRadialGradient(cx, cy, fx, fy, radius float64, ramp []Offcolor) {
+	cr, nr := makeramp(ramp)
 	C.FillRadialGradient(C.VGfloat(cx), C.VGfloat(cy), C.VGfloat(fx), C.VGfloat(fy), C.VGfloat(radius), cr, nr)
 }
 
-// FillRGB sets the fill color, using RGB triples
+// FillRGB sets the fill color, using RGB triples and alpha values
 func FillRGB(r, g, b uint8, alpha float64) {
 	C.Fill(C.uint(r), C.uint(g), C.uint(b), C.VGfloat(alpha))
 }
@@ -265,14 +269,21 @@ func StrokeWidth(w float64) {
 }
 
 // colorlookup returns a RGB triple corresponding to the named color,
-// or black on error.
+// or "rgb(r,g,b)" string. On error, return black.
 func colorlookup(s string) RGB {
-	var black = RGB{0, 0, 0}
+	var rcolor = RGB{0, 0, 0}
 	color, ok := colornames[s]
 	if ok {
 		return color
 	}
-	return black
+	if strings.HasPrefix(s, "rgb(") {
+		n, err := fmt.Sscanf(s[3:], "(%d,%d,%d)", &rcolor.Red, &rcolor.Green, &rcolor.Blue)
+		if n != 3 || err != nil {
+			return RGB{0, 0, 0}
+		}
+		return rcolor
+	}
+	return rcolor
 }
 
 // FillColor sets the fill color using names to specify the color, optionally applying alpha.
@@ -336,24 +347,49 @@ func fakeimage(x, y float64, w, h int, s string) {
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }
 
-// Image places the image in s image at (x,y) with dimensions (w,h)
+// Image places the named image (either on-disk or via http) at (x,y) with dimensions (w,h)
 func Image(x, y float64, w, h int, s string) {
-	f, ferr := os.Open(s)
-	if ferr != nil {
-		fakeimage(x, y, w, h, s)
-		return
-	}
-	defer f.Close()
-	img, _, err := image.Decode(f)
+	var img image.Image
+	var derr error
+	/*
+		if strings.HasPrefix(s, "http://") {
+		println("get", s)
+			r, err := http.Get(s)
+			if err != nil {
+				fakeimage(x, y, w, h, s)
+				return
+			}
+			img, _, derr = image.Decode(r.Body)
+			println("decode", s)
+			if derr != nil {
+				fakeimage(x, y, w, h, s)
+				r.Body.Close()
+				return
+			}
+			r.Body.Close()
+		} else {
+	*/
+	f, err := os.Open(s)
 	if err != nil {
 		fakeimage(x, y, w, h, s)
 		return
 	}
+	img, _, derr = image.Decode(f)
+	if derr != nil {
+		fakeimage(x, y, w, h, s)
+		f.Close()
+		return
+	}
+	f.Close()
+	//}
+	//println("processing", s)
 	bounds := img.Bounds()
 	minx := bounds.Min.X
 	maxx := bounds.Max.X
 	miny := bounds.Min.Y
 	maxy := bounds.Max.Y
+	//w = maxx - minx
+	//h = maxy - miny
 	data := make([]C.VGubyte, w*h*4)
 	n := 0
 	for y := miny; y < maxy; y++ {
