@@ -12,15 +12,15 @@ package openvg
 #include "shapes.h"   // C API
 */
 import "C"
-import "image"
-import _ "image/jpeg"
-import _ "image/png"
-import "os"
-import "fmt"
-import "unsafe"
-
-//import "net/http"
-import "strings"
+import (
+	"fmt"
+	"image"
+	_ "image/jpeg"
+	_ "image/png"
+	"os"
+	"strings"
+	"unsafe"
+)
 
 // RGB defines the red, green, blue triple that makes up colors.
 type RGB struct {
@@ -347,54 +347,32 @@ func fakeimage(x, y float64, w, h int, s string) {
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }
 
-// Image places the named image (either on-disk or via http) at (x,y) with dimensions (w,h)
+// Image places the named image at (x,y) with dimensions (w,h)
 func Image(x, y float64, w, h int, s string) {
 	var img image.Image
 	var derr error
-	/*
-		if strings.HasPrefix(s, "http://") {
-		println("get", s)
-			r, err := http.Get(s)
-			if err != nil {
-				fakeimage(x, y, w, h, s)
-				return
-			}
-			img, _, derr = image.Decode(r.Body)
-			println("decode", s)
-			if derr != nil {
-				fakeimage(x, y, w, h, s)
-				r.Body.Close()
-				return
-			}
-			r.Body.Close()
-		} else {
-	*/
 	f, err := os.Open(s)
 	if err != nil {
 		fakeimage(x, y, w, h, s)
 		return
 	}
 	img, _, derr = image.Decode(f)
+	defer f.Close()
 	if derr != nil {
 		fakeimage(x, y, w, h, s)
-		f.Close()
 		return
 	}
-	f.Close()
-	//}
-	//println("processing", s)
 	bounds := img.Bounds()
 	minx := bounds.Min.X
 	maxx := bounds.Max.X
 	miny := bounds.Min.Y
 	maxy := bounds.Max.Y
-	//w = maxx - minx
-	//h = maxy - miny
 	data := make([]C.VGubyte, w*h*4)
 	n := 0
-	for y := miny; y < maxy; y++ {
-		for x := minx; x < maxx; x++ {
-			r, g, b, a := img.At(x, (maxy-1)-y).RGBA() // OpenVG has origin at lower left, y increasing up
+	var r, g, b, a uint32
+	for yp := miny; yp < maxy; yp++ {
+		for xp := minx; xp < maxx; xp++ {
+			r, g, b, a = img.At(xp, (maxy-1)-yp).RGBA() // OpenVG has origin at lower left, y increasing up
 			data[n] = C.VGubyte(r)
 			n++
 			data[n] = C.VGubyte(g)
