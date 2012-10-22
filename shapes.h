@@ -37,3 +37,6 @@ extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const 
 			 int);
 extern void unloadfont(VGPath *, int);
 extern void makeimage(VGfloat, VGfloat, int, int, VGubyte *);
+extern void saveterm();
+extern void restoreterm();
+extern void rawterm();

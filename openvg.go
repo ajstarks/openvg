@@ -521,3 +521,15 @@ func Shear(x, y float64) {
 func Scale(x, y float64) {
 	C.Scale(C.VGfloat(x), C.VGfloat(y))
 }
+// SaveTerm saves terminal settings
+func SaveTerm() {
+	C.saveterm()
+}
+// RestoreTerm retores terminal settings
+func RestoreTerm() {
+	C.restoreterm()
+}
+// func RawTerm() sets the terminal to raw mode
+func RawTerm() {
+	C.rawterm()
+}

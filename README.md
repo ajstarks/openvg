@@ -54,6 +54,9 @@ End the picture, rendering to the screen.
 End the picture, rendering to the screen, save the raster to the named file as 4-byte RGBA words, with a stride of
 width*4 bytes. The program raw2png converts the "raw" raster to png.
 
+	void saveterm(), restoreterm(), rawterm()
+Terminal settings, save current settings, restore settings, put the terminal in raw mode.
+
 ### Attributes
 
 	void setfill(float color[4])
@@ -78,7 +81,7 @@ Set the Stroke color using RGBA values.
 Set the Fill color using RGBA values.
 
 	void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat *stops, int n)
-Set the fill to a linear gradient bounded by (x1, y1) and (x2, y2), using offsets and colors specified in n number of stops
+Set the fill to a linear gradient bounded by (x1, y1) and (x2, y2). using offsets and colors specified in n number of stops
 
 	void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx VGfloat fy, VGfloat r, VGfloat *stops, int n)
 Set the fill to a radial gradient centered at (cx, cy) with radius r, and focal point at (fx, ry), using offsets and colors specified in n number of stops

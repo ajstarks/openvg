@@ -616,12 +616,17 @@ void demo(int w, int h, int sec) {
 	advert(w, h);
 }
 
-// nlwait, hacky way to wait for a [RETURN]
-void nlwait() {
-	char s[3];
-	fgets(s, 2, stdin);
-}
+// wait for a specific character 
+void waituntil(int endchar) {
+    int key;
 
+    for (;;) {
+        key = getchar();
+        if (key == endchar || key == '\n') {
+            break;
+        }
+    }
+}
 // main initializes the system and shows the picture. 
 // Exit and clean up when you hit [RETURN].
 int main(int argc, char **argv) {
@@ -629,7 +634,9 @@ int main(int argc, char **argv) {
 	char *usage =
 	    "%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfontsize\n\traspi\n\tadvert\n\tgradient\n";
 	char *progname = argv[0];
+	saveterm();
 	init(&w, &h);
+	rawterm();
 	switch (argc) {
 	case 2:
 		if (strncmp(argv[1], "image", 5) == 0) {
@@ -647,6 +654,7 @@ int main(int argc, char **argv) {
 		} else if (strncmp(argv[1], "gradient", 8) == 0) {
 			gradient(w,h);
 		} else {
+			restoreterm();
 			fprintf(stderr, usage, progname);
 			return 1;
 		}
@@ -666,6 +674,7 @@ int main(int argc, char **argv) {
 		} else if (strncmp(argv[1], "test", 4) == 0) {
 			testpattern(w, h, argv[2]);
 		} else {
+			restoreterm();
 			fprintf(stderr, usage, progname);
 			return 1;
 		}
@@ -675,6 +684,7 @@ int main(int argc, char **argv) {
 		if (strncmp(argv[1], "rotate", 6) == 0) {
 			rotext(w, h, atoi(argv[2]), argv[3]);
 		} else {
+			restoreterm();
 			fprintf(stderr, usage, progname);
 			return 1;
 		}
@@ -683,8 +693,8 @@ int main(int argc, char **argv) {
 	default:
 		refcard(w, h);
 	}
-	nlwait();
-
+	waituntil(0x1b);
+	restoreterm();
 	finish();
 	return 0;
 }

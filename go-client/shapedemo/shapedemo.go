@@ -68,7 +68,7 @@ func gradient(width, height int) {
 	openvg.Circle(cx+r/2, cy, 10)
 	openvg.Circle(fx, fy, 10)
 
-	openvg.FillRGB(0, 0, 0, 1.0)
+	openvg.FillColor("black")
 	SansTypeface := "sans"
 	openvg.TextMid(x1, y1-20, "(x1, y1)", SansTypeface, 18)
 	openvg.TextMid(x2, y2+10, "(x2, y2)", SansTypeface, 18)
@@ -313,17 +313,25 @@ func imagetest(w, h int) {
 	openvg.End()
 }
 
+type it struct {
+	name string
+	width int
+	height int
+}
+
 func imagetable(w, h int) {
 	imgw, imgh := 422, 238
-	itable := []string{
-		"desert0.jpg",
-		"desert1.jpg",
-		"desert2.jpg",
-		"desert3.jpg",
-		"desert4.jpg",
-		"desert5.jpg",
-		"desert6.jpg",
-		"desert7.jpg",
+	itable := []it{
+		{"desert0.jpg", imgw, imgh},
+		{"desert1.jpg", imgw, imgh},
+		{"desert2.jpg", imgw, imgh},
+		{"desert3.jpg", imgw, imgh},
+		{"desert4.jpg", imgw, imgh},
+		{"desert5.jpg", imgw, imgh},
+		{"desert6.jpg", imgw, imgh},
+		{"desert7.jpg", imgw, imgh},
+		//{"http://farm4.static.flickr.com/3546/3338566612_9c56bfb53e_m.jpg", 240, 164},
+		//{"http://farm4.static.flickr.com/3642/3337734413_e36baba755_m.jpg", 240, 164},
 	}
 	left := 50.0
 	bot := float64(h-imgh) - 50.0
@@ -333,15 +341,15 @@ func imagetable(w, h int) {
 	openvg.Start(w, h)
 	openvg.BackgroundColor("black")
 	for _, iname := range itable {
-		openvg.Image(x, y, imgw, imgh, iname)
+		openvg.Image(x, y, iname.width, iname.height, iname.name)
 		openvg.FillRGB(255, 255, 255, 0.3)
 		openvg.Rect(x, y, float64(imgw), 32)
 		openvg.FillRGB(0, 0, 0, 1)
-		openvg.TextMid(x+float64(imgw/2), y+10, iname, "sans", 16)
-		x += float64(imgw) + gutter
+		openvg.TextMid(x+float64(imgw/2), y+10, iname.name, "sans", 16)
+		x += float64(iname.width) + gutter
 		if x > float64(w) {
 			x = left
-			y -= float64(imgh) + gutter
+			y -= float64(iname.height) + gutter
 		}
 	}
 	y = float64(h) * 0.1
@@ -630,12 +638,14 @@ func advert(w, h int) {
 
 // pause waits for user input
 func pause(r *bufio.Reader) bool {
-	line, err := r.ReadBytes('\n')
-	if err != nil {
-		return false
-	}
-	if len(line) > 1 {
-		return false
+	for {
+			c, _ := r.ReadByte() 
+			if c == '\n' {
+				return true
+			}
+			if c == 0x1b {
+				return false
+			}
 	}
 	return true
 }
@@ -746,12 +756,19 @@ func demo(w, h, s int) {
 }
 
 func WaitEnd() {
-	var x int
-	fmt.Scanf("%d", &x)
+	r := bufio.NewReader(os.Stdin)
+	for {
+			c, _ := r.ReadByte()
+			if c == '\n' {
+				break
+			} 
+	}
+	openvg.RestoreTerm()
 	openvg.Finish()
 }
 
 func usage(s string) {
+	openvg.RestoreTerm()
 	fmt.Fprintf(os.Stderr,
 		"%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfontsize\n\traspi\n\tgradient\n\tadvert\n", s)
 }
@@ -760,8 +777,10 @@ func usage(s string) {
 // Exit and clean up when you hit [RETURN].
 func main() {
 	rseed()
+	openvg.SaveTerm()
 	nargs := len(os.Args)
 	w, h := openvg.Init()
+	openvg.RawTerm()
 	progname := os.Args[0]
 	n := 5
 	if nargs > 2 {
