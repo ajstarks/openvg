@@ -7,39 +7,28 @@ import (
 	"os"
 )
 
-var ssDist = []float64{ // Astronomical Units
-	0.00,  // Sun
-	0.34,  // Mercury
-	0.72,  // Venus
-	1.00,  // Earth
-	1.54,  // Mars
-	5.02,  // Jupiter
-	9.46,  // Saturn
-	20.11, // Uranus
-	30.08} // Netpune
-
-var ssRad = []float64{ // Planet radius in miles
-	423200.0, // Sun
-	1516.0,   // Mercury
-	3760.0,   // Venus
-	3957.0,   // Earth
-	2104.0,   // Mars
-	42980.0,  // Jupiter
-	35610.0,  // Saturn
-	15700.0,  // Uranus
-	15260.0}  // Neptune
-
-var ssColor = []openvg.RGB{ // Planet colors
-	{247, 115, 12},  // Sun
-	{250, 248, 242}, // Mercury
-	{255, 255, 242}, // Venus
-	{11, 92, 227},   // Earth
-	{240, 198, 29},  // Mars
-	{253, 199, 145}, // Jupiter
-	{224, 196, 34},  // Saturn
-	{220, 241, 245}, // Uranus
-	{57, 182, 247},  // Neptune
+// Body describes a body within the solar system:
+// name, distance from the sun, size and color
+type Body struct {
+	name     string
+	distance float64
+	radius   float64
+	color    openvg.RGB
 }
+
+var (
+	sun     = Body{"Sun", 0, 695500, openvg.RGB{247, 115, 12}}
+	mercury = Body{"Mercury", 0.34, 2439.7, openvg.RGB{250, 248, 242}}
+	venus   = Body{"Venus", 0.72, 6051.8, openvg.RGB{255, 255, 242}}
+	earth   = Body{"Earth", 1.0, 6371, openvg.RGB{11, 92, 227}}
+	mars    = Body{"Mars", 1.54, 3396.2, openvg.RGB{240, 198, 29}}
+	jupiter = Body{"Jupiter", 5.02, 69911, openvg.RGB{253, 199, 145}}
+	saturn  = Body{"saturn", 9.46, 60268, openvg.RGB{224, 196, 34}}
+	uranus  = Body{"uranus", 20.11, 25559, openvg.RGB{220, 241, 245}}
+	neptune = Body{"neptune", 30.08, 24764, openvg.RGB{57, 182, 247}}
+
+	SolarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
+)
 
 func vmap(value, low1, high1, low2, high2 float64) float64 {
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
@@ -50,43 +39,51 @@ func light(x, y, r float64, c openvg.RGB) {
 		{0.0, c, 1},
 		{0.50, openvg.RGB{c.Red / 2, c.Green / 2, c.Blue / 2}, 1},
 	}
-	openvg.FillRadialGradient(x, y, (x-r)*.75, y, r, stops)
+	openvg.FillRadialGradient(x, y, (x+r)*.90, y, r, stops)
 }
 
 func main() {
 
 	width, height := openvg.Init()
-	nobj := len(ssDist)
-	y := float64(height) / 2.0
+
+	w := float64(width)
+	h := float64(height)
+	y := h / 2
+
 	margin := 100.0
 	minsize := 7.0
 	labeloc := 100.0
 	bgcolor := "black"
 	labelcolor := "white"
-	maxh := (float64(height) / 2) * 0.05
+	maxsize := (h / 2) * 0.05
+
+	origin := sun.distance
+	mostDistant := neptune.distance
+	firstSize := mercury.radius
+	lastSize := neptune.radius
+
 	openvg.Start(width, height)
 	openvg.BackgroundColor(bgcolor)
 
-	for i := 0; i < nobj; i++ {
-		x := vmap(ssDist[i], ssDist[0], ssDist[nobj-1], margin, float64(width)-margin)
-		r := vmap(ssRad[i], ssRad[1], ssRad[nobj-1], minsize, maxh)
+	for _, p := range SolarSystem {
+		x := vmap(p.distance, origin, mostDistant, margin, w-margin)
+		r := vmap(p.radius, firstSize, lastSize, minsize, maxsize)
 
-		if ssDist[i] == 0 { // Sun
-			openvg.FillRGB(ssColor[0].Red, ssColor[0].Green, ssColor[0].Blue, 1)
+		if p.name == "Sun" {
+			openvg.FillRGB(p.color.Red, p.color.Green, p.color.Blue, 1)
 			openvg.Circle(margin-(r/2), y, r)
-			continue
+		} else {
+			light(x, y, r, p.color)
+			openvg.Circle(x, y, r)
 		}
-		if ssDist[i] == 1.0 { // earth
+		if p.name == "Earth" && len(os.Args) > 1 {
 			openvg.StrokeColor(labelcolor)
 			openvg.StrokeWidth(1)
 			openvg.Line(x, y+(r/2), x, y+labeloc)
 			openvg.StrokeWidth(0)
 			openvg.FillColor(labelcolor)
-			openvg.TextMid(x, y+labeloc+10, "You are here", "sans", 12)
+			openvg.TextMid(x, y+labeloc+10, os.Args[1], "sans", 12)
 		}
-
-		light(x, y, r, ssColor[i])
-		openvg.Circle(x, y, r)
 	}
 	openvg.End()
 	bufio.NewReader(os.Stdin).ReadByte()
