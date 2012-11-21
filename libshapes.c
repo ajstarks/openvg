@@ -11,6 +11,7 @@
 #include "VG/vgu.h"
 #include "EGL/egl.h"
 #include "GLES/gl.h"
+#include "bcm_host.h"
 #include "DejaVuSans.inc"	// font data
 #include "DejaVuSerif.inc"
 #include "DejaVuSansMono.inc"
