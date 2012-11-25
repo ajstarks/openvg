@@ -78,7 +78,7 @@ func gradient(width, height int) {
 
 	openvg.TextMid(x1+((x2-x1)/2), h/6, "Linear Gradient", SansTypeface, 36)
 	openvg.TextMid(cx, h/6, "Radial Gradient", SansTypeface, 36)
-	openvg.SaveEnd("gradient.raw")
+	openvg.End()
 }
 
 // makepi draws the Raspberry Pi
@@ -199,7 +199,7 @@ func (f *FW) fitwidth(width, adj int, s string) {
 	}
 }
 
-// testpattern shows a test pattern 
+// testpattern shows a test pattern
 func testpattern(w, h int, s string) {
 	var midx, midy1, midy2, midy3 float64
 	fontsize := 256
@@ -314,8 +314,8 @@ func imagetest(w, h int) {
 }
 
 type it struct {
-	name string
-	width int
+	name   string
+	width  int
 	height int
 }
 
@@ -528,7 +528,7 @@ func rseed() {
 	rand.Seed(int64(time.Now().Nanosecond()) % 1e9)
 }
 
-// rshapes draws shapes with random colors, openvg.Strokes, and sizes. 
+// rshapes draws shapes with random colors, openvg.Strokes, and sizes.
 func rshapes(width, height, n int) {
 
 	var sx, sy, cx, cy, px, py, ex, ey, pox, poy float64
@@ -590,28 +590,94 @@ func rshapes(width, height, n int) {
 	openvg.End()
 }
 
-// sunearth shows the relative sizes of the sun and the earth
-func sunearth(w, h int) {
-	var sun, earth, x, y float64
+// Body describes a body within the solar system:
+// name, distance from the sun, size and color
+type Body struct {
+	name     string
+	distance float64
+	radius   float64
+	color    openvg.RGB
+}
 
-	openvg.Start(w, h)
-	openvg.Background(0, 0, 0)
-	openvg.FillRGB(255, 255, 255, 1)
-	for i := 0; i < w/4; i++ {
-		x = randf(w)
-		y = randf(h)
-		openvg.Circle(x, y, 2)
+var (
+	sun     = Body{"Sun", 0, 695500, openvg.RGB{247, 115, 12}}
+	mercury = Body{"Mercury", 0.34, 2439.7, openvg.RGB{250, 248, 242}}
+	venus   = Body{"Venus", 0.72, 6051.8, openvg.RGB{255, 255, 242}}
+	earth   = Body{"Earth", 1.0, 6371, openvg.RGB{11, 92, 227}}
+	mars    = Body{"Mars", 1.54, 3396.2, openvg.RGB{240, 198, 29}}
+	jupiter = Body{"Jupiter", 5.02, 69911, openvg.RGB{253, 199, 145}}
+	saturn  = Body{"Saturn", 9.46, 60268, openvg.RGB{224, 196, 34}}
+	uranus  = Body{"Uranus", 20.11, 25559, openvg.RGB{220, 241, 245}}
+	neptune = Body{"Neptune", 30.08, 24764, openvg.RGB{57, 182, 247}}
+
+	SolarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
+)
+
+func vmap(value, low1, high1, low2, high2 float64) float64 {
+	return low2 + (high2-low2)*(value-low1)/(high1-low1)
+}
+
+func light(x, y, r float64, c openvg.RGB) {
+	stops := []openvg.Offcolor{
+		{0.0, c, 1},
+		{0.50, openvg.RGB{c.Red / 2, c.Green / 2, c.Blue / 2}, 1},
 	}
-	earth = float64(w) * 0.010
-	sun = earth * 109
-	openvg.FillRGB(0, 0, 255, 1)
-	openvg.Circle(float64(w/3), float64(h-(h/10)), earth)
-	openvg.FillRGB(255, 255, 224, 1)
-	openvg.Circle(float64(w), 0, sun)
+	openvg.FillRadialGradient(x, y, (x+r)*.90, y, r, stops)
+}
+
+//planets is an exploration of scale
+func planets(width, height int, message string) {
+
+	w := float64(width)
+	h := float64(height)
+	y := h / 2
+
+	margin := 100.0
+	minsize := 7.0
+	labeloc := 100.0
+	bgcolor := "black"
+	labelcolor := "white"
+	maxsize := (h / 2) * 0.05
+
+	origin := sun.distance
+	mostDistant := neptune.distance
+	firstSize := mercury.radius
+	lastSize := neptune.radius
+
+	openvg.Start(width, height)
+	openvg.BackgroundColor(bgcolor)
+
+	for _, p := range SolarSystem {
+		x := vmap(p.distance, origin, mostDistant, margin, w-margin)
+		r := vmap(p.radius, firstSize, lastSize, minsize, maxsize)
+
+		if p.name == "Sun" {
+			openvg.FillRGB(p.color.Red, p.color.Green, p.color.Blue, 1)
+			openvg.Circle(margin-(r/2), y, r)
+		} else {
+			light(x, y, r, p.color)
+			openvg.Circle(x, y, r)
+			if p.name == "Saturn" {
+				ringwidth := r * 2.35 // Saturn's rings are over 2x the planet radius
+				openvg.StrokeWidth(3)
+				openvg.StrokeRGB(p.color.Red, p.color.Green, p.color.Blue, 1)
+				openvg.Line((x - ringwidth/2), y, (x + ringwidth/2), y)
+				openvg.StrokeWidth(0)
+			}
+		}
+		if p.name == "Earth" && len(message) > 1 {
+			openvg.StrokeColor(labelcolor)
+			openvg.StrokeWidth(1)
+			openvg.Line(x, y+(r/2), x, y+labeloc)
+			openvg.StrokeWidth(0)
+			openvg.FillColor(labelcolor)
+			openvg.TextMid(x, y+labeloc+10, message, "sans", 12)
+		}
+	}
 	openvg.End()
 }
 
-// advert is an ad for the package 
+// advert is an ad for the package
 func advert(w, h int) {
 	y := float64(h) / 4
 	fontsize := (w * 4) / 100
@@ -639,13 +705,13 @@ func advert(w, h int) {
 // pause waits for user input
 func pause(r *bufio.Reader) bool {
 	for {
-			c, _ := r.ReadByte() 
-			if c == '\n' {
-				return true
-			}
-			if c == 0x1b {
-				return false
-			}
+		c, _ := r.ReadByte()
+		if c == '\n' {
+			return true
+		}
+		if c == 0x1b {
+			return false
+		}
 	}
 	return true
 }
@@ -694,7 +760,7 @@ func loop(w, h int) {
 			return
 		}
 
-		sunearth(w, h)
+		planets(w, h, "You are here")
 		if !pause(in) {
 			return
 		}
@@ -743,7 +809,7 @@ func demo(w, h, s int) {
 	fontrange(w, h)
 	time.Sleep(sec)
 
-	sunearth(w, h)
+	planets(w, h, "You are here")
 	time.Sleep(sec)
 
 	raspi(w, h, "The Raspberry Pi")
@@ -758,10 +824,10 @@ func demo(w, h, s int) {
 func WaitEnd() {
 	r := bufio.NewReader(os.Stdin)
 	for {
-			c, _ := r.ReadByte()
-			if c == '\n' {
-				break
-			} 
+		c, _ := r.ReadByte()
+		if c == '\n' {
+			break
+		}
 	}
 	openvg.RestoreTerm()
 	openvg.Finish()
@@ -773,7 +839,7 @@ func usage(s string) {
 		"%s [command]\n\tdemo sec\n\tastro\n\ttest ...\n\trand n\n\trotate n ...\n\timage\n\ttext\n\tfontsize\n\traspi\n\tgradient\n\tadvert\n", s)
 }
 
-// main initializes the system and shows the picture. 
+// main initializes the system and shows the picture.
 // Exit and clean up when you hit [RETURN].
 func main() {
 	rseed()
@@ -800,7 +866,7 @@ func main() {
 		case "textplay":
 			textplay(w, h)
 		case "astro":
-			sunearth(w, h)
+			planets(w, h, "You are here")
 		case "fontsize":
 			fontrange(w, h)
 		case "raspi":
