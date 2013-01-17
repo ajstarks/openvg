@@ -18,6 +18,7 @@ import (
 	_ "image/jpeg"
 	_ "image/png"
 	"os"
+	"runtime"
 	"strings"
 	"unsafe"
 )
@@ -188,6 +189,7 @@ var colornames = map[string]RGB{
 
 // Init initializes the graphics subsystem
 func Init() (int, int) {
+	runtime.LockOSThread()
 	var rh, rw C.int
 	C.init(&rw, &rh)
 	return int(rw), int(rh)
@@ -196,6 +198,7 @@ func Init() (int, int) {
 // Finish shuts down the graphics subsystem
 func Finish() {
 	C.finish()
+	runtime.UnlockOSThread()
 }
 
 // Background clears the screen with the specified solid background color using RGB triples
