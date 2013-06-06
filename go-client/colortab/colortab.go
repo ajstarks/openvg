@@ -25,7 +25,7 @@ func main() {
 		colw               = flag.Float64("c", 340, "column size")
 		swatch             = flag.Float64("s", 16, "swatch size")
 		gutter             = flag.Float64("g", 12, "gutter")
-		err          error = nil
+		err          error
 		tcolor, line string
 	)
 

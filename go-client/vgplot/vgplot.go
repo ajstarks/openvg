@@ -253,7 +253,7 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 func readxy(f io.Reader) (int, []rawdata) {
 	var (
 		r     rawdata
-		err   error = nil
+		err   error
 		n, nf int
 	)
 	data := make([]rawdata, 1)
@@ -297,7 +297,7 @@ func main() {
 	} else {
 		plotgrid(beginx, beginy, filenames)
 	}
-	openvg.SaveEnd("vgplot.raw")
+	openvg.End()
 	bufio.NewReader(os.Stdin).ReadByte()
 	openvg.Finish()
 }

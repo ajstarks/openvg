@@ -27,7 +27,7 @@ var (
 	uranus  = Body{"uranus", 20.11, 25559, openvg.RGB{220, 241, 245}}
 	neptune = Body{"neptune", 30.08, 24764, openvg.RGB{57, 182, 247}}
 
-	SolarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
+	solarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
 )
 
 func vmap(value, low1, high1, low2, high2 float64) float64 {
@@ -65,7 +65,7 @@ func main() {
 	openvg.Start(width, height)
 	openvg.BackgroundColor(bgcolor)
 
-	for _, p := range SolarSystem {
+	for _, p := range solarSystem {
 		x := vmap(p.distance, origin, mostDistant, margin, w-margin)
 		r := vmap(p.radius, firstSize, lastSize, minsize, maxsize)
 

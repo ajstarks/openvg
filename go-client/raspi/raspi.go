@@ -59,6 +59,7 @@ func makepi(x, y, w, h float64) {
 	openvg.Rect(x-sdw, (y+h2)-(sdh/2), sdw, sdh) // SD card
 }
 
+// WaitEnd paused for user input, then terminates
 func WaitEnd() {
 	openvg.End()
 	bufio.NewReader(os.Stdin).ReadBytes('\n')

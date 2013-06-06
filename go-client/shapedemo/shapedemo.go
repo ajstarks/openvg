@@ -12,6 +12,7 @@ import (
 	"time"
 )
 
+// Color defines the structure of a pixel
 type Color struct {
 	red, green, blue uint8
 	alpha            float64
@@ -148,6 +149,7 @@ func raspi(w, h int, s string) {
 	openvg.End()
 }
 
+// FW defines font metrics
 type FW struct {
 	font     string
 	tw       float64
@@ -610,7 +612,7 @@ var (
 	uranus  = Body{"Uranus", 20.11, 25559, openvg.RGB{220, 241, 245}}
 	neptune = Body{"Neptune", 30.08, 24764, openvg.RGB{57, 182, 247}}
 
-	SolarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
+	solarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
 )
 
 func vmap(value, low1, high1, low2, high2 float64) float64 {
@@ -647,7 +649,7 @@ func planets(width, height int, message string) {
 	openvg.Start(width, height)
 	openvg.BackgroundColor(bgcolor)
 
-	for _, p := range SolarSystem {
+	for _, p := range solarSystem {
 		x := vmap(p.distance, origin, mostDistant, margin, w-margin)
 		r := vmap(p.radius, firstSize, lastSize, minsize, maxsize)
 
@@ -821,6 +823,8 @@ func demo(w, h, s int) {
 	advert(w, h)
 }
 
+
+// WaitEnd waits for user input
 func WaitEnd() {
 	r := bufio.NewReader(os.Stdin)
 	for {
