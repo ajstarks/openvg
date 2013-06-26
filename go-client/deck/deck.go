@@ -30,6 +30,7 @@ type list struct {
 	Sp    float64  `xml:"sp,attr"`
 	Type  string   `xml:"type,attr"`
 	Align string   `xml:"align,attr"`
+	Color string   `xml:"color,attr"`
 	Li    []string `xml:"li"`
 }
 
@@ -37,8 +38,9 @@ type text struct {
 	Xp    float64 `xml:"xp,attr"`
 	Yp    float64 `xml:"yp,attr"`
 	Sp    float64 `xml:"sp,attr"`
-	Align string  `xml:"align,attr"`
 	Type  string  `xml:"type,attr"`
+	Align string  `xml:"align,attr"`
+	Color string  `xml:"color,attr"`
 	Tdata string  `xml:",chardata"`
 }
 
@@ -141,6 +143,11 @@ func showslide(d Deck, n int) {
 		} else {
 			offset = 0
 		}
+		if l.Color != "" {
+			openvg.FillColor(l.Color)
+		} else {
+			openvg.FillColor(s.Fg)
+		}
 		for _, li := range l.Li {
 			if l.Type == "bullet" {
 				boffset := float64(fontsize) / 2
@@ -157,6 +164,7 @@ func showslide(d Deck, n int) {
 			y -= float64(fontsize) * 2.0
 		}
 	}
+	openvg.FillColor(s.Fg)
 
 	// every text in the slide
 	var font string
@@ -166,6 +174,11 @@ func showslide(d Deck, n int) {
 			font = "mono"
 		} else {
 			font = "sans"
+		}
+		if t.Color != "" {
+			openvg.FillColor(t.Color)
+		} else {
+			openvg.FillColor(s.Fg)
 		}
 		td := strings.Split(t.Tdata, "\n")
 		for _, txt := range td {
@@ -180,6 +193,8 @@ func showslide(d Deck, n int) {
 			y -= float64(fontsize) * 1.8
 		}
 	}
+	openvg.FillColor(s.Fg)
+
 
 	// every image in the slide
 	for _, im := range s.Image {
@@ -266,6 +281,7 @@ func searchdeck(d Deck, n int, s string) int {
 func readcmd(r *bufio.Reader) string {
 	s, err := r.ReadBytes('\n')
 	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return "q"
 	}
 	return string(s)

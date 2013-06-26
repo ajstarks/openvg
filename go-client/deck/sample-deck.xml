@@ -5,8 +5,8 @@
     <text xp="50" yp="60" sp="5" align="center">Why I use Go</text>
     <image xp="50" yp="50" width="75" height="100" name="doc.png"/>
     <text xp="50" yp="20" sp="1.5" align="center">Anthony Starks</text>
-    <text xp="50" yp="15" sp="0.75" align="center">@ajstarks</text>
-    <text xp="50" yp="12" sp="0.75" align="center">ajstarks@gmail.com</text>
+    <text xp="50" yp="15" sp="0.75" align="center" color="rgb(0,127,127)">@ajstarks</text>
+    <text xp="50" yp="12" sp="0.75" align="center" color="rgb(127,127,127)">ajstarks@gmail.com</text>
   </slide>
   
  
@@ -23,18 +23,19 @@
   </slide>
 
   <slide bg="darkgreen" fg="white">
-    <text xp="20" yp="80" sp="3">Interesting aspects of the language:</text>
+    <text xp="20" yp="80" sp="3" color="yellow">Interesting aspects of the language:</text>
     <list xp="20" yp="70" sp="2" type="text">
       <li>C-ish</li>
       <li>Designed with large-scale development in mind</li>
-      <li>Conversative: Pragmatism over features</li>
+      <li>Conservative: Pragmatism over features</li>
       <li>Rich standard library</li>
       <li>Compatibility Promise</li>
       <li>Opinionated, yet helpful community</li>
     </list>
   </slide>
+
   <slide bg="lightsteelblue" fg="black">
-    <text xp="20" yp="80" sp="2" type="code">package main 
+    <text xp="20" yp="80" sp="2" type="code" color="green">package main 
 import "fmt"
 
 func main() { 
