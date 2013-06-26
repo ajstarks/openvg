@@ -1,0 +1,49 @@
+<deck>
+  <canvas width="1920" height="1080" />
+  
+  <slide bg="white" fg="maroon">
+    <text xp="50" yp="60" sp="5" align="center">Why I use Go</text>
+    <image xp="50" yp="50" width="75" height="100" name="doc.png"/>
+    <text xp="50" yp="20" sp="1.5" align="center">Anthony Starks</text>
+    <text xp="50" yp="15" sp="0.75" align="center">@ajstarks</text>
+    <text xp="50" yp="12" sp="0.75" align="center">ajstarks@gmail.com</text>
+  </slide>
+  
+ 
+ <slide bg="maroon" fg="white">
+      <text xp="20" yp="80" sp="3">Go is:</text>
+      <list xp="20" yp="70" sp="2" type="bullet">
+         <li>Simple</li>
+         <li>Productive</li>
+         <li>Portable</li>
+         <li>Compiled</li>
+         <li>Fast</li>
+         <li>Concurrent</li>
+      </list>
+  </slide>
+
+  <slide bg="darkgreen" fg="white">
+    <text xp="20" yp="80" sp="3">Interesting aspects of the language:</text>
+    <list xp="20" yp="70" sp="2" type="text">
+      <li>C-ish</li>
+      <li>Designed with large-scale development in mind</li>
+      <li>Conversative: Pragmatism over features</li>
+      <li>Rich standard library</li>
+      <li>Compatibility Promise</li>
+      <li>Opinionated, yet helpful community</li>
+    </list>
+  </slide>
+  <slide bg="lightsteelblue" fg="black">
+    <text xp="20" yp="80" sp="2" type="code">package main 
+import "fmt"
+
+func main() { 
+    fmt.Println("hello, world") 
+}
+    </text>
+    <text xp="20" yp="30" sp="1" type="block">This is the traditional hello, world program.
+It's six lines long, and imports the fmt package, 
+leading some to be suprised at the size of the resulting binary.
+   </text>
+ </slide>
+</deck>
