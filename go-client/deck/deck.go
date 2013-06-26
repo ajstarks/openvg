@@ -62,14 +62,10 @@ type slide struct {
 func dodeck(filename string) {
 	var r io.ReadCloser
 	var err error
-	if len(filename) > 0 {
-		r, err = os.Open(filename)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			return
-		}
-	} else {
-		r = os.Stdin
+	r, err = os.Open(filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return
 	}
 	defer r.Close()
 
@@ -147,7 +143,7 @@ func showslide(d Deck, n int) {
 		}
 		for _, li := range l.Li {
 			if l.Type == "bullet" {
-				boffset := float64(fontsize)/2
+				boffset := float64(fontsize) / 2
 				openvg.Circle(x, y+boffset, boffset)
 			}
 			switch l.Align {
@@ -181,7 +177,7 @@ func showslide(d Deck, n int) {
 			default:
 				openvg.Text(x, y, txt, font, fontsize)
 			}
-			y -= float64(fontsize) * 1.8 
+			y -= float64(fontsize) * 1.8
 		}
 	}
 
@@ -194,7 +190,7 @@ func showslide(d Deck, n int) {
 	openvg.End()
 }
 
-// interact controls the display of the deck 
+// interact controls the display of the deck
 func interact(d Deck) {
 	firstslide := 0
 	lastslide := len(d.Slide) - 1
@@ -265,6 +261,7 @@ func searchdeck(d Deck, n int, s string) int {
 	}
 	return -1
 }
+
 // readcmd reads interaction commands
 func readcmd(r *bufio.Reader) string {
 	s, err := r.ReadBytes('\n')
