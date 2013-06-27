@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"encoding/xml"
 	"fmt"
-	"io"
 	"os"
 	"strings"
 
@@ -62,9 +61,7 @@ type slide struct {
 
 // dodeck reads and decodes slide files
 func dodeck(filename string) {
-	var r io.ReadCloser
-	var err error
-	r, err = os.Open(filename)
+	r, err := os.Open(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return
@@ -72,12 +69,11 @@ func dodeck(filename string) {
 	defer r.Close()
 
 	var d Deck
-	derr := xml.NewDecoder(r).Decode(&d)
-	if derr != nil {
+	err = xml.NewDecoder(r).Decode(&d)
+	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return
 	}
-
 	w, h := openvg.Init()
 	if d.Canvas.Width == 0 {
 		d.Canvas.Width = w
@@ -113,6 +109,18 @@ func dimen(c canvas, xp, yp, sp float64) (x, y float64, s int) {
 	y = (yp / 100) * float64(c.Height)
 	s = int((sp / 100) * float64(c.Width))
 	return
+}
+
+//showtext displays text
+func showtext(x, y float64, s, align, font string, fontsize int) {
+	switch align {
+	case "center", "middle", "mid":
+		openvg.TextMid(x, y, s, font, fontsize)
+	case "right", "end":
+		openvg.TextEnd(x, y, s, font, fontsize)
+	default:
+		openvg.Text(x, y, s, font, fontsize)
+	}
 }
 
 // showlide displays slides
@@ -153,14 +161,7 @@ func showslide(d Deck, n int) {
 				boffset := float64(fontsize) / 2
 				openvg.Circle(x, y+boffset, boffset)
 			}
-			switch l.Align {
-			case "center", "middle", "mid":
-				openvg.TextMid(x+offset, y, li, "sans", fontsize)
-			case "right", "end":
-				openvg.TextEnd(x+offset, y, li, "sans", fontsize)
-			default:
-				openvg.Text(x+offset, y, li, "sans", fontsize)
-			}
+			showtext(x+offset, y, li, l.Align, "sans", fontsize)
 			y -= float64(fontsize) * 2.0
 		}
 	}
@@ -182,19 +183,11 @@ func showslide(d Deck, n int) {
 		}
 		td := strings.Split(t.Tdata, "\n")
 		for _, txt := range td {
-			switch t.Align {
-			case "center", "middle", "mid":
-				openvg.TextMid(x, y, txt, font, fontsize)
-			case "right", "end":
-				openvg.TextEnd(x, y, txt, font, fontsize)
-			default:
-				openvg.Text(x, y, txt, font, fontsize)
-			}
+			showtext(x, y, txt, t.Align, font, fontsize)
 			y -= float64(fontsize) * 1.8
 		}
 	}
 	openvg.FillColor(s.Fg)
-
 
 	// every image in the slide
 	for _, im := range s.Image {
@@ -240,8 +233,7 @@ func interact(d Deck) {
 
 		case '/':
 			if len(cmd) > 2 {
-				ns := searchdeck(d, n, cmd[1:len(cmd)-1])
-				println("searchdeck", ns)
+				ns := searchdeck(d, cmd[1:len(cmd)-1])
 				if ns >= 0 {
 					showslide(d, ns)
 				}
@@ -251,16 +243,12 @@ func interact(d Deck) {
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
-func searchdeck(d Deck, n int, s string) int {
-	if n < 0 || n > len(d.Slide)-1 {
-		return -1
-	}
+func searchdeck(d Deck, s string) int {
 	// for every slide...
 	for i := 0; i < len(d.Slide); i++ {
 		// search lists
 		for _, l := range d.Slide[i].List {
 			for _, ll := range l.Li {
-				// fmt.Printf("searching %s in list %v\n", s, ll)
 				if strings.Contains(ll, s) {
 					return i
 				}
@@ -268,7 +256,6 @@ func searchdeck(d Deck, n int, s string) int {
 		}
 		// search text
 		for _, t := range d.Slide[i].Text {
-			// fmt.Printf("searching %s in text %v\n", s, t.Tdata)
 			if strings.Contains(t.Tdata, s) {
 				return i
 			}
