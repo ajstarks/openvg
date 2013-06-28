@@ -83,7 +83,6 @@ func dodeck(filename string) {
 	}
 	interact(d)
 	openvg.Finish()
-	//dumpdeck(d)
 }
 
 // dumpdeck shows the decoded description
@@ -208,10 +207,10 @@ func interact(d Deck) {
 	defer openvg.RestoreTerm()
 	r := bufio.NewReader(os.Stdin)
 
-	var cmd = "0"
+	var cmd byte = '0'
 
-	for ; rune(cmd[0]) != 'q'; cmd = readcmd(r) {
-		switch rune(cmd[0]) {
+	for ; cmd != 'q'; cmd = readcmd(r) {
+		switch cmd {
 		case '0', '1':
 			n = firstslide
 			showslide(d, n)
@@ -236,21 +235,19 @@ func interact(d Deck) {
 
 		case '/':
 			openvg.RestoreTerm()
-			searchterm, err := r.ReadBytes('\n')
+			searchterm, err := r.ReadString('\n')
 			openvg.RawTerm()
 			if err != nil {
 				continue
 			}
 			if len(searchterm) > 2 {
-				st := string(searchterm)
-				ns := searchdeck(d, st[0:len(st)-1])
+				ns := searchdeck(d, searchterm[0:len(searchterm)-1])
 				if ns >= 0 {
 					showslide(d, ns)
 				}
 			}
 		}
 	}
-	openvg.RestoreTerm()
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
@@ -276,13 +273,12 @@ func searchdeck(d Deck, s string) int {
 }
 
 // readcmd reads interaction commands
-func readcmd(r *bufio.Reader) string {
-	//s, err := r.ReadBytes('\n')
+func readcmd(r *bufio.Reader) byte {
 	s, err := r.ReadByte()
 	if err != nil {
-		return "e"
+		return 'e'
 	}
-	return string(s)
+	return s
 }
 
 // for every file, make a deck
