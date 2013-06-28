@@ -142,6 +142,12 @@ func showslide(d Deck, n int) {
 	var x, y float64
 	var fontsize int
 
+	// every image in the slide
+	for _, im := range s.Image {
+		x = (im.Xp / 100) * float64(d.Canvas.Width)
+		y = (im.Yp / 100) * float64(d.Canvas.Height)
+		openvg.Image(x-float64(im.Width/2), y-float64(im.Height/2), im.Width, im.Height, im.Name)
+	}
 	// every list in the slide
 	var offset float64
 	for _, l := range s.List {
@@ -189,12 +195,6 @@ func showslide(d Deck, n int) {
 	}
 	openvg.FillColor(s.Fg)
 
-	// every image in the slide
-	for _, im := range s.Image {
-		x = (im.Xp / 100) * float64(d.Canvas.Width)
-		y = (im.Yp / 100) * float64(d.Canvas.Height)
-		openvg.Image(x-float64(im.Width/2), y-float64(im.Height/2), im.Width, im.Height, im.Name)
-	}
 	openvg.End()
 }
 
