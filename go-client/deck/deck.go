@@ -203,6 +203,9 @@ func interact(d Deck) {
 	firstslide := 0
 	lastslide := len(d.Slide) - 1
 	n := firstslide
+	openvg.SaveTerm()
+	openvg.RawTerm()
+	defer openvg.RestoreTerm()
 	r := bufio.NewReader(os.Stdin)
 
 	var cmd = "0"
@@ -217,14 +220,14 @@ func interact(d Deck) {
 			n = lastslide
 			showslide(d, n)
 
-		case '+', 'n', '\n', '\t':
+		case '+', 'n', '\n', ' ':
 			n++
 			if n > lastslide {
 				n = firstslide
 			}
 			showslide(d, n)
 
-		case '-', 'p':
+		case '-', 'p', 8, 127:
 			n--
 			if n < firstslide {
 				n = lastslide
@@ -232,14 +235,22 @@ func interact(d Deck) {
 			showslide(d, n)
 
 		case '/':
-			if len(cmd) > 2 {
-				ns := searchdeck(d, cmd[1:len(cmd)-1])
+			openvg.RestoreTerm()
+			searchterm, err := r.ReadBytes('\n')
+			openvg.RawTerm()
+			if err != nil {
+				continue
+			}
+			if len(searchterm) > 2 {
+				st := string(searchterm)
+				ns := searchdeck(d, st[0:len(st)-1])
 				if ns >= 0 {
 					showslide(d, ns)
 				}
 			}
 		}
 	}
+	openvg.RestoreTerm()
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
@@ -266,10 +277,10 @@ func searchdeck(d Deck, s string) int {
 
 // readcmd reads interaction commands
 func readcmd(r *bufio.Reader) string {
-	s, err := r.ReadBytes('\n')
+	//s, err := r.ReadBytes('\n')
+	s, err := r.ReadByte()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		return "q"
+		return "e"
 	}
 	return string(s)
 }
