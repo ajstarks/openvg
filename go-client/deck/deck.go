@@ -59,50 +59,101 @@ type slide struct {
 	Image []image `xml:"image"`
 }
 
-// dodeck reads and decodes slide files
+// dodeck sets up the graphics environment and kicks off the interaction
 func dodeck(filename string) {
+	w, h := openvg.Init()
+	interact(filename, w, h)
+	openvg.Finish()
+}
+
+// readdeck reads the deck description file
+func readdeck(filename string) (Deck, error) {
+	var d Deck
 	r, err := os.Open(filename)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		return
+		return d, err
 	}
 	defer r.Close()
 
-	var d Deck
 	err = xml.NewDecoder(r).Decode(&d)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return d, err
+	}
+	return d, err
+}
+
+// interact controls the display of the deck
+func interact(filename string, w, h int) {
+	openvg.SaveTerm()
+	defer openvg.RestoreTerm()
+	var d Deck
+	var err error
+	d, err = readdeck(filename)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return
 	}
-	w, h := openvg.Init()
 	if d.Canvas.Width == 0 {
 		d.Canvas.Width = w
 	}
 	if d.Canvas.Height == 0 {
 		d.Canvas.Height = h
 	}
-	interact(d)
-	openvg.Finish()
-}
+	openvg.RawTerm()
+	r := bufio.NewReader(os.Stdin)
+	firstslide := 0
+	lastslide := len(d.Slide) - 1
+	n := firstslide
 
-// dumpdeck shows the decoded description
-func dumpdeck(d Deck) {
-	fmt.Printf("Canvas = %v\n", d.Canvas)
-	for i, s := range d.Slide {
-		fmt.Printf("Slide #%d = %v %v\n", i, s.Bg, s.Fg)
-		for j, l := range s.List {
-			fmt.Printf("\tList #%d = %#v\n", j, l)
-		}
-		for k, t := range s.Text {
-			fmt.Printf("\tText #%d = %#v\n", k, t)
-		}
-		for m, im := range s.Image {
-			fmt.Printf("\tImage #%d = %#v\n", m, im)
+	for cmd := byte('0'); cmd != 'q'; cmd = readcmd(r) {
+		switch cmd {
+		case 'r':
+			d, err = readdeck(filename)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				return
+			}
+		case '0', '1':
+			n = firstslide
+			showslide(d, n)
+
+		case '*':
+			n = lastslide
+			showslide(d, n)
+
+		case '+', 'n', '\n', ' ':
+			n++
+			if n > lastslide {
+				n = firstslide
+			}
+			showslide(d, n)
+
+		case '-', 'p', 8, 127:
+			n--
+			if n < firstslide {
+				n = lastslide
+			}
+			showslide(d, n)
+
+		case '/':
+			openvg.RestoreTerm()
+			searchterm, serr := r.ReadString('\n')
+			openvg.RawTerm()
+			if serr != nil {
+				continue
+			}
+			if len(searchterm) > 2 {
+				ns := searchdeck(d, searchterm[0:len(searchterm)-1])
+				if ns >= 0 {
+					showslide(d, ns)
+				}
+			}
 		}
 	}
 }
 
-// dimen determines the coordinates and size of an object
+// dimen computes the coordinates and size of an object
 func dimen(c canvas, xp, yp, sp float64) (x, y float64, s int) {
 	x = (xp / 100) * float64(c.Width)
 	y = (yp / 100) * float64(c.Height)
@@ -161,6 +212,7 @@ func showslide(d Deck, n int) {
 		} else {
 			openvg.FillColor(s.Fg)
 		}
+		// every list item
 		for _, li := range l.Li {
 			if l.Type == "bullet" {
 				boffset := float64(fontsize) / 2
@@ -176,8 +228,12 @@ func showslide(d Deck, n int) {
 	var font string
 	for _, t := range s.Text {
 		x, y, fontsize = dimen(d.Canvas, t.Xp, t.Yp, t.Sp)
+		td := strings.Split(t.Tdata, "\n")
 		if t.Type == "code" {
+			tdepth := (float64(fontsize) * 1.8) * float64(len(td)-1)
 			font = "mono"
+			openvg.FillColor("rgb(240,240,240)")
+			openvg.Rect(x-20, y-tdepth+40, float64(d.Canvas.Width)-20-x, tdepth)
 		} else {
 			font = "sans"
 		}
@@ -186,68 +242,14 @@ func showslide(d Deck, n int) {
 		} else {
 			openvg.FillColor(s.Fg)
 		}
-		td := strings.Split(t.Tdata, "\n")
+		// every text line
 		for _, txt := range td {
 			showtext(x, y, txt, t.Align, font, fontsize)
 			y -= float64(fontsize) * 1.8
 		}
 	}
 	openvg.FillColor(s.Fg)
-
 	openvg.End()
-}
-
-// interact controls the display of the deck
-func interact(d Deck) {
-	firstslide := 0
-	lastslide := len(d.Slide) - 1
-	n := firstslide
-	openvg.SaveTerm()
-	openvg.RawTerm()
-	defer openvg.RestoreTerm()
-	r := bufio.NewReader(os.Stdin)
-
-	var cmd byte = '0'
-
-	for ; cmd != 'q'; cmd = readcmd(r) {
-		switch cmd {
-		case '0', '1':
-			n = firstslide
-			showslide(d, n)
-
-		case '*':
-			n = lastslide
-			showslide(d, n)
-
-		case '+', 'n', '\n', ' ':
-			n++
-			if n > lastslide {
-				n = firstslide
-			}
-			showslide(d, n)
-
-		case '-', 'p', 8, 127:
-			n--
-			if n < firstslide {
-				n = lastslide
-			}
-			showslide(d, n)
-
-		case '/':
-			openvg.RestoreTerm()
-			searchterm, err := r.ReadString('\n')
-			openvg.RawTerm()
-			if err != nil {
-				continue
-			}
-			if len(searchterm) > 2 {
-				ns := searchdeck(d, searchterm[0:len(searchterm)-1])
-				if ns >= 0 {
-					showslide(d, ns)
-				}
-			}
-		}
-	}
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
@@ -270,6 +272,23 @@ func searchdeck(d Deck, s string) int {
 		}
 	}
 	return -1
+}
+
+// dumpdeck shows the decoded description
+func dumpdeck(d Deck) {
+	fmt.Printf("Canvas = %v\n", d.Canvas)
+	for i, s := range d.Slide {
+		fmt.Printf("Slide #%d = %v %v\n", i, s.Bg, s.Fg)
+		for j, l := range s.List {
+			fmt.Printf("\tList #%d = %#v\n", j, l)
+		}
+		for k, t := range s.Text {
+			fmt.Printf("\tText #%d = %#v\n", k, t)
+		}
+		for m, im := range s.Image {
+			fmt.Printf("\tImage #%d = %#v\n", m, im)
+		}
+	}
 }
 
 // readcmd reads interaction commands
