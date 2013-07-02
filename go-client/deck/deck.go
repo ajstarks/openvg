@@ -67,19 +67,24 @@ func dodeck(filename string) {
 }
 
 // readdeck reads the deck description file
-func readdeck(filename string) (Deck, error) {
+func readdeck(filename string, w, h int) (Deck, error) {
 	var d Deck
 	r, err := os.Open(filename)
 	if err != nil {
 		return d, err
 	}
-	defer r.Close()
 
 	err = xml.NewDecoder(r).Decode(&d)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
-		return d, err
 	}
+	if d.Canvas.Width == 0 {
+		d.Canvas.Width = w
+	}
+	if d.Canvas.Height == 0 {
+		d.Canvas.Height = h
+	}
+	r.Close()
 	return d, err
 }
 
@@ -89,16 +94,10 @@ func interact(filename string, w, h int) {
 	defer openvg.RestoreTerm()
 	var d Deck
 	var err error
-	d, err = readdeck(filename)
+	d, err = readdeck(filename, w, h)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		return
-	}
-	if d.Canvas.Width == 0 {
-		d.Canvas.Width = w
-	}
-	if d.Canvas.Height == 0 {
-		d.Canvas.Height = h
 	}
 	openvg.RawTerm()
 	r := bufio.NewReader(os.Stdin)
@@ -109,7 +108,7 @@ func interact(filename string, w, h int) {
 	for cmd := byte('0'); cmd != 'q'; cmd = readcmd(r) {
 		switch cmd {
 		case 'r':
-			d, err = readdeck(filename)
+			d, err = readdeck(filename, w, h)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				return
@@ -200,8 +199,10 @@ func showslide(d Deck, n int) {
 	}
 	// every list in the slide
 	var offset float64
+	const blinespacing = 2.0
 	for _, l := range s.List {
 		x, y, fontsize = dimen(d.Canvas, l.Xp, l.Yp, l.Sp)
+		fs := float64(fontsize)
 		if l.Type == "bullet" {
 			offset = 1.2 * float64(fontsize)
 		} else {
@@ -215,25 +216,27 @@ func showslide(d Deck, n int) {
 		// every list item
 		for _, li := range l.Li {
 			if l.Type == "bullet" {
-				boffset := float64(fontsize) / 2
+				boffset := fs / 2
 				openvg.Circle(x, y+boffset, boffset)
 			}
 			showtext(x+offset, y, li, l.Align, "sans", fontsize)
-			y -= float64(fontsize) * 2.0
+			y -= fs * blinespacing 
 		}
 	}
 	openvg.FillColor(s.Fg)
 
 	// every text in the slide
 	var font string
+	const linespacing = 1.8
 	for _, t := range s.Text {
 		x, y, fontsize = dimen(d.Canvas, t.Xp, t.Yp, t.Sp)
+		fs := float64(fontsize)
 		td := strings.Split(t.Tdata, "\n")
 		if t.Type == "code" {
-			tdepth := (float64(fontsize) * 1.8) * float64(len(td)-1)
+			tdepth := ((fs*linespacing)*float64(len(td))) + fs
 			font = "mono"
 			openvg.FillColor("rgb(240,240,240)")
-			openvg.Rect(x-20, y-tdepth+40, float64(d.Canvas.Width)-20-x, tdepth)
+			openvg.Rect(x-20, y-tdepth+(fs*linespacing), float64(d.Canvas.Width)-20-x, tdepth)
 		} else {
 			font = "sans"
 		}
@@ -245,11 +248,12 @@ func showslide(d Deck, n int) {
 		// every text line
 		for _, txt := range td {
 			showtext(x, y, txt, t.Align, font, fontsize)
-			y -= float64(fontsize) * 1.8
+			y -= (fs * linespacing)
 		}
 	}
 	openvg.FillColor(s.Fg)
 	openvg.End()
+	//openvg.SaveEnd(fmt.Sprintf("slide%0d.raw", n))
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
