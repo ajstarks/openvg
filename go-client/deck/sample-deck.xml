@@ -39,15 +39,17 @@
 
   <slide bg="white" fg="black">
     <text xp="95" yp="5" sp="0.75" align="right">@ajstarks</text>
-    <text xp="20" yp="80" sp="2" type="code">package main
+    <text xp="20" yp="80" sp="2" type="code">
+package main
 import "fmt"
 func main() {
-    fmt.Println("hello, world")
-}</text>
-    <text xp="20" yp="30" sp="1.5" type="block" color="darkblue">This is the traditional hello, world program. 
-It's five lines long, and imports the fmt package, 
-leading some to be suprised at the size
-of the resulting binary.</text>
+  fmt.Println("hello, world")
+}
+    </text>
+    <text xp="20" yp="30" sp="1.5" type="block" color="darkblue">
+      This is the traditional hello, world program. It's five lines long, and imports the fmt package, 
+      leading some to be suprised at the size of the resulting binary.
+    </text>
     <text xp="5" yp="5" sp="0.75">Why Go</text>
     <text xp="95" yp="5" sp="0.75" align="right">@ajstarks</text>
   </slide>

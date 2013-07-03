@@ -220,7 +220,7 @@ func showslide(d Deck, n int) {
 				openvg.Circle(x, y+boffset, boffset)
 			}
 			showtext(x+offset, y, li, l.Align, "sans", fontsize)
-			y -= fs * blinespacing 
+			y -= fs * blinespacing
 		}
 	}
 	openvg.FillColor(s.Fg)
@@ -233,7 +233,7 @@ func showslide(d Deck, n int) {
 		fs := float64(fontsize)
 		td := strings.Split(t.Tdata, "\n")
 		if t.Type == "code" {
-			tdepth := ((fs*linespacing)*float64(len(td))) + fs
+			tdepth := ((fs * linespacing) * float64(len(td))) + fs
 			font = "mono"
 			openvg.FillColor("rgb(240,240,240)")
 			openvg.Rect(x-20, y-tdepth+(fs*linespacing), float64(d.Canvas.Width)-20-x, tdepth)
@@ -245,10 +245,14 @@ func showslide(d Deck, n int) {
 		} else {
 			openvg.FillColor(s.Fg)
 		}
-		// every text line
-		for _, txt := range td {
-			showtext(x, y, txt, t.Align, font, fontsize)
-			y -= (fs * linespacing)
+		if t.Type == "block" {
+			textwrap(x, y, float64(d.Canvas.Width)/2, t.Tdata, font, fontsize, fs*linespacing, 0.3)
+		} else {
+			// every text line
+			for _, txt := range td {
+				showtext(x, y, txt, t.Align, font, fontsize)
+				y -= (fs * linespacing)
+			}
 		}
 	}
 	openvg.FillColor(s.Fg)
@@ -292,6 +296,28 @@ func dumpdeck(d Deck) {
 		for m, im := range s.Image {
 			fmt.Printf("\tImage #%d = %#v\n", m, im)
 		}
+	}
+}
+func whitespace(c rune) bool {
+	return c == ' ' || c == '\n' || c == '\t'
+}
+
+// textwrap draws text at location, wrapping at the specified width
+func textwrap(x, y, w float64, s string, font string, size int, leading, factor float64) {
+	wordspacing := openvg.TextWidth("m", font, size)
+	words := strings.FieldsFunc(s, whitespace)
+	xp := x
+	yp := y
+	edge := x + w
+	for i := 0; i < len(words); i++ {
+		tw := openvg.TextWidth(words[i], font, size)
+		openvg.Text(xp, yp, words[i], font, size)
+		xp += tw + (wordspacing * factor)
+		if xp > edge {
+			xp = x
+			yp -= leading
+		}
+
 	}
 }
 
