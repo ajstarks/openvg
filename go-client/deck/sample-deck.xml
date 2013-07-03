@@ -3,22 +3,22 @@
 
   <slide bg="white" fg="rgb(127,0,0)">
     <text xp="50" yp="60" sp="5" align="center">Why I use Go</text>
-    <image xp="50" yp="50" width="132" height="100" name="talks.png"/>
+    <image xp="50" yp="50" width="132" height="100" name="talks.png" />
     <text xp="50" yp="20" sp="1.5" align="center">Anthony Starks</text>
     <text xp="50" yp="15" sp="0.75" align="center" color="rgb(127,127,127)">@ajstarks</text>
     <text xp="50" yp="12" sp="0.75" align="center" color="rgb(127,127,127)">ajstarks@gmail.com</text>
   </slide>
-  
+
   <slide bg="rgb(127,0,0)" fg="white">
-      <text xp="20" yp="80" sp="3">Go is:</text>
-      <list xp="20" yp="70" sp="2" type="bullet">
-         <li>Simple</li>
-         <li>Productive</li>
-         <li>Portable</li>
-         <li>Compiled</li>
-         <li>Fast</li>
-         <li>Concurrent</li>
- </list>
+    <text xp="20" yp="80" sp="3">Go is:</text>
+    <list xp="20" yp="70" sp="2" type="bullet">
+      <li>Simple</li>
+      <li>Productive</li>
+      <li>Portable</li>
+      <li>Compiled</li>
+      <li>Fast</li>
+      <li>Concurrent</li>
+    </list>
     <text xp="5" yp="5" sp="0.75">Why Go</text>
     <text xp="95" yp="5" sp="0.75" align="right">@ajstarks</text>
   </slide>
@@ -39,25 +39,23 @@
 
   <slide bg="white" fg="black">
     <text xp="95" yp="5" sp="0.75" align="right">@ajstarks</text>
-    <text xp="20" yp="80" sp="2" type="code">package main 
+    <text xp="20" yp="80" sp="2" type="code">package main
 import "fmt"
-
-func main() { 
-    fmt.Println("hello, world") 
-}
-    </text>
-    <text xp="20" yp="30" sp="1.5" type="block" color="darkblue">This is the traditional hello, world program.
-It's six lines long, and imports the fmt package, 
-leading some to be suprised at the size of the resulting binary.
-   </text>
+func main() {
+    fmt.Println("hello, world")
+}</text>
+    <text xp="20" yp="30" sp="1.5" type="block" color="darkblue">This is the traditional hello, world program. 
+It's five lines long, and imports the fmt package, 
+leading some to be suprised at the size
+of the resulting binary.</text>
     <text xp="5" yp="5" sp="0.75">Why Go</text>
     <text xp="95" yp="5" sp="0.75" align="right">@ajstarks</text>
- </slide>
+  </slide>
 
- <slide>
-	 <image xp="50" yp="65" width="335" height="335" name="deck.png"/>
-	 <text xp="50" yp="40" sp="2" align="center">made with deck</text>
-	 <text xp="50" yp="25" sp="1" align="center" color="rgb(127,127,127)">github.com/ajstarks/openvg</text>
-	 <text xp="50" yp="20" sp="1" color="rgb(127,127,127)" align="center">ajstarks@gmail.com</text>
- </slide>
+  <slide>
+    <image xp="50" yp="65" width="335" height="335" name="deck.png" />
+    <text xp="50" yp="40" sp="2" align="center">made with deck</text>
+    <text xp="50" yp="25" sp="1" align="center" color="rgb(127,127,127)">github.com/ajstarks/openvg</text>
+    <text xp="50" yp="20" sp="1" color="rgb(127,127,127)" align="center">ajstarks@gmail.com</text>
+  </slide>
 </deck>
