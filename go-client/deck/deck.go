@@ -37,6 +37,7 @@ type text struct {
 	Xp    float64 `xml:"xp,attr"`
 	Yp    float64 `xml:"yp,attr"`
 	Sp    float64 `xml:"sp,attr"`
+	Wp    float64 `xml:"wp,attr"`
 	Type  string  `xml:"type,attr"`
 	Align string  `xml:"align,attr"`
 	Color string  `xml:"color,attr"`
@@ -73,11 +74,7 @@ func readdeck(filename string, w, h int) (Deck, error) {
 	if err != nil {
 		return d, err
 	}
-
 	err = xml.NewDecoder(r).Decode(&d)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-	}
 	if d.Canvas.Width == 0 {
 		d.Canvas.Width = w
 	}
@@ -107,28 +104,29 @@ func interact(filename string, w, h int) {
 
 	for cmd := byte('0'); cmd != 'q'; cmd = readcmd(r) {
 		switch cmd {
-		case 'r':
+		case 'r', 18:
 			d, err = readdeck(filename, w, h)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				return
 			}
-		case '0', '1':
+			showslide(d, n)
+		case '0', '1', 1, '^': // 0,1,Ctrl-A,^
 			n = firstslide
 			showslide(d, n)
 
-		case '*':
+		case '*', 5, '$': // *, Crtl-E, $
 			n = lastslide
 			showslide(d, n)
 
-		case '+', 'n', '\n', ' ':
+		case '+', 'n', '\n', ' ', '\t', 14: // +,n,newline,space,tab,Crtl-N
 			n++
 			if n > lastslide {
 				n = firstslide
 			}
 			showslide(d, n)
 
-		case '-', 'p', 8, 127:
+		case '-', 'p', 8, 16, 127: // -,p,Backspace,Ctrl-P,Del
 			n--
 			if n < firstslide {
 				n = lastslide
@@ -228,6 +226,7 @@ func showslide(d Deck, n int) {
 	// every text in the slide
 	var font string
 	const linespacing = 1.8
+	cw := float64(d.Canvas.Width)
 	for _, t := range s.Text {
 		x, y, fontsize = dimen(d.Canvas, t.Xp, t.Yp, t.Sp)
 		fs := float64(fontsize)
@@ -236,7 +235,7 @@ func showslide(d Deck, n int) {
 			tdepth := ((fs * linespacing) * float64(len(td))) + fs
 			font = "mono"
 			openvg.FillColor("rgb(240,240,240)")
-			openvg.Rect(x-20, y-tdepth+(fs*linespacing), float64(d.Canvas.Width)-20-x, tdepth)
+			openvg.Rect(x-20, y-tdepth+(fs*linespacing), cw-20-x, tdepth)
 		} else {
 			font = "sans"
 		}
@@ -246,7 +245,13 @@ func showslide(d Deck, n int) {
 			openvg.FillColor(s.Fg)
 		}
 		if t.Type == "block" {
-			textwrap(x, y, float64(d.Canvas.Width)/2, t.Tdata, font, fontsize, fs*linespacing, 0.3)
+			var tw float64
+			if t.Wp == 0 {
+				tw = cw / 2
+			} else {
+				tw = (t.Wp / 100) * cw
+			}
+			textwrap(x, y, tw, t.Tdata, font, fontsize, fs*linespacing, 0.3)
 		} else {
 			// every text line
 			for _, txt := range td {
@@ -257,7 +262,7 @@ func showslide(d Deck, n int) {
 	}
 	openvg.FillColor(s.Fg)
 	openvg.End()
-	//openvg.SaveEnd(fmt.Sprintf("slide%0d.raw", n))
+	//openvg.SaveEnd(fmt.Sprintf("slide%02d", n))
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
