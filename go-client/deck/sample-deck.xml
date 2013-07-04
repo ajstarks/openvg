@@ -68,23 +68,20 @@
 	</list>
 	<text xp="20" yp="5" sp="1" align="begin" color="gray">Andrew Mackenzie-Ross, OBJECTIVE-C LESSONS FROM GO</text>
   </slide>
-  <slide bg="black" fg="white">
-	  <text xp="10" yp="70" sp="1" wp="33.3" type="block">
+  <slide bg="white" fg="black">
+	  <text xp="33.3" yp="70" sp="1" wp="33.3" type="block">
 	  A few months ago, I had a look at the brainchild of a few serious heavyweights working at Google.
 	  Their project, the Go programming language, is a static typed, c lookalike, semicolon-less, 
 	  self formatting, package managed, object oriented, easily paralellizable, 
 	  cluster fuck of genius with an unique class inheritance system.</text>
  
-	  <text xp="10" yp="30" sp="1.5">It doesn't have one. Zilch. Nada. Zero.</text>
+	  <text xp="33.3" yp="40" sp="1.5" color="rgb(127,0,0)">It doesn't have one. Zilch. Nada. Zero.</text>
   </slide>
 
   <slide bg="white" bg="black">
-	  <image xp="60" yp="33" width="75" height="100" name="doc.png"/>
-	  <text 
-		  xp="10" yp="70" 
-		  sp="2.5" wp="40"
-		  align="center" type="block">So, the next time you're about to make a subclass, think hard and ask yourself</text>
-	  <text xp="20" yp="30" sp="3" color="rgb(127,0,0)">what would Go do</text>
+	  <image xp="60" yp="42" width="75" height="100" name="doc.png"/>
+	  <text xp="20" yp="70" sp="2.5" wp="40" font="serif" type="block">So, the next time you're about to make a subclass, think hard and ask yourself</text>
+	  <text xp="20" yp="40" sp="3" font="sans" color="rgb(127,0,0)">what would Go do</text>
   </slide>
   <slide bg="white" fg="black">
     <text xp="95" yp="5" sp="0.75" align="right">@ajstarks</text>
@@ -95,7 +92,7 @@ func main() {
   fmt.Println("hello, world")
 }
     </text>
-    <text xp="20" yp="30" sp="1.5" wp="40" type="block" color="darkblue">
+    <text xp="20" yp="30" sp="1.5" wp="40"  type="block" color="darkblue">
       This is the traditional "hello, world" program. It's five lines long, and imports the fmt package, 
       leading some to be suprised at the size of the resulting binary.
     </text>

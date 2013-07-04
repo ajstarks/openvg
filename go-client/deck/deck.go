@@ -30,6 +30,7 @@ type list struct {
 	Type  string   `xml:"type,attr"`
 	Align string   `xml:"align,attr"`
 	Color string   `xml:"color,attr"`
+	Font  string   `xml:"font,attr"`
 	Li    []string `xml:"li"`
 }
 
@@ -41,6 +42,7 @@ type text struct {
 	Type  string  `xml:"type,attr"`
 	Align string  `xml:"align,attr"`
 	Color string  `xml:"color,attr"`
+	Font  string  `xml:"font,attr"`
 	Tdata string  `xml:",chardata"`
 }
 
@@ -101,24 +103,33 @@ func interact(filename string, w, h int) {
 	firstslide := 0
 	lastslide := len(d.Slide) - 1
 	n := firstslide
-
+	// respond to keyboard commands, 'q' to exit
 	for cmd := byte('0'); cmd != 'q'; cmd = readcmd(r) {
 		switch cmd {
-		case 'r', 18:
+		// read/reload
+		case 'r', 18: // r, Ctrl-R
 			d, err = readdeck(filename, w, h)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				return
 			}
 			showslide(d, n)
+
+		// save slide
+		case 's':
+			openvg.SaveEnd(fmt.Sprintf("slide-%04d", n))
+
+		// first slide
 		case '0', '1', 1, '^': // 0,1,Ctrl-A,^
 			n = firstslide
 			showslide(d, n)
 
+		// last slide
 		case '*', 5, '$': // *, Crtl-E, $
 			n = lastslide
 			showslide(d, n)
 
+		// next slide
 		case '+', 'n', '\n', ' ', '\t', 14: // +,n,newline,space,tab,Crtl-N
 			n++
 			if n > lastslide {
@@ -126,6 +137,7 @@ func interact(filename string, w, h int) {
 			}
 			showslide(d, n)
 
+		// previous slide
 		case '-', 'p', 8, 16, 127: // -,p,Backspace,Ctrl-P,Del
 			n--
 			if n < firstslide {
@@ -133,7 +145,12 @@ func interact(filename string, w, h int) {
 			}
 			showslide(d, n)
 
-		case '/':
+		// grid
+		case 'g':
+			showgrid(d, n)
+
+		// search
+		case '/', 6: // slash, Ctrl-F
 			openvg.RestoreTerm()
 			searchterm, serr := r.ReadString('\n')
 			openvg.RawTerm()
@@ -144,10 +161,55 @@ func interact(filename string, w, h int) {
 				ns := searchdeck(d, searchterm[0:len(searchterm)-1])
 				if ns >= 0 {
 					showslide(d, ns)
+					n = ns
 				}
 			}
 		}
 	}
+}
+
+func showgrid(d Deck, n int) {
+	w := float64(d.Canvas.Width)
+	h := float64(d.Canvas.Height)
+	fs := w * 0.01 // labels are 1% of the width
+	pct := 10.0    // 10% intervals
+	xpct := (pct / 100.0) * w
+	ypct := (pct / 100.0) * h
+
+	openvg.StrokeColor("lightgray", 0.5)
+	openvg.StrokeWidth(2)
+
+	// vertical gridlines
+	xl := 0.0
+	for x := xl; x <= w; x += xpct {
+		openvg.Line(x, 0, x, h)
+		openvg.Text(x, 0, fmt.Sprintf("%.0f%%", xl), "sans", int(fs))
+		xl += pct
+	}
+
+	// horizontal gridlines
+	yl := 0.0
+	for y := yl; y <= h; y += ypct {
+		openvg.Line(0, y, w, y)
+		openvg.Text(0, y, fmt.Sprintf("%.0f%%", yl), "sans", int(fs))
+		yl += pct
+	}
+
+	// show any images
+	if n < 0 || n > len(d.Slide) {
+		return
+	}
+	for _, im := range d.Slide[n].Image {
+		x := (im.Xp / 100) * w
+		y := (im.Yp / 100) * h
+		iw := float64(im.Width)
+		ih := float64(im.Height)
+		openvg.FillRGB(127, 0, 0, 0.3)
+		openvg.Circle(x, y, fs)
+		openvg.FillRGB(255, 0, 0, 0.1)
+		openvg.Rect(x-iw/2, y-ih/2, iw, ih)
+	}
+	openvg.End()
 }
 
 // dimen computes the coordinates and size of an object
@@ -175,22 +237,22 @@ func showslide(d Deck, n int) {
 	if n < 0 || n > len(d.Slide)-1 {
 		return
 	}
-	s := d.Slide[n]
+	slide := d.Slide[n]
 	openvg.Start(d.Canvas.Width, d.Canvas.Height)
-	if s.Bg == "" {
-		s.Bg = "white"
+	if slide.Bg == "" {
+		slide.Bg = "white"
 	}
-	if s.Fg == "" {
-		s.Fg = "black"
+	if slide.Fg == "" {
+		slide.Fg = "black"
 	}
-	openvg.BackgroundColor(s.Bg)
-	openvg.FillColor(s.Fg)
+	openvg.BackgroundColor(slide.Bg)
+	openvg.FillColor(slide.Fg)
 
 	var x, y float64
 	var fontsize int
 
 	// every image in the slide
-	for _, im := range s.Image {
+	for _, im := range slide.Image {
 		x = (im.Xp / 100) * float64(d.Canvas.Width)
 		y = (im.Yp / 100) * float64(d.Canvas.Height)
 		openvg.Image(x-float64(im.Width/2), y-float64(im.Height/2), im.Width, im.Height, im.Name)
@@ -198,7 +260,10 @@ func showslide(d Deck, n int) {
 	// every list in the slide
 	var offset float64
 	const blinespacing = 2.0
-	for _, l := range s.List {
+	for _, l := range slide.List {
+		if l.Font == "" {
+			l.Font = "sans"
+		}
 		x, y, fontsize = dimen(d.Canvas, l.Xp, l.Yp, l.Sp)
 		fs := float64(fontsize)
 		if l.Type == "bullet" {
@@ -209,7 +274,7 @@ func showslide(d Deck, n int) {
 		if l.Color != "" {
 			openvg.FillColor(l.Color)
 		} else {
-			openvg.FillColor(s.Fg)
+			openvg.FillColor(slide.Fg)
 		}
 		// every list item
 		for _, li := range l.Li {
@@ -217,32 +282,32 @@ func showslide(d Deck, n int) {
 				boffset := fs / 2
 				openvg.Circle(x, y+boffset, boffset)
 			}
-			showtext(x+offset, y, li, l.Align, "sans", fontsize)
+			showtext(x+offset, y, li, l.Align, l.Font, fontsize)
 			y -= fs * blinespacing
 		}
 	}
-	openvg.FillColor(s.Fg)
+	openvg.FillColor(slide.Fg)
 
 	// every text in the slide
-	var font string
 	const linespacing = 1.8
 	cw := float64(d.Canvas.Width)
-	for _, t := range s.Text {
+	for _, t := range slide.Text {
+		if t.Font == "" {
+			t.Font = "sans"
+		}
 		x, y, fontsize = dimen(d.Canvas, t.Xp, t.Yp, t.Sp)
 		fs := float64(fontsize)
 		td := strings.Split(t.Tdata, "\n")
 		if t.Type == "code" {
 			tdepth := ((fs * linespacing) * float64(len(td))) + fs
-			font = "mono"
+			t.Font = "mono"
 			openvg.FillColor("rgb(240,240,240)")
 			openvg.Rect(x-20, y-tdepth+(fs*linespacing), cw-20-x, tdepth)
-		} else {
-			font = "sans"
 		}
 		if t.Color != "" {
 			openvg.FillColor(t.Color)
 		} else {
-			openvg.FillColor(s.Fg)
+			openvg.FillColor(slide.Fg)
 		}
 		if t.Type == "block" {
 			var tw float64
@@ -251,16 +316,16 @@ func showslide(d Deck, n int) {
 			} else {
 				tw = (t.Wp / 100) * cw
 			}
-			textwrap(x, y, tw, t.Tdata, font, fontsize, fs*linespacing, 0.3)
+			textwrap(x, y, tw, t.Tdata, t.Font, fontsize, fs*linespacing, 0.3)
 		} else {
 			// every text line
 			for _, txt := range td {
-				showtext(x, y, txt, t.Align, font, fontsize)
+				showtext(x, y, txt, t.Align, t.Font, fontsize)
 				y -= (fs * linespacing)
 			}
 		}
 	}
-	openvg.FillColor(s.Fg)
+	openvg.FillColor(slide.Fg)
 	openvg.End()
 	//openvg.SaveEnd(fmt.Sprintf("slide%02d", n))
 }
