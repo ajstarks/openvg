@@ -23,26 +23,32 @@ type canvas struct {
 	Height int `xml:"height,attr"`
 }
 
-type list struct {
-	Xp    float64  `xml:"xp,attr"`
-	Yp    float64  `xml:"yp,attr"`
-	Sp    float64  `xml:"sp,attr"`
-	Type  string   `xml:"type,attr"`
-	Align string   `xml:"align,attr"`
-	Color string   `xml:"color,attr"`
-	Font  string   `xml:"font,attr"`
-	Li    []string `xml:"li"`
+type slide struct {
+	Bg    string  `xml:"bg,attr"`
+	Fg    string  `xml:"fg,attr"`
+	List  []list  `xml:"list"`
+	Text  []text  `xml:"text"`
+	Image []image `xml:"image"`
 }
 
-type text struct {
+type CommonAttr struct {
 	Xp    float64 `xml:"xp,attr"`
 	Yp    float64 `xml:"yp,attr"`
 	Sp    float64 `xml:"sp,attr"`
-	Wp    float64 `xml:"wp,attr"`
 	Type  string  `xml:"type,attr"`
 	Align string  `xml:"align,attr"`
 	Color string  `xml:"color,attr"`
 	Font  string  `xml:"font,attr"`
+}
+
+type list struct {
+	CommonAttr
+	Li []string `xml:"li"`
+}
+
+type text struct {
+	CommonAttr
+	Wp    float64 `xml:"wp,attr"`
 	Tdata string  `xml:",chardata"`
 }
 
@@ -54,17 +60,10 @@ type image struct {
 	Name   string  `xml:"name,attr"`
 }
 
-type slide struct {
-	Bg    string  `xml:"bg,attr"`
-	Fg    string  `xml:"fg,attr"`
-	List  []list  `xml:"list"`
-	Text  []text  `xml:"text"`
-	Image []image `xml:"image"`
-}
-
 // dodeck sets up the graphics environment and kicks off the interaction
 func dodeck(filename string) {
 	w, h := openvg.Init()
+	openvg.Background(0, 0, 0)
 	interact(filename, w, h)
 	openvg.Finish()
 }
@@ -103,6 +102,7 @@ func interact(filename string, w, h int) {
 	firstslide := 0
 	lastslide := len(d.Slide) - 1
 	n := firstslide
+
 	// respond to keyboard commands, 'q' to exit
 	for cmd := byte('0'); cmd != 'q'; cmd = readcmd(r) {
 		switch cmd {
@@ -168,11 +168,12 @@ func interact(filename string, w, h int) {
 	}
 }
 
+// showgrid xrays a slide
 func showgrid(d Deck, n int) {
 	w := float64(d.Canvas.Width)
 	h := float64(d.Canvas.Height)
 	fs := w * 0.01 // labels are 1% of the width
-	pct := 10.0    // 10% intervals
+	pct := 10.0    // grid at 10% intervals
 	xpct := (pct / 100.0) * w
 	ypct := (pct / 100.0) * h
 
@@ -195,7 +196,7 @@ func showgrid(d Deck, n int) {
 		yl += pct
 	}
 
-	// show any images
+	// show boundary and location of images
 	if n < 0 || n > len(d.Slide) {
 		return
 	}
@@ -238,14 +239,17 @@ func showslide(d Deck, n int) {
 		return
 	}
 	slide := d.Slide[n]
-	openvg.Start(d.Canvas.Width, d.Canvas.Height)
 	if slide.Bg == "" {
 		slide.Bg = "white"
 	}
 	if slide.Fg == "" {
 		slide.Fg = "black"
 	}
-	openvg.BackgroundColor(slide.Bg)
+	openvg.Start(d.Canvas.Width, d.Canvas.Height)
+	cw := float64(d.Canvas.Width)
+	ch := float64(d.Canvas.Height)
+	openvg.FillColor(slide.Bg)
+	openvg.Rect(0, 0, cw, ch)
 	openvg.FillColor(slide.Fg)
 
 	var x, y float64
@@ -253,10 +257,11 @@ func showslide(d Deck, n int) {
 
 	// every image in the slide
 	for _, im := range slide.Image {
-		x = (im.Xp / 100) * float64(d.Canvas.Width)
-		y = (im.Yp / 100) * float64(d.Canvas.Height)
+		x = (im.Xp / 100) * cw
+		y = (im.Yp / 100) * ch
 		openvg.Image(x-float64(im.Width/2), y-float64(im.Height/2), im.Width, im.Height, im.Name)
 	}
+
 	// every list in the slide
 	var offset float64
 	const blinespacing = 2.0
@@ -267,7 +272,7 @@ func showslide(d Deck, n int) {
 		x, y, fontsize = dimen(d.Canvas, l.Xp, l.Yp, l.Sp)
 		fs := float64(fontsize)
 		if l.Type == "bullet" {
-			offset = 1.2 * float64(fontsize)
+			offset = 1.2 * fs
 		} else {
 			offset = 0
 		}
@@ -290,7 +295,6 @@ func showslide(d Deck, n int) {
 
 	// every text in the slide
 	const linespacing = 1.8
-	cw := float64(d.Canvas.Width)
 	for _, t := range slide.Text {
 		if t.Font == "" {
 			t.Font = "sans"
@@ -299,8 +303,8 @@ func showslide(d Deck, n int) {
 		fs := float64(fontsize)
 		td := strings.Split(t.Tdata, "\n")
 		if t.Type == "code" {
-			tdepth := ((fs * linespacing) * float64(len(td))) + fs
 			t.Font = "mono"
+			tdepth := ((fs * linespacing) * float64(len(td))) + fs
 			openvg.FillColor("rgb(240,240,240)")
 			openvg.Rect(x-20, y-tdepth+(fs*linespacing), cw-20-x, tdepth)
 		}
@@ -327,15 +331,14 @@ func showslide(d Deck, n int) {
 	}
 	openvg.FillColor(slide.Fg)
 	openvg.End()
-	//openvg.SaveEnd(fmt.Sprintf("slide%02d", n))
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
 func searchdeck(d Deck, s string) int {
 	// for every slide...
-	for i := 0; i < len(d.Slide); i++ {
+	for i, slide := range d.Slide {
 		// search lists
-		for _, l := range d.Slide[i].List {
+		for _, l := range slide.List {
 			for _, ll := range l.Li {
 				if strings.Contains(ll, s) {
 					return i
@@ -343,7 +346,7 @@ func searchdeck(d Deck, s string) int {
 			}
 		}
 		// search text
-		for _, t := range d.Slide[i].Text {
+		for _, t := range slide.Text {
 			if strings.Contains(t.Tdata, s) {
 				return i
 			}
@@ -368,8 +371,10 @@ func dumpdeck(d Deck) {
 		}
 	}
 }
-func whitespace(c rune) bool {
-	return c == ' ' || c == '\n' || c == '\t'
+
+// whitespace determines if a rune is whitespace
+func whitespace(r rune) bool {
+	return r == ' ' || r == '\n' || r == '\t'
 }
 
 // textwrap draws text at location, wrapping at the specified width
@@ -387,7 +392,6 @@ func textwrap(x, y, w float64, s string, font string, size int, leading, factor 
 			xp = x
 			yp -= leading
 		}
-
 	}
 }
 
