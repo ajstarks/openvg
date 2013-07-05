@@ -384,9 +384,9 @@ func textwrap(x, y, w float64, s string, font string, size int, leading, factor 
 	xp := x
 	yp := y
 	edge := x + w
-	for i := 0; i < len(words); i++ {
-		tw := openvg.TextWidth(words[i], font, size)
-		openvg.Text(xp, yp, words[i], font, size)
+	for _, s := range words {
+		tw := openvg.TextWidth(s, font, size)
+		openvg.Text(xp, yp, s, font, size)
 		xp += tw + (wordspacing * factor)
 		if xp > edge {
 			xp = x
