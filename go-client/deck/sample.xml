@@ -1,0 +1,12 @@
+<deck>
+  <canvas width="1024" height="768" />
+  <slide bg="black" fg="white">
+      <image xp="50" yp="50" width="256" height="256" name="sdeck256.png" />
+      <text  xp="20" yp="80" sp="3">Deck uses these elements</text>
+      <list  xp="20" yp="70" sp="2" type="bullet">
+	      <li>text</li>
+	      <li>list</li>
+	      <li>image</li>
+      </list>
+  </slide>
+</deck>

@@ -113,11 +113,12 @@ func interact(filename string, w, h int) {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				return
 			}
+			openvg.Background(0,0,0)
 			showslide(d, n)
 
 		// save slide
-		case 's':
-			openvg.SaveEnd(fmt.Sprintf("slide-%04d", n))
+		case 's', 19: // s, Ctrl-S
+			openvg.SaveEnd(fmt.Sprintf("%s-slide-%04d", filename, n))
 
 		// first slide
 		case '0', '1', 1, '^': // 0,1,Ctrl-A,^
@@ -146,7 +147,7 @@ func interact(filename string, w, h int) {
 			showslide(d, n)
 
 		// grid
-		case 'g':
+		case 'x', 24: // x, Ctrl-X
 			showgrid(d, n)
 
 		// search
@@ -306,7 +307,7 @@ func showslide(d Deck, n int) {
 			t.Font = "mono"
 			tdepth := ((fs * linespacing) * float64(len(td))) + fs
 			openvg.FillColor("rgb(240,240,240)")
-			openvg.Rect(x-20, y-tdepth+(fs*linespacing), cw-20-x, tdepth)
+			openvg.Rect(x-20, y-tdepth+(fs*linespacing), pwidth(t.Wp, cw, cw-x-20), tdepth)
 		}
 		if t.Color != "" {
 			openvg.FillColor(t.Color)
@@ -314,13 +315,7 @@ func showslide(d Deck, n int) {
 			openvg.FillColor(slide.Fg)
 		}
 		if t.Type == "block" {
-			var tw float64
-			if t.Wp == 0 {
-				tw = cw / 2
-			} else {
-				tw = (t.Wp / 100) * cw
-			}
-			textwrap(x, y, tw, t.Tdata, t.Font, fontsize, fs*linespacing, 0.3)
+			textwrap(x, y, pwidth(t.Wp, cw, cw/2), t.Tdata, t.Font, fontsize, fs*linespacing, 0.3)
 		} else {
 			// every text line
 			for _, txt := range td {
@@ -331,6 +326,15 @@ func showslide(d Deck, n int) {
 	}
 	openvg.FillColor(slide.Fg)
 	openvg.End()
+}
+
+// pwidth computes the percent width based on canvas size
+func pwidth(wp, cw, defval float64) float64 {
+	if wp == 0 {
+		return defval 
+	} else {
+		return (wp/100)  * cw
+	}
 }
 
 // searchdeck searches the deck for the specified text, returning the slide number if found
