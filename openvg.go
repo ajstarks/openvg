@@ -350,6 +350,31 @@ func fakeimage(x, y float64, w, h int, s string) {
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }
 
+func ImageGo(x, y, float64, w, h int, im image.Image) {
+	bounds := im.Bounds()
+	minx := bounds.Min.X
+	maxx := bounds.Max.X
+	miny := bounds.Min.Y
+	maxy := bounds.Max.Y
+	data := make([]C.VGubyte, w*h*4)
+	n := 0
+	var r, g, b, a uint32
+	for yp := miny; yp < maxy; yp++ {
+		for xp := minx; xp < maxx; xp++ {
+			r, g, b, a = im.At(xp, (maxy-1)-yp).RGBA() // OpenVG has origin at lower left, y increasing up
+			data[n] = C.VGubyte(r)
+			n++
+			data[n] = C.VGubyte(g)
+			n++
+			data[n] = C.VGubyte(b)
+			n++
+			data[n] = C.VGubyte(a)
+			n++
+		}
+	}
+	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(w), C.int(h), &data[0])
+}
+
 // Image places the named image at (x,y) with dimensions (w,h)
 func Image(x, y float64, w, h int, s string) {
 	var img image.Image
