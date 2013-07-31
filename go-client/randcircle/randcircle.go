@@ -24,8 +24,8 @@ func main() {
 	rseed()
 
 	width, height := openvg.Init()
-	fw := float64(width)
-	fh := float64(height)
+	fw := float32(width)
+	fh := float32(height)
 
 	openvg.Start(width, height)
 	openvg.BackgroundColor(*bgcolor)
@@ -34,11 +34,11 @@ func main() {
 		red := uint8(rand.Intn(255))
 		green := uint8(rand.Intn(255))
 		blue := uint8(rand.Intn(255))
-		alpha := rand.Float64()
+		alpha := rand.Float32()
 
-		x := rand.Float64() * fw
-		y := rand.Float64() * fh
-		radius := rand.Float64() * fw / 10
+		x := rand.Float32() * fw
+		y := rand.Float32() * fh
+		radius := rand.Float32() * fw / 10
 
 		openvg.FillRGB(red, green, blue, alpha)
 		openvg.Circle(x, y, radius)

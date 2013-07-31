@@ -22,9 +22,9 @@ func main() {
 		outline            = flag.Bool("outline", false, "outline swatch")
 		fontsize           = flag.Int("fs", 12, "fontsize")
 		rowsize            = flag.Int("r", 32, "rowsize")
-		colw               = flag.Float64("c", 340, "column size")
-		swatch             = flag.Float64("s", 16, "swatch size")
-		gutter             = flag.Float64("g", 12, "gutter")
+		colw               = flag.Float32("c", 340, "column size")
+		swatch             = flag.Float32("s", 16, "swatch size")
+		gutter             = flag.Float32("g", 12, "gutter")
 		err          error
 		tcolor, line string
 	)
@@ -38,8 +38,8 @@ func main() {
 	width, height := openvg.Init()
 
 	openvg.Start(width, height)
-	fw := float64(width)
-	fh := float64(height)
+	fw := float32(width)
+	fh := float32(height)
 	if *neg {
 		openvg.FillColor("black")
 		openvg.Rect(0, 0, fw, fh)
@@ -75,7 +75,7 @@ func main() {
 			}
 			openvg.StrokeWidth(0)
 			openvg.FillColor(tcolor)
-			openvg.Text(x+*swatch+float64(*fontsize/2), y, fields[0], *fontname, *fontsize)
+			openvg.Text(x+*swatch+float32(*fontsize/2), y, fields[0], *fontname, *fontsize)
 			var label string
 			if *showcode {
 				if *showrgb {

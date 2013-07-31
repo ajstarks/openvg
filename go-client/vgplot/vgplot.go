@@ -12,15 +12,15 @@ import (
 	"github.com/ajstarks/openvg"
 )
 
-// rawdata defines data as float64 x,y coordinates
+// rawdata defines data as float32 x,y coordinates
 type rawdata struct {
-	x float64
-	y float64
+	x float32
+	y float32
 }
 
 type options map[string]bool
 type attributes map[string]string
-type measures map[string]float64
+type measures map[string]float32
 
 // plotset defines plot metadata
 type plotset struct {
@@ -34,7 +34,7 @@ var (
 	plotattr                                                     = attributes{}
 	plotnum                                                      = measures{}
 	ps                                                           = plotset{plotopt, plotattr, plotnum}
-	plotw, ploth, plotc, gwidth, gheight, gutter, beginx, beginy float64
+	plotw, ploth, plotc, gwidth, gheight, gutter, beginx, beginy float32
 )
 
 // init initializes command flags and sets default options
@@ -62,22 +62,22 @@ func init() {
 	plotlabel := flag.String("label", "", "plot label")
 
 	// sizes
-	dotsize := flag.Float64("dotsize", 2, "dot size")
-	linesize := flag.Float64("linesize", 2, "line size")
-	barsize := flag.Float64("barsize", 2, "bar size")
-	fontsize := flag.Float64("fontsize", 11, "font size")
-	xinterval := flag.Float64("xint", 10, "x axis interval")
-	yinterval := flag.Float64("yint", 4, "y axis interval")
+	dotsize := flag.Float32("dotsize", 2, "dot size")
+	linesize := flag.Float32("linesize", 2, "line size")
+	barsize := flag.Float32("barsize", 2, "bar size")
+	fontsize := flag.Float32("fontsize", 11, "font size")
+	xinterval := flag.Float32("xint", 10, "x axis interval")
+	yinterval := flag.Float32("yint", 4, "y axis interval")
 
 	// meta options
-	flag.Float64Var(&gutter, "gutter", ploth/10, "gutter")
-	flag.Float64Var(&gwidth, "width", 1024, "canvas width")
-	flag.Float64Var(&gheight, "height", 768, "canvas height")
-	flag.Float64Var(&plotw, "pw", 500, "plot width")
-	flag.Float64Var(&ploth, "ph", 500, "plot height")
-	flag.Float64Var(&beginx, "bx", 100, "initial x")
-	flag.Float64Var(&beginy, "by", gheight-10, "initial y")
-	flag.Float64Var(&plotc, "pc", 2, "plot columns")
+	flag.Float32Var(&gutter, "gutter", ploth/10, "gutter")
+	flag.Float32Var(&gwidth, "width", 1024, "canvas width")
+	flag.Float32Var(&gheight, "height", 768, "canvas height")
+	flag.Float32Var(&plotw, "pw", 500, "plot width")
+	flag.Float32Var(&ploth, "ph", 500, "plot height")
+	flag.Float32Var(&beginx, "bx", 100, "initial x")
+	flag.Float32Var(&beginy, "by", gheight-10, "initial y")
+	flag.Float32Var(&plotc, "pc", 2, "plot columns")
 
 	flag.Parse()
 
@@ -110,12 +110,12 @@ func init() {
 }
 
 // fmap maps world data to document coordinates
-func fmap(value float64, low1 float64, high1 float64, low2 float64, high2 float64) float64 {
+func fmap(value float32, low1 float32, high1 float32, low2 float32, high2 float32) float32 {
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
 }
 
 // doplot opens a file and makes a plot
-func doplot(x, y float64, location string) {
+func doplot(x, y float32, location string) {
 	var f *os.File
 	var err error
 	if len(location) > 0 {
@@ -140,7 +140,7 @@ func doplot(x, y float64, location string) {
 
 // plot places a plot at the specified location with the specified dimemsions
 // using the specified settings, using the specified data
-func plot(x, y, w, h float64, settings plotset, d []rawdata) {
+func plot(x, y, w, h float32, settings plotset, d []rawdata) {
 	nd := len(d)
 	if nd < 2 {
 		fmt.Fprintf(os.Stderr, "%d is not enough points to plot\n", len(d))
@@ -168,10 +168,10 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 	// polygon coordinates; for the horizon plot, you need two extra coordinates
 	// for the extrema.
 	needpoly := settings.opt["area"] || settings.opt["connect"]
-	var xpoly, ypoly []float64
+	var xpoly, ypoly []float32
 	if needpoly {
-		xpoly = make([]float64, nd+2)
-		ypoly = make([]float64, nd+2)
+		xpoly = make([]float32, nd+2)
+		ypoly = make([]float32, nd+2)
 		// preload the extrema of the polygon, 
 		// the bottom left and bottom right of the plot's rectangle
 		xpoly[0] = x
@@ -230,9 +230,9 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 		bot := math.Floor(miny)
 		top := math.Ceil(maxy)
 		yrange := top - bot
-		interval := yrange / float64(settings.size["yinterval"])
+		interval := yrange / float32(settings.size["yinterval"])
 		for yax := bot; yax <= top; yax += interval {
-			yaxp := fmap(yax, bot, top, float64(y), float64(y+h))
+			yaxp := fmap(yax, bot, top, float32(y), float32(y+h))
 			openvg.FillColor("black")
 			openvg.TextEnd(x-spacer, yaxp, fmt.Sprintf("%.1f", yax), settings.attr["font"], int(settings.size["fontsize"]))
 			openvg.StrokeColor("silver")
@@ -249,7 +249,7 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 	openvg.StrokeWidth(0)
 }
 
-// readxy reads coordinates (x,y float64 values) from a io.Reader
+// readxy reads coordinates (x,y float32 values) from a io.Reader
 func readxy(f io.Reader) (int, []rawdata) {
 	var (
 		r     rawdata
@@ -270,7 +270,7 @@ func readxy(f io.Reader) (int, []rawdata) {
 }
 
 // plotgrid places plots on a grid, governed by a number of columns.
-func plotgrid(x, y float64, files []string) {
+func plotgrid(x, y float32, files []string) {
 	px := x
 	for i, f := range files {
 		if i > 0 && i%int(plotc) == 0 && !plotopt["sameplot"] {

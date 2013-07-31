@@ -10,9 +10,9 @@ import (
 func main() {
 	width, height := openvg.Init() // OpenGL, etc initialization
 
-	w2 := float64(width / 2)
-	h2 := float64(height / 2)
-	w := float64(width)
+	w2 := float32(width / 2)
+	h2 := float32(height / 2)
+	w := float32(width)
 
 	stops := []openvg.Offcolor{
 		{0.0, openvg.RGB{44, 100, 232}, 1.0}, // blue-ish

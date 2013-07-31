@@ -15,7 +15,7 @@ import (
 // Color defines the structure of a pixel
 type Color struct {
 	red, green, blue uint8
-	alpha            float64
+	alpha            float32
 }
 
 // randcolor returns a random number 0..255
@@ -24,12 +24,12 @@ func randcolor() uint8 {
 }
 
 // randf returns a floating point number bounded by n
-func randf(n int) float64 {
-	return (rand.Float64() * float64(n))
+func randf(n int) float32 {
+	return (rand.Float32() * float32(n))
 }
 
 // coordpoint marks a coordinate, preserving a previous color
-func coordpoint(x, y, size float64, c Color) {
+func coordpoint(x, y, size float32, c Color) {
 	openvg.FillRGB(128, 0, 0, 0.3)
 	openvg.Circle(x, y, size)
 	openvg.FillRGB(c.red, c.green, c.blue, c.alpha)
@@ -38,8 +38,8 @@ func coordpoint(x, y, size float64, c Color) {
 // gradient shows linear and radial gradients
 
 func gradient(width, height int) {
-	w := float64(width)
-	h := float64(height)
+	w := float32(width)
+	h := float32(height)
 	stops := []openvg.Offcolor{
 		{0.0, openvg.RGB{255, 255, 255}, 1.0},
 		{0.5, openvg.RGB{128, 128, 128}, 1.0},
@@ -83,7 +83,7 @@ func gradient(width, height int) {
 }
 
 // makepi draws the Raspberry Pi
-func makepi(x, y, w, h float64) {
+func makepi(x, y, w, h float32) {
 	// dimensions
 	socw := h / 5
 	compw := h / 5
@@ -136,8 +136,8 @@ func makepi(x, y, w, h float64) {
 
 // raspberry pi, scaled to the screen dimensions
 func raspi(w, h int, s string) {
-	midx := float64(w) / 2
-	midy := float64(h) / 2
+	midx := float32(w) / 2
+	midy := float32(h) / 2
 	rw := midx
 	rh := (rw * 2) / 3
 	fontsize := w / 25
@@ -145,19 +145,19 @@ func raspi(w, h int, s string) {
 	openvg.Background(255, 255, 255)
 	makepi(midx-(rw/2), midy-(rh/2), rw, rh)
 	openvg.FillRGB(128, 0, 0, 1)
-	openvg.TextMid(midx, midy-(rh/2)-float64(fontsize*2), s, "sans", fontsize)
+	openvg.TextMid(midx, midy-(rh/2)-float32(fontsize*2), s, "sans", fontsize)
 	openvg.End()
 }
 
 // FW defines font metrics
 type FW struct {
 	font     string
-	tw       float64
+	tw       float32
 	fontsize int
 }
 
 // textwrap draws text at location, wrapping at the specified width
-func textwrap(x, y, w float64, s string, font string, size int, leading, factor float64, color string) {
+func textwrap(x, y, w float32, s string, font string, size int, leading, factor float32, color string) {
 	openvg.FillColor(color)
 	wordspacing := openvg.TextWidth("M", font, size)
 	words := strings.Split(s, " ")
@@ -184,7 +184,7 @@ func textplay(w, h int) {
 
 	openvg.Start(w, h)
 	tw := 300.0
-	for x, y := 50.0, float64(h)-100.0; x < float64(w/2); x += 400 {
+	for x, y := 50.0, float32(h)-100.0; x < float32(w/2); x += 400 {
 		textwrap(x, y, tw, forlo, "sans", 12, 24, 0.25, "black")
 		textwrap(x, y-400, tw, forlo, "sans", 12, 24, 0.5, "black")
 		tw -= 100
@@ -195,7 +195,7 @@ func textplay(w, h int) {
 // adjust the font to fit within a width
 func (f *FW) fitwidth(width, adj int, s string) {
 	f.tw = openvg.TextWidth(s, f.font, f.fontsize)
-	for f.tw > float64(width) {
+	for f.tw > float32(width) {
 		f.fontsize -= adj
 		f.tw = openvg.TextWidth(s, f.font, f.fontsize)
 	}
@@ -203,11 +203,11 @@ func (f *FW) fitwidth(width, adj int, s string) {
 
 // testpattern shows a test pattern
 func testpattern(w, h int, s string) {
-	var midx, midy1, midy2, midy3 float64
+	var midx, midy1, midy2, midy3 float32
 	fontsize := 256
-	h2 := float64(h / 2)
-	by := float64(h - 100)
-	bx := float64(w - 100)
+	h2 := float32(h / 2)
+	by := float32(h - 100)
+	bx := float32(w - 100)
 	tw1 := &FW{"mono", 0, fontsize}
 	tw2 := &FW{"sans", 0, fontsize}
 	tw3 := &FW{"serif", 0, fontsize}
@@ -229,12 +229,12 @@ func testpattern(w, h int, s string) {
 	tw2.fitwidth(w, 20, s)
 	tw3.fitwidth(w, 20, s)
 
-	midx = float64(w / 2)
+	midx = float32(w / 2)
 
 	// Adjust the baselines to be medial
-	midy1 = h2 + 20 + float64((tw1.fontsize)/2)
-	midy2 = h2 - float64((tw2.fontsize)/2)
-	midy3 = h2 - 20 - float64(tw2.fontsize) - float64((tw3.fontsize)/2)
+	midy1 = h2 + 20 + float32((tw1.fontsize)/2)
+	midy2 = h2 - float32((tw2.fontsize)/2)
+	midy3 = h2 - 20 - float32(tw2.fontsize) - float32((tw3.fontsize)/2)
 
 	openvg.FillRGB(128, 128, 128, 1)
 	openvg.TextMid(midx, midy1, s, tw1.font, tw1.fontsize)
@@ -246,7 +246,7 @@ func testpattern(w, h int, s string) {
 }
 
 // textlines writes openvg.Lines of text
-func textlines(x, y float64, text []string, f string, fontsize int, leading float64) {
+func textlines(x, y float32, text []string, f string, fontsize int, leading float32) {
 	for _, s := range text {
 		openvg.TextMid(x, y, s, f, fontsize)
 		y -= leading
@@ -264,16 +264,16 @@ func tb(w, h int) {
 		"and the voice of the turtle is heard in our land",
 	}
 
-	tmargin := float64(w) * 0.50
-	lmargin := float64(w) * 0.10
-	top := float64(h) * .9
-	mid := float64(h) * .6
-	bot := float64(h) * .3
+	tmargin := float32(w) * 0.50
+	lmargin := float32(w) * 0.10
+	top := float32(h) * .9
+	mid := float32(h) * .6
+	bot := float32(h) * .3
 
 	fontsize := 24
 	leading := 40.0
 	lfontsize := fontsize * 2
-	midb := ((leading * 2) + (leading / 2)) - float64(lfontsize/2)
+	midb := ((leading * 2) + (leading / 2)) - float32(lfontsize/2)
 
 	openvg.Start(w, h)
 	openvg.FillRGB(49, 79, 79, 1)
@@ -291,10 +291,10 @@ func imagetest(w, h int) {
 	openvg.Start(w, h)
 	imgw := 422
 	imgh := 238
-	fiw := float64(imgw)
-	fih := float64(imgh)
-	fw := float64(w)
-	fh := float64(h)
+	fiw := float32(imgw)
+	fih := float32(imgh)
+	fw := float32(w)
+	fh := float32(h)
 	cx := (fw / 2) - (fiw / 2)
 	cy := (fh / 2) - (fih / 2)
 	ulx := 0.0
@@ -336,7 +336,7 @@ func imagetable(w, h int) {
 		//{"http://farm4.static.flickr.com/3642/3337734413_e36baba755_m.jpg", 240, 164},
 	}
 	left := 50.0
-	bot := float64(h-imgh) - 50.0
+	bot := float32(h-imgh) - 50.0
 	gutter := 50.0
 	x := left
 	y := bot
@@ -345,26 +345,26 @@ func imagetable(w, h int) {
 	for _, iname := range itable {
 		openvg.Image(x, y, iname.width, iname.height, iname.name)
 		openvg.FillRGB(255, 255, 255, 0.3)
-		openvg.Rect(x, y, float64(imgw), 32)
+		openvg.Rect(x, y, float32(imgw), 32)
 		openvg.FillRGB(0, 0, 0, 1)
-		openvg.TextMid(x+float64(imgw/2), y+10, iname.name, "sans", 16)
-		x += float64(iname.width) + gutter
-		if x > float64(w) {
+		openvg.TextMid(x+float32(imgw/2), y+10, iname.name, "sans", 16)
+		x += float32(iname.width) + gutter
+		if x > float32(w) {
 			x = left
-			y -= float64(iname.height) + gutter
+			y -= float32(iname.height) + gutter
 		}
 	}
-	y = float64(h) * 0.1
+	y = float32(h) * 0.1
 	openvg.FillRGB(128, 128, 128, 1)
-	openvg.TextMid(float64(w/2), 100, "Joshua Tree National Park", "sans", 48)
+	openvg.TextMid(float32(w/2), 100, "Joshua Tree National Park", "sans", 48)
 	openvg.End()
 }
 
 // fontrange shows a range of fonts
 func fontrange(w, h int) {
-	var x, lx, length float64
-	y := float64(h) / 2.0
-	w2 := float64(w) / 2.0
+	var x, lx, length float32
+	y := float32(h) / 2.0
+	w2 := float32(w) / 2.0
 	spacing := 50.0
 	s2 := spacing / 2.0
 	sizes := []int{6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 21, 24, 36, 48, 60, 72, 96}
@@ -375,7 +375,7 @@ func fontrange(w, h int) {
 	// compute the length so we can center
 	length = 0.0
 	for _, s := range sizes {
-		length += float64(s) + spacing
+		length += float32(s) + spacing
 	}
 	length -= spacing
 	lx = w2 - (length / 2) // center point
@@ -387,7 +387,7 @@ func fontrange(w, h int) {
 		openvg.TextMid(x, y, "a", "serif", s)
 		openvg.FillRGB(128, 128, 128, 1)
 		openvg.TextMid(x, y-spacing, fmt.Sprintf("%d", s), "sans", 16)
-		x += float64(s) + spacing
+		x += float32(s) + spacing
 	}
 	// draw a openvg.Line below the characters, a curve above
 	x -= spacing
@@ -414,19 +414,19 @@ func refcard(width, height int) {
 		"Cubic Bezier",
 		"Image",
 	}
-	top := float64(height) * .95
-	sx := float64(width) * 0.10
+	top := float32(height) * .95
+	sx := float32(width) * 0.10
 	sy := top
-	sw := float64(width) * .05
-	sh := float64(height) * .045
+	sw := float32(width) * .05
+	sh := float32(height) * .045
 	dotsize := 7.0
 	spacing := 2.0
-	fontsize := int(float64(height) * .033)
+	fontsize := int(float32(height) * .033)
 	shapecolor := Color{202, 225, 255, 1.0}
 
 	openvg.Start(width, height)
 	openvg.FillRGB(128, 0, 0, 1)
-	openvg.TextEnd(float64(width-20), float64(height/2),
+	openvg.TextEnd(float32(width-20), float32(height/2),
 		"OpenVG on the Raspberry Pi", "sans", fontsize+(fontsize/2))
 	openvg.FillRGB(0, 0, 0, 1)
 	for _, s := range shapenames {
@@ -457,8 +457,8 @@ func refcard(width, height int) {
 	coordpoint(ex, sy, dotsize, shapecolor)
 	sy -= sh
 
-	px := []float64{sx, sx + (sw / 4), sx + (sw / 2), sx + ((sw * 3) / 4), sx + sw}
-	py := []float64{sy, sy - sh, sy, sy - sh, sy}
+	px := []float32{sx, sx + (sw / 4), sx + (sw / 2), sx + ((sw * 3) / 4), sx + sw}
+	py := []float32{sy, sy - sh, sy, sy - sh, sy}
 
 	openvg.Polyline(px, py) // , 5)
 	coordpoint(px[0], py[0], dotsize, shapecolor)
@@ -480,7 +480,7 @@ func refcard(width, height int) {
 	coordpoint(sx+(sw/2), sy, dotsize, shapecolor)
 	sy -= sh * spacing
 
-	var cy, ey float64
+	var cy, ey float32
 	cy = sy + (sh / 2)
 	ey = sy
 	openvg.Qbezier(sx, sy, cx, cy, ex, ey)
@@ -505,10 +505,10 @@ func refcard(width, height int) {
 
 // rotext draws text, rotated around the center of the screen, progressively faded
 func rotext(w, h, n int, s string) {
-	fade := (100.0 / float64(n)) / 100.0
-	deg := 360.0 / float64(n)
-	x := float64(w) / 2.0
-	y := float64(h) / 2.0
+	fade := (100.0 / float32(n)) / 100.0
+	deg := 360.0 / float32(n)
+	x := float32(w) / 2.0
+	y := float32(h) / 2.0
 	alpha := 1.0
 	size := w / 8
 
@@ -533,14 +533,14 @@ func rseed() {
 // rshapes draws shapes with random colors, openvg.Strokes, and sizes.
 func rshapes(width, height, n int) {
 
-	var sx, sy, cx, cy, px, py, ex, ey, pox, poy float64
+	var sx, sy, cx, cy, px, py, ex, ey, pox, poy float32
 
 	np := 10
-	polyx := make([]float64, np)
-	polyy := make([]float64, np)
+	polyx := make([]float32, np)
+	polyy := make([]float32, np)
 	openvg.Start(width, height)
 	for i := 0; i < n; i++ {
-		openvg.FillRGB(randcolor(), randcolor(), randcolor(), rand.Float64())
+		openvg.FillRGB(randcolor(), randcolor(), randcolor(), rand.Float32())
 		openvg.Ellipse(randf(width), randf(height), randf(200), randf(100))
 		openvg.Circle(randf(width), randf(height), randf(100))
 		openvg.Rect(randf(width), randf(height), randf(200), randf(100))
@@ -596,8 +596,8 @@ func rshapes(width, height, n int) {
 // name, distance from the sun, size and color
 type Body struct {
 	name     string
-	distance float64
-	radius   float64
+	distance float32
+	radius   float32
 	color    openvg.RGB
 }
 
@@ -615,11 +615,11 @@ var (
 	solarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
 )
 
-func vmap(value, low1, high1, low2, high2 float64) float64 {
+func vmap(value, low1, high1, low2, high2 float32) float32 {
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
 }
 
-func light(x, y, r float64, c openvg.RGB) {
+func light(x, y, r float32, c openvg.RGB) {
 	stops := []openvg.Offcolor{
 		{0.0, c, 1},
 		{0.50, openvg.RGB{c.Red / 2, c.Green / 2, c.Blue / 2}, 1},
@@ -630,8 +630,8 @@ func light(x, y, r float64, c openvg.RGB) {
 //planets is an exploration of scale
 func planets(width, height int, message string) {
 
-	w := float64(width)
-	h := float64(height)
+	w := float32(width)
+	h := float32(height)
 	y := h / 2
 
 	margin := 100.0
@@ -681,7 +681,7 @@ func planets(width, height int, message string) {
 
 // advert is an ad for the package
 func advert(w, h int) {
-	y := float64(h) / 4
+	y := float32(h) / 4
 	fontsize := (w * 4) / 100
 	f3 := fontsize / 3
 	s := "github.com/ajstarks/openvg"
@@ -689,18 +689,18 @@ func advert(w, h int) {
 
 	imw := 110
 	imh := 110
-	rw := float64(w / 4)
+	rw := float32(w / 4)
 	rh := (rw * 2) / 3
-	midx := float64(w / 2)
+	midx := float32(w / 2)
 
 	openvg.Start(w, h)
-	makepi(midx-float64(rw/2), float64(h/2), rw, rh)
+	makepi(midx-float32(rw/2), float32(h/2), rw, rh)
 	openvg.FillRGB(128, 0, 0, 1)
-	openvg.TextMid(midx, y-float64(fontsize/4), s, "sans", fontsize)
+	openvg.TextMid(midx, y-float32(fontsize/4), s, "sans", fontsize)
 	y -= 100
 	openvg.FillRGB(128, 128, 128, 1)
 	openvg.TextMid(midx, y, a, "sans", f3)
-	openvg.Image(float64(w/2)-float64(imw/2), 20, imw, imh, "starx.jpg")
+	openvg.Image(float32(w/2)-float32(imw/2), 20, imw, imh, "starx.jpg")
 	openvg.End()
 }
 

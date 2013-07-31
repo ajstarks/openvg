@@ -8,7 +8,7 @@ import (
 )
 
 // makepi draws the Raspberry Pi
-func makepi(x, y, w, h float64) {
+func makepi(x, y, w, h float32) {
 	// dimensions
 	socw := h / 5
 	compw := h / 5
@@ -69,8 +69,8 @@ func WaitEnd() {
 // raspberry pi, scaled to the screen dimensions
 func main() {
 	w, h := openvg.Init()
-	midx := float64(w) / 2
-	midy := float64(h) / 2
+	midx := float32(w) / 2
+	midy := float32(h) / 2
 	rw := midx
 	rh := (rw * 2) / 3
 	fontsize := w / 25
@@ -79,6 +79,6 @@ func main() {
 	makepi(midx-(rw/2), midy-(rh/2), rw, rh)
 	makepi(200, 100, 75, 50)
 	openvg.FillRGB(128, 0, 0, 1)
-	openvg.TextMid(midx, midy-(rh/2)-float64(fontsize*2), "The Raspberry Pi", "sans", fontsize)
+	openvg.TextMid(midx, midy-(rh/2)-float32(fontsize*2), "The Raspberry Pi", "sans", fontsize)
 	WaitEnd()
 }
