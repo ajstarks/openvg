@@ -350,7 +350,7 @@ func fakeimage(x, y float32, w, h int, s string) {
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }
 
-func ImageGo(x, y, float32, w, h int, im image.Image) {
+func ImageGo(x, y float32, w, h int, im image.Image) {
 	bounds := im.Bounds()
 	minx := bounds.Min.X
 	maxx := bounds.Max.X
