@@ -13,14 +13,14 @@ import (
 
 var (
 	width, height, niter int
-	opacity, size        float32
+	opacity, size        float64
 )
 
 func init() {
 	width, height = openvg.Init()
-	flag.Float32Var(&size, "s", float32(width)*.05, "bubble size")
+	flag.Float64Var(&size, "s", float64(width)*.05, "bubble size")
 	flag.IntVar(&niter, "n", width/6, "number of iterations")
-	flag.Float32Var(&opacity, "o", 0.5, "opacity")
+	flag.Float64Var(&opacity, "o", 0.5, "opacity")
 	flag.Parse()
 	rand.Seed(int64(time.Now().Nanosecond()) % 1e9)
 }
@@ -50,8 +50,8 @@ func main() {
 		case r > 7500 && r <= 10000:
 			color = "black"
 		}
-		openvg.FillColor(color, opacity)
-		openvg.Circle(float32(x), float32(y), size)
+		openvg.FillColor(color, float32(opacity))
+		openvg.Circle(float32(x), float32(y), float32(size))
 	}
 	openvg.End()
 	bufio.NewReader(os.Stdin).ReadByte()
