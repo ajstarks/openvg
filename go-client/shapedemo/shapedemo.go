@@ -183,8 +183,8 @@ func textplay(w, h int) {
 	// forsince := `For since by man came death, by man came also the resurrection of the dead, for as in Adam all die, even so in Christ shall all be made alive.`
 
 	openvg.Start(w, h)
-	tw := 300.0
-	for x, y := 50.0, float32(h)-100.0; x < float32(w/2); x += 400 {
+	tw := float32(300.0)
+	for x, y := float32(50.0), float32(h)-float32(100.0); x < float32(w/2); x += 400 {
 		textwrap(x, y, tw, forlo, "sans", 12, 24, 0.25, "black")
 		textwrap(x, y-400, tw, forlo, "sans", 12, 24, 0.5, "black")
 		tw -= 100
@@ -271,7 +271,7 @@ func tb(w, h int) {
 	bot := float32(h) * .3
 
 	fontsize := 24
-	leading := 40.0
+	leading := float32(40.0)
 	lfontsize := fontsize * 2
 	midb := ((leading * 2) + (leading / 2)) - float32(lfontsize/2)
 
@@ -297,12 +297,12 @@ func imagetest(w, h int) {
 	fh := float32(h)
 	cx := (fw / 2) - (fiw / 2)
 	cy := (fh / 2) - (fih / 2)
-	ulx := 0.0
+	ulx := float32(0.0)
 	uly := fh - fih
 	urx := fw - fiw
 	ury := uly
-	llx := 0.0
-	lly := 0.0
+	llx := float32(0.0)
+	lly := float32(0.0)
 	lrx := urx
 	lry := lly
 	openvg.Start(w, h)
@@ -311,7 +311,7 @@ func imagetest(w, h int) {
 	openvg.Image(ulx, uly, "desert2.jpg")
 	openvg.Image(urx, ury, "desert3.jpg")
 	openvg.Image(llx, lly, "desert4.jpg")
-	openvg.Image(lrx, lry, imgw, imgh, "desert5.jpg")
+	openvg.Image(lrx, lry, "desert5.jpg")
 	openvg.End()
 }
 
@@ -325,13 +325,13 @@ func imagetable(w, h int) {
 		"desert4.jpg",
 		"desert5.jpg",
 		"desert6.jpg",
-		"desert7.jpg"
+		"desert7.jpg",
 		//{"http://farm4.static.flickr.com/3546/3338566612_9c56bfb53e_m.jpg", 240, 164},
 		//{"http://farm4.static.flickr.com/3642/3337734413_e36baba755_m.jpg", 240, 164},
 	}
-	left := 50.0
+	left := float32(50.0)
 	bot := float32(h-imgh) - 50.0
-	gutter := 50.0
+	gutter := float32(50.0)
 	x := left
 	y := bot
 	openvg.Start(w, h)
@@ -359,7 +359,7 @@ func fontrange(w, h int) {
 	var x, lx, length float32
 	y := float32(h) / 2.0
 	w2 := float32(w) / 2.0
-	spacing := 50.0
+	spacing := float32(50.0)
 	s2 := spacing / 2.0
 	sizes := []int{6, 7, 8, 9, 10, 11, 12, 14, 16, 18, 21, 24, 36, 48, 60, 72, 96}
 
@@ -367,7 +367,7 @@ func fontrange(w, h int) {
 	openvg.Background(255, 255, 255)
 
 	// compute the length so we can center
-	length = 0.0
+	length = float32(0.0)
 	for _, s := range sizes {
 		length += float32(s) + spacing
 	}
@@ -413,8 +413,8 @@ func refcard(width, height int) {
 	sy := top
 	sw := float32(width) * .05
 	sh := float32(height) * .045
-	dotsize := 7.0
-	spacing := 2.0
+	dotsize := float32(7.0)
+	spacing := float32(2.0)
 	fontsize := int(float32(height) * .033)
 	shapecolor := Color{202, 225, 255, 1.0}
 
@@ -492,7 +492,7 @@ func refcard(width, height int) {
 	coordpoint(ex, ey, dotsize, shapecolor)
 
 	sy -= (sh * spacing * 1.5)
-	openvg.Image(sx, sy, 110, 110, "starx.jpg")
+	openvg.Image(sx, sy, "starx.jpg")
 
 	openvg.End()
 }
@@ -503,7 +503,7 @@ func rotext(w, h, n int, s string) {
 	deg := 360.0 / float32(n)
 	x := float32(w) / 2.0
 	y := float32(h) / 2.0
-	alpha := 1.0
+	alpha := float32(1.0)
 	size := w / 8
 
 	openvg.Start(w, h)
@@ -628,12 +628,12 @@ func planets(width, height int, message string) {
 	h := float32(height)
 	y := h / 2
 
-	margin := 100.0
-	minsize := 7.0
-	labeloc := 100.0
+	margin := float32(100.0)
+	minsize := float32(7.0)
+	labeloc := float32(100.0)
 	bgcolor := "black"
 	labelcolor := "white"
-	maxsize := (h / 2) * 0.05
+	maxsize := (h / 2.0) * 0.05
 
 	origin := sun.distance
 	mostDistant := neptune.distance
@@ -682,7 +682,6 @@ func advert(w, h int) {
 	a := "ajstarks@gmail.com"
 
 	imw := 110
-	imh := 110
 	rw := float32(w / 4)
 	rh := (rw * 2) / 3
 	midx := float32(w / 2)
@@ -694,7 +693,7 @@ func advert(w, h int) {
 	y -= 100
 	openvg.FillRGB(128, 128, 128, 1)
 	openvg.TextMid(midx, y, a, "sans", f3)
-	openvg.Image(float32(w/2)-float32(imw/2), 20, imw, imh, "starx.jpg")
+	openvg.Image(float32(w/2)-float32(imw/2), 20.0, "starx.jpg")
 	openvg.End()
 }
 
