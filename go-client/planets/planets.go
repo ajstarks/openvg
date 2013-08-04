@@ -48,14 +48,14 @@ func main() {
 
 	w := float32(width)
 	h := float32(height)
-	y := h / 2
+	y := h / 2.0
 
-	margin := 100.0
-	minsize := 7.0
-	labeloc := 100.0
+	margin := float32(100.0)
+	minsize := float32(7.0)
+	labeloc := float32(100.0)
 	bgcolor := "black"
 	labelcolor := "white"
-	maxsize := (h / 2) * 0.05
+	maxsize := (h / 2.0) * 0.05
 
 	origin := sun.distance
 	mostDistant := neptune.distance
