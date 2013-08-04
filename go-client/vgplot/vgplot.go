@@ -34,7 +34,7 @@ var (
 	plotattr                                                     = attributes{}
 	plotnum                                                      = measures{}
 	ps                                                           = plotset{plotopt, plotattr, plotnum}
-	plotw, ploth, plotc, gwidth, gheight, gutter, beginx, beginy float32
+	plotw, ploth, plotc, gwidth, gheight, gutter, beginx, beginy float64
 )
 
 // init initializes command flags and sets default options
@@ -62,22 +62,22 @@ func init() {
 	plotlabel := flag.String("label", "", "plot label")
 
 	// sizes
-	dotsize := flag.Float32("dotsize", 2, "dot size")
-	linesize := flag.Float32("linesize", 2, "line size")
-	barsize := flag.Float32("barsize", 2, "bar size")
-	fontsize := flag.Float32("fontsize", 11, "font size")
-	xinterval := flag.Float32("xint", 10, "x axis interval")
-	yinterval := flag.Float32("yint", 4, "y axis interval")
+	dotsize := flag.Float64("dotsize", 2, "dot size")
+	linesize := flag.Float64("linesize", 2, "line size")
+	barsize := flag.Float64("barsize", 2, "bar size")
+	fontsize := flag.Float64("fontsize", 11, "font size")
+	xinterval := flag.Float64("xint", 10, "x axis interval")
+	yinterval := flag.Float64("yint", 4, "y axis interval")
 
 	// meta options
-	flag.Float32Var(&gutter, "gutter", ploth/10, "gutter")
-	flag.Float32Var(&gwidth, "width", 1024, "canvas width")
-	flag.Float32Var(&gheight, "height", 768, "canvas height")
-	flag.Float32Var(&plotw, "pw", 500, "plot width")
-	flag.Float32Var(&ploth, "ph", 500, "plot height")
-	flag.Float32Var(&beginx, "bx", 100, "initial x")
-	flag.Float32Var(&beginy, "by", gheight-10, "initial y")
-	flag.Float32Var(&plotc, "pc", 2, "plot columns")
+	flag.Float64Var(&gutter, "gutter", ploth/10, "gutter")
+	flag.Float64Var(&gwidth, "width", 1024, "canvas width")
+	flag.Float64Var(&gheight, "height", 768, "canvas height")
+	flag.Float64Var(&plotw, "pw", 500, "plot width")
+	flag.Float64Var(&ploth, "ph", 500, "plot height")
+	flag.Float64Var(&beginx, "bx", 100, "initial x")
+	flag.Float64Var(&beginy, "by", gheight-10, "initial y")
+	flag.Float64Var(&plotc, "pc", 2, "plot columns")
 
 	flag.Parse()
 
@@ -101,12 +101,12 @@ func init() {
 	plotattr["label"] = *plotlabel
 	plotattr["labelcolor"] = *labelcolor
 
-	plotnum["dotsize"] = *dotsize
-	plotnum["linesize"] = *linesize
-	plotnum["fontsize"] = *fontsize
-	plotnum["xinterval"] = *xinterval
-	plotnum["yinterval"] = *yinterval
-	plotnum["barsize"] = *barsize
+	plotnum["dotsize"] = float32(*dotsize)
+	plotnum["linesize"] = float32(*linesize)
+	plotnum["fontsize"] = float32(*fontsize)
+	plotnum["xinterval"] = float32(*xinterval)
+	plotnum["yinterval"] = float32(*yinterval)
+	plotnum["barsize"] = float32(*barsize)
 }
 
 // fmap maps world data to document coordinates
@@ -134,7 +134,7 @@ func doplot(x, y float32, location string) {
 	f.Close()
 
 	if nd >= 2 {
-		plot(x, y, plotw, ploth, ps, data)
+		plot(x, y, float32(plotw), float32(ploth), ps, data)
 	}
 }
 
@@ -185,7 +185,7 @@ func plot(x, y, w, h float32, settings plotset, d []rawdata) {
 		openvg.Rect(x, y, w, h)
 	}
 	// Loop through the data, drawing items as specified
-	spacer := 10.0
+	spacer := float32(10.0)
 	for i, v := range d {
 		xp := fmap(v.x, minx, maxx, x, x+w)
 		yp := fmap(v.y, miny, maxy, y, y+h)
@@ -206,7 +206,7 @@ func plot(x, y, w, h float32, settings plotset, d []rawdata) {
 		if settings.opt["showx"] {
 			if i%int(settings.size["xinterval"]) == 0 {
 				openvg.FillColor("black")
-				openvg.TextMid(xp, y-(spacer*2), fmt.Sprintf("%d", int(v.x)), settings.attr["font"], int(settings.size["fontsize"]))
+				openvg.TextMid(xp, y-(spacer*2.0), fmt.Sprintf("%d", int(v.x)), settings.attr["font"], int(settings.size["fontsize"]))
 				openvg.StrokeColor("silver")
 				openvg.StrokeWidth(1)
 				openvg.Line(xp, y, xp, y-spacer)
@@ -227,8 +227,8 @@ func plot(x, y, w, h float32, settings plotset, d []rawdata) {
 	}
 	// Put on the y axis labels, if specified
 	if settings.opt["showy"] {
-		bot := math.Floor(miny)
-		top := math.Ceil(maxy)
+		bot := float32(math.Floor(float64(miny)))
+		top := float32(math.Ceil(float64(maxy)))
 		yrange := top - bot
 		interval := yrange / float32(settings.size["yinterval"])
 		for yax := bot; yax <= top; yax += interval {
@@ -275,11 +275,11 @@ func plotgrid(x, y float32, files []string) {
 	for i, f := range files {
 		if i > 0 && i%int(plotc) == 0 && !plotopt["sameplot"] {
 			px = x
-			y -= (ploth + gutter)
+			y -= (float32(ploth) + float32(gutter))
 		}
 		doplot(px, y, f)
 		if !plotopt["sameplot"] {
-			px += (plotw + gutter)
+			px += (float32(plotw) + float32(gutter))
 		}
 	}
 }
@@ -290,12 +290,12 @@ func main() {
 	w, h := openvg.Init()
 	openvg.Start(w, h)
 	openvg.FillColor("white")
-	openvg.Rect(0, 0, gwidth, gheight)
+	openvg.Rect(0, 0, float32(gwidth), float32(gheight))
 	filenames := flag.Args()
 	if len(filenames) == 0 {
-		doplot(beginx, beginy, "")
+		doplot(float32(beginx), float32(beginy), "")
 	} else {
-		plotgrid(beginx, beginy, filenames)
+		plotgrid(float32(beginx), float32(beginy), filenames)
 	}
 	openvg.End()
 	bufio.NewReader(os.Stdin).ReadByte()
