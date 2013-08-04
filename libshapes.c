@@ -258,21 +258,41 @@ void finish() {
 
 // Translate the coordinate system to x,y
 void Translate(VGfloat x, VGfloat y) {
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+	vgTranslate(x, y);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_IMAGE_USER_TO_SURFACE);
+	vgTranslate(x, y);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_GLYPH_USER_TO_SURFACE);
 	vgTranslate(x, y);
 }
 
 // Rotate around angle r
 void Rotate(VGfloat r) {
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+	vgRotate(r);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_IMAGE_USER_TO_SURFACE);
+	vgRotate(r);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_GLYPH_USER_TO_SURFACE);
 	vgRotate(r);
 }
 
 // Shear shears the x coordinate by x degrees, the y coordinate by y degrees
 void Shear(VGfloat x, VGfloat y) {
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+	vgShear(x, y);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_IMAGE_USER_TO_SURFACE);
+	vgShear(x, y);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_GLYPH_USER_TO_SURFACE);
 	vgShear(x, y);
 }
 
 // Scale scales by  x, y
 void Scale(VGfloat x, VGfloat y) {
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_PATH_USER_TO_SURFACE);
+	vgScale(x, y);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_IMAGE_USER_TO_SURFACE);
+	vgScale(x, y);
+	vgSeti(VG_MATRIX_MODE, VG_MATRIX_GLYPH_USER_TO_SURFACE);
 	vgScale(x, y);
 }
 
