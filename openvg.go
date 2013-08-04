@@ -350,7 +350,7 @@ func fakeimage(x, y float32, w, h int, s string) {
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }
 
-func ImageGo(x, y float32, w, h int, im image.Image) {
+func ImageGo(x, y float32, im image.Image) {
 	bounds := im.Bounds()
 	minx := bounds.Min.X
 	maxx := bounds.Max.X
@@ -372,11 +372,11 @@ func ImageGo(x, y float32, w, h int, im image.Image) {
 			n++
 		}
 	}
-	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(w), C.int(h), &data[0])
+	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(maxx), C.int(maxy), &data[0])
 }
 
 // Image places the named image at (x,y) with dimensions (w,h)
-func Image(x, y float32, w, h int, s string) {
+func Image(x, y float32, s string) {
 	var img image.Image
 	var derr error
 	f, err := os.Open(s)
@@ -411,7 +411,7 @@ func Image(x, y float32, w, h int, s string) {
 			n++
 		}
 	}
-	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(w), C.int(h), &data[0])
+	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(maxx), C.int(maxy), &data[0])
 }
 
 // Line draws a line between two points
