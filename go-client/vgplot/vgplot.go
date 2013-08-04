@@ -12,15 +12,15 @@ import (
 	"github.com/ajstarks/openvg"
 )
 
-// rawdata defines data as float64 x,y coordinates
+// rawdata defines data as float32 x,y coordinates
 type rawdata struct {
-	x float64
-	y float64
+	x float32
+	y float32
 }
 
 type options map[string]bool
 type attributes map[string]string
-type measures map[string]float64
+type measures map[string]float32
 
 // plotset defines plot metadata
 type plotset struct {
@@ -101,21 +101,21 @@ func init() {
 	plotattr["label"] = *plotlabel
 	plotattr["labelcolor"] = *labelcolor
 
-	plotnum["dotsize"] = *dotsize
-	plotnum["linesize"] = *linesize
-	plotnum["fontsize"] = *fontsize
-	plotnum["xinterval"] = *xinterval
-	plotnum["yinterval"] = *yinterval
-	plotnum["barsize"] = *barsize
+	plotnum["dotsize"] = float32(*dotsize)
+	plotnum["linesize"] = float32(*linesize)
+	plotnum["fontsize"] = float32(*fontsize)
+	plotnum["xinterval"] = float32(*xinterval)
+	plotnum["yinterval"] = float32(*yinterval)
+	plotnum["barsize"] = float32(*barsize)
 }
 
 // fmap maps world data to document coordinates
-func fmap(value float64, low1 float64, high1 float64, low2 float64, high2 float64) float64 {
+func fmap(value float32, low1 float32, high1 float32, low2 float32, high2 float32) float32 {
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
 }
 
 // doplot opens a file and makes a plot
-func doplot(x, y float64, location string) {
+func doplot(x, y float32, location string) {
 	var f *os.File
 	var err error
 	if len(location) > 0 {
@@ -134,13 +134,13 @@ func doplot(x, y float64, location string) {
 	f.Close()
 
 	if nd >= 2 {
-		plot(x, y, plotw, ploth, ps, data)
+		plot(x, y, float32(plotw), float32(ploth), ps, data)
 	}
 }
 
 // plot places a plot at the specified location with the specified dimemsions
 // using the specified settings, using the specified data
-func plot(x, y, w, h float64, settings plotset, d []rawdata) {
+func plot(x, y, w, h float32, settings plotset, d []rawdata) {
 	nd := len(d)
 	if nd < 2 {
 		fmt.Fprintf(os.Stderr, "%d is not enough points to plot\n", len(d))
@@ -168,10 +168,10 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 	// polygon coordinates; for the horizon plot, you need two extra coordinates
 	// for the extrema.
 	needpoly := settings.opt["area"] || settings.opt["connect"]
-	var xpoly, ypoly []float64
+	var xpoly, ypoly []float32
 	if needpoly {
-		xpoly = make([]float64, nd+2)
-		ypoly = make([]float64, nd+2)
+		xpoly = make([]float32, nd+2)
+		ypoly = make([]float32, nd+2)
 		// preload the extrema of the polygon, 
 		// the bottom left and bottom right of the plot's rectangle
 		xpoly[0] = x
@@ -185,7 +185,7 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 		openvg.Rect(x, y, w, h)
 	}
 	// Loop through the data, drawing items as specified
-	spacer := 10.0
+	spacer := float32(10.0)
 	for i, v := range d {
 		xp := fmap(v.x, minx, maxx, x, x+w)
 		yp := fmap(v.y, miny, maxy, y, y+h)
@@ -206,7 +206,7 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 		if settings.opt["showx"] {
 			if i%int(settings.size["xinterval"]) == 0 {
 				openvg.FillColor("black")
-				openvg.TextMid(xp, y-(spacer*2), fmt.Sprintf("%d", int(v.x)), settings.attr["font"], int(settings.size["fontsize"]))
+				openvg.TextMid(xp, y-(spacer*2.0), fmt.Sprintf("%d", int(v.x)), settings.attr["font"], int(settings.size["fontsize"]))
 				openvg.StrokeColor("silver")
 				openvg.StrokeWidth(1)
 				openvg.Line(xp, y, xp, y-spacer)
@@ -227,12 +227,12 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 	}
 	// Put on the y axis labels, if specified
 	if settings.opt["showy"] {
-		bot := math.Floor(miny)
-		top := math.Ceil(maxy)
+		bot := float32(math.Floor(float64(miny)))
+		top := float32(math.Ceil(float64(maxy)))
 		yrange := top - bot
-		interval := yrange / float64(settings.size["yinterval"])
+		interval := yrange / float32(settings.size["yinterval"])
 		for yax := bot; yax <= top; yax += interval {
-			yaxp := fmap(yax, bot, top, float64(y), float64(y+h))
+			yaxp := fmap(yax, bot, top, float32(y), float32(y+h))
 			openvg.FillColor("black")
 			openvg.TextEnd(x-spacer, yaxp, fmt.Sprintf("%.1f", yax), settings.attr["font"], int(settings.size["fontsize"]))
 			openvg.StrokeColor("silver")
@@ -249,7 +249,7 @@ func plot(x, y, w, h float64, settings plotset, d []rawdata) {
 	openvg.StrokeWidth(0)
 }
 
-// readxy reads coordinates (x,y float64 values) from a io.Reader
+// readxy reads coordinates (x,y float32 values) from a io.Reader
 func readxy(f io.Reader) (int, []rawdata) {
 	var (
 		r     rawdata
@@ -270,16 +270,16 @@ func readxy(f io.Reader) (int, []rawdata) {
 }
 
 // plotgrid places plots on a grid, governed by a number of columns.
-func plotgrid(x, y float64, files []string) {
+func plotgrid(x, y float32, files []string) {
 	px := x
 	for i, f := range files {
 		if i > 0 && i%int(plotc) == 0 && !plotopt["sameplot"] {
 			px = x
-			y -= (ploth + gutter)
+			y -= (float32(ploth) + float32(gutter))
 		}
 		doplot(px, y, f)
 		if !plotopt["sameplot"] {
-			px += (plotw + gutter)
+			px += (float32(plotw) + float32(gutter))
 		}
 	}
 }
@@ -290,12 +290,12 @@ func main() {
 	w, h := openvg.Init()
 	openvg.Start(w, h)
 	openvg.FillColor("white")
-	openvg.Rect(0, 0, gwidth, gheight)
+	openvg.Rect(0, 0, float32(gwidth), float32(gheight))
 	filenames := flag.Args()
 	if len(filenames) == 0 {
-		doplot(beginx, beginy, "")
+		doplot(float32(beginx), float32(beginy), "")
 	} else {
-		plotgrid(beginx, beginy, filenames)
+		plotgrid(float32(beginx), float32(beginy), filenames)
 	}
 	openvg.End()
 	bufio.NewReader(os.Stdin).ReadByte()
