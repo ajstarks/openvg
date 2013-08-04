@@ -307,31 +307,25 @@ func imagetest(w, h int) {
 	lry := lly
 	openvg.Start(w, h)
 	openvg.Background(0, 0, 0)
-	openvg.Image(cx, cy, imgw, imgh, "desert1.jpg")
-	openvg.Image(ulx, uly, imgw, imgh, "desert2.jpg")
-	openvg.Image(urx, ury, imgw, imgh, "desert3.jpg")
-	openvg.Image(llx, lly, imgw, imgh, "desert4.jpg")
+	openvg.Image(cx, cy, "desert1.jpg")
+	openvg.Image(ulx, uly, "desert2.jpg")
+	openvg.Image(urx, ury, "desert3.jpg")
+	openvg.Image(llx, lly, "desert4.jpg")
 	openvg.Image(lrx, lry, imgw, imgh, "desert5.jpg")
 	openvg.End()
 }
 
-type it struct {
-	name   string
-	width  int
-	height int
-}
-
 func imagetable(w, h int) {
 	imgw, imgh := 422, 238
-	itable := []it{
-		{"desert0.jpg", imgw, imgh},
-		{"desert1.jpg", imgw, imgh},
-		{"desert2.jpg", imgw, imgh},
-		{"desert3.jpg", imgw, imgh},
-		{"desert4.jpg", imgw, imgh},
-		{"desert5.jpg", imgw, imgh},
-		{"desert6.jpg", imgw, imgh},
-		{"desert7.jpg", imgw, imgh},
+	itable := []string{
+		"desert0.jpg",
+		"desert1.jpg",
+		"desert2.jpg",
+		"desert3.jpg",
+		"desert4.jpg",
+		"desert5.jpg",
+		"desert6.jpg",
+		"desert7.jpg"
 		//{"http://farm4.static.flickr.com/3546/3338566612_9c56bfb53e_m.jpg", 240, 164},
 		//{"http://farm4.static.flickr.com/3642/3337734413_e36baba755_m.jpg", 240, 164},
 	}
@@ -343,15 +337,15 @@ func imagetable(w, h int) {
 	openvg.Start(w, h)
 	openvg.BackgroundColor("black")
 	for _, iname := range itable {
-		openvg.Image(x, y, iname.width, iname.height, iname.name)
+		openvg.Image(x, y, iname)
 		openvg.FillRGB(255, 255, 255, 0.3)
 		openvg.Rect(x, y, float32(imgw), 32)
 		openvg.FillRGB(0, 0, 0, 1)
-		openvg.TextMid(x+float32(imgw/2), y+10, iname.name, "sans", 16)
-		x += float32(iname.width) + gutter
+		openvg.TextMid(x+float32(imgw/2), y+10, iname, "sans", 16)
+		x += float32(imgw) + gutter
 		if x > float32(w) {
 			x = left
-			y -= float32(iname.height) + gutter
+			y -= float32(imgh) + gutter
 		}
 	}
 	y = float32(h) * 0.1
