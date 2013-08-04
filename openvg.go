@@ -356,7 +356,7 @@ func ImageGo(x, y float32, im image.Image) {
 	maxx := bounds.Max.X
 	miny := bounds.Min.Y
 	maxy := bounds.Max.Y
-	data := make([]C.VGubyte, w*h*4)
+	data := make([]C.VGubyte, bounds.Dx()*bounds.Dy()*4)
 	n := 0
 	var r, g, b, a uint32
 	for yp := miny; yp < maxy; yp++ {
@@ -372,7 +372,7 @@ func ImageGo(x, y float32, im image.Image) {
 			n++
 		}
 	}
-	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(maxx), C.int(maxy), &data[0])
+	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(bounds.Dx()), C.int(bounds.Dy()), &data[0])
 }
 
 // Image places the named image at (x,y) with dimensions (w,h)
@@ -381,13 +381,13 @@ func Image(x, y float32, s string) {
 	var derr error
 	f, err := os.Open(s)
 	if err != nil {
-		fakeimage(x, y, w, h, s)
+		fakeimage(x, y, 100, 100, s)
 		return
 	}
 	img, _, derr = image.Decode(f)
 	defer f.Close()
 	if derr != nil {
-		fakeimage(x, y, w, h, s)
+		fakeimage(x, y, 100, 100, s)
 		return
 	}
 	bounds := img.Bounds()
@@ -395,7 +395,7 @@ func Image(x, y float32, s string) {
 	maxx := bounds.Max.X
 	miny := bounds.Min.Y
 	maxy := bounds.Max.Y
-	data := make([]C.VGubyte, w*h*4)
+	data := make([]C.VGubyte, bounds.Dx()*bounds.Dy()*4)
 	n := 0
 	var r, g, b, a uint32
 	for yp := miny; yp < maxy; yp++ {
@@ -411,7 +411,7 @@ func Image(x, y float32, s string) {
 			n++
 		}
 	}
-	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(maxx), C.int(maxy), &data[0])
+	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(bounds.Dx()), C.int(bounds.Dy()), &data[0])
 }
 
 // Line draws a line between two points
