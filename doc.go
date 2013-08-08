@@ -14,9 +14,9 @@ The typical "hello world" program looks like this:
 	func main() {
 		width, height := openvg.Init() // OpenGL, etc initialization
 
-		w2 := float64(width / 2)
-		h2 := float64(height / 2)
-		w := float64(width)
+		w2 := openvg.VGfloat(width / 2)
+		h2 := openvg.VGfloat(height / 2)
+		w := openvg.VGfloat(width)
 
 		openvg.Start(width, height)                               // Start the picture
 		openvg.BackgroundColor("black")                           // Black background
