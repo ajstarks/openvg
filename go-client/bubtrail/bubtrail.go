@@ -50,8 +50,8 @@ func main() {
 		case r > 7500 && r <= 10000:
 			color = "black"
 		}
-		openvg.FillColor(color, opacity)
-		openvg.Circle(float64(x), float64(y), size)
+		openvg.FillColor(color, openvg.VGfloat(opacity))
+		openvg.Circle(openvg.VGfloat(x), openvg.VGfloat(y), openvg.VGfloat(size))
 	}
 	openvg.End()
 	bufio.NewReader(os.Stdin).ReadByte()

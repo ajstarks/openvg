@@ -11,8 +11,8 @@ import (
 // name, distance from the sun, size and color
 type Body struct {
 	name     string
-	distance float64
-	radius   float64
+	distance openvg.VGfloat
+	radius   openvg.VGfloat
 	color    openvg.RGB
 }
 
@@ -30,11 +30,11 @@ var (
 	solarSystem = []Body{sun, mercury, venus, earth, mars, jupiter, saturn, uranus, neptune}
 )
 
-func vmap(value, low1, high1, low2, high2 float64) float64 {
+func vmap(value, low1, high1, low2, high2 openvg.VGfloat) openvg.VGfloat {
 	return low2 + (high2-low2)*(value-low1)/(high1-low1)
 }
 
-func light(x, y, r float64, c openvg.RGB) {
+func light(x, y, r openvg.VGfloat, c openvg.RGB) {
 	stops := []openvg.Offcolor{
 		{0.0, c, 1},
 		{0.50, openvg.RGB{c.Red / 2, c.Green / 2, c.Blue / 2}, 1},
@@ -46,13 +46,14 @@ func main() {
 
 	width, height := openvg.Init()
 
-	w := float64(width)
-	h := float64(height)
+	w := openvg.VGfloat(width)
+	h := openvg.VGfloat(height)
 	y := h / 2
-
-	margin := 100.0
-	minsize := 7.0
-	labeloc := 100.0
+	var (
+		margin  openvg.VGfloat = 100.0
+		minsize openvg.VGfloat = 7.0
+		labeloc openvg.VGfloat = 100.0
+	)
 	bgcolor := "black"
 	labelcolor := "white"
 	maxsize := (h / 2) * 0.05

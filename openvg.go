@@ -28,13 +28,17 @@ type RGB struct {
 	Red, Green, Blue uint8
 }
 
+// VGfloat defines the basic type for coordinates, dimensions and other values
+type VGfloat C.VGfloat 
+
 // Offcolor defines the offset, color and alpha values used in gradients
 // the Offset ranges from 0..1, colors as RGB triples, alpha ranges from 0..1
 type Offcolor struct {
-	Offset float64
+	Offset VGfloat
 	RGB
-	Alpha float64
+	Alpha VGfloat
 }
+
 
 // colornames maps SVG color names to RGB triples.
 var colornames = map[string]RGB{
@@ -207,12 +211,12 @@ func Background(r, g, b uint8) {
 }
 
 // BackgroundRGB clears the screen with the specified background color using a RGBA quad
-func BackgroundRGB(r, g, b uint8, alpha float64) {
+func BackgroundRGB(r, g, b uint8, alpha VGfloat) {
 	C.BackgroundRGB(C.uint(r), C.uint(g), C.uint(b), C.VGfloat(alpha))
 }
 
 // BackgroundColor sets the background color
-func BackgroundColor(s string, alpha ...float64) {
+func BackgroundColor(s string, alpha ...VGfloat) {
 	c := colorlookup(s)
 	if len(alpha) == 0 {
 		BackgroundRGB(c.Red, c.Green, c.Blue, 1)
@@ -230,11 +234,11 @@ func makeramp(r []Offcolor) (*C.VGfloat, C.int) {
 	for i := 0; i < lr; i++ {
 		cs[j] = C.VGfloat(r[i].Offset)
 		j++
-		cs[j] = C.VGfloat(float64(r[i].Red) / 255.0)
+		cs[j] = C.VGfloat(VGfloat(r[i].Red) / 255.0)
 		j++
-		cs[j] = C.VGfloat(float64(r[i].Green) / 255.0)
+		cs[j] = C.VGfloat(VGfloat(r[i].Green) / 255.0)
 		j++
-		cs[j] = C.VGfloat(float64(r[i].Blue) / 255.0)
+		cs[j] = C.VGfloat(VGfloat(r[i].Blue) / 255.0)
 		j++
 		cs[j] = C.VGfloat(r[i].Alpha)
 		j++
@@ -244,30 +248,30 @@ func makeramp(r []Offcolor) (*C.VGfloat, C.int) {
 
 // FillLinearGradient sets up a linear gradient between (x1,y2) and (x2, y2)
 // using the specified offsets and colors in ramp
-func FillLinearGradient(x1, y1, x2, y2 float64, ramp []Offcolor) {
+func FillLinearGradient(x1, y1, x2, y2 VGfloat, ramp []Offcolor) {
 	cr, nr := makeramp(ramp)
 	C.FillLinearGradient(C.VGfloat(x1), C.VGfloat(y1), C.VGfloat(x2), C.VGfloat(y2), cr, nr)
 }
 
 // FillRadialGradient sets up a radial gradient centered at (cx, cy), radius r,
 // with a focal point at (fx, fy) using the specified offsets and colors in ramp
-func FillRadialGradient(cx, cy, fx, fy, radius float64, ramp []Offcolor) {
+func FillRadialGradient(cx, cy, fx, fy, radius VGfloat, ramp []Offcolor) {
 	cr, nr := makeramp(ramp)
 	C.FillRadialGradient(C.VGfloat(cx), C.VGfloat(cy), C.VGfloat(fx), C.VGfloat(fy), C.VGfloat(radius), cr, nr)
 }
 
 // FillRGB sets the fill color, using RGB triples and alpha values
-func FillRGB(r, g, b uint8, alpha float64) {
+func FillRGB(r, g, b uint8, alpha VGfloat) {
 	C.Fill(C.uint(r), C.uint(g), C.uint(b), C.VGfloat(alpha))
 }
 
 // StrokeRGB sets the stroke color, using RGB triples
-func StrokeRGB(r, g, b uint8, alpha float64) {
+func StrokeRGB(r, g, b uint8, alpha VGfloat) {
 	C.Stroke(C.uint(r), C.uint(g), C.uint(b), C.VGfloat(alpha))
 }
 
 // StrokeWidth sets the stroke width
-func StrokeWidth(w float64) {
+func StrokeWidth(w VGfloat) {
 	C.StrokeWidth(C.VGfloat(w))
 }
 
@@ -290,7 +294,7 @@ func colorlookup(s string) RGB {
 }
 
 // FillColor sets the fill color using names to specify the color, optionally applying alpha.
-func FillColor(s string, alpha ...float64) {
+func FillColor(s string, alpha ...VGfloat) {
 	fc := colorlookup(s)
 	if len(alpha) == 0 {
 		FillRGB(fc.Red, fc.Green, fc.Blue, 1)
@@ -300,7 +304,7 @@ func FillColor(s string, alpha ...float64) {
 }
 
 // StrokeColor sets the fill color using names to specify the color, optionally applying alpha.
-func StrokeColor(s string, alpha ...float64) {
+func StrokeColor(s string, alpha ...VGfloat) {
 	fc := colorlookup(s)
 	if len(alpha) == 0 {
 		StrokeRGB(fc.Red, fc.Green, fc.Blue, 1)
@@ -318,7 +322,7 @@ func Start(w, h int, color ...uint8) {
 }
 
 // Startcolor begins the picture with the specified color background
-func StartColor(w, h int, color string, alpha ...float64) {
+func StartColor(w, h int, color string, alpha ...VGfloat) {
 	C.Start(C.int(w), C.int(h))
 	BackgroundColor(color, alpha...)
 }
@@ -336,9 +340,9 @@ func SaveEnd(filename string) {
 }
 
 // fakeimage makes a placeholder for a missing image
-func fakeimage(x, y float64, w, h int, s string) {
-	fw := float64(w)
-	fh := float64(h)
+func fakeimage(x, y VGfloat, w, h int, s string) {
+	fw := VGfloat(w)
+	fh := VGfloat(h)
 	FillColor("lightgray")
 	Rect(x, y, fw, fh)
 	StrokeWidth(1)
@@ -349,9 +353,35 @@ func fakeimage(x, y float64, w, h int, s string) {
 	FillColor("black")
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }
-
+// Img places an image object at (x,y)
+func Img(x, y VGfloat, im image.Image) {
+	bounds := im.Bounds()
+	minx := bounds.Min.X
+	maxx := bounds.Max.X
+	miny := bounds.Min.Y
+	maxy := bounds.Max.Y
+	data := make([]C.VGubyte, bounds.Dx()*bounds.Dy()*4)
+	n := 0
+	var r, g, b, a uint32
+	for yp := miny; yp < maxy; yp++ {
+		for xp := minx; xp < maxx; xp++ {
+			r, g, b, a = im.At(xp, (maxy-1)-yp).RGBA() // OpenVG has origin at lower left, y increasing up
+			data[n] = C.VGubyte(r)
+			n++
+			data[n] = C.VGubyte(g)
+			n++
+			data[n] = C.VGubyte(b)
+			n++
+			data[n] = C.VGubyte(a)
+			n++
+		}
+	}
+	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(bounds.Dx()), C.int(bounds.Dy()), &data[0])
+}
 // Image places the named image at (x,y) with dimensions (w,h)
-func Image(x, y float64, w, h int, s string) {
+// the derived image dimensions override the specified ones.
+func Image(x, y VGfloat, w, h int, s string) {
+
 	var img image.Image
 	var derr error
 	f, err := os.Open(s)
@@ -365,76 +395,55 @@ func Image(x, y float64, w, h int, s string) {
 		fakeimage(x, y, w, h, s)
 		return
 	}
-	bounds := img.Bounds()
-	minx := bounds.Min.X
-	maxx := bounds.Max.X
-	miny := bounds.Min.Y
-	maxy := bounds.Max.Y
-	data := make([]C.VGubyte, w*h*4)
-	n := 0
-	var r, g, b, a uint32
-	for yp := miny; yp < maxy; yp++ {
-		for xp := minx; xp < maxx; xp++ {
-			r, g, b, a = img.At(xp, (maxy-1)-yp).RGBA() // OpenVG has origin at lower left, y increasing up
-			data[n] = C.VGubyte(r)
-			n++
-			data[n] = C.VGubyte(g)
-			n++
-			data[n] = C.VGubyte(b)
-			n++
-			data[n] = C.VGubyte(a)
-			n++
-		}
-	}
-	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(w), C.int(h), &data[0])
+	Img(x, y, img)
 }
 
 // Line draws a line between two points
-func Line(x1, y1, x2, y2 float64, style ...string) {
+func Line(x1, y1, x2, y2 VGfloat, style ...string) {
 	C.Line(C.VGfloat(x1), C.VGfloat(y1), C.VGfloat(x2), C.VGfloat(y2))
 }
 
 // Rect draws a rectangle at (x,y) with dimesions (w,h)
-func Rect(x, y, w, h float64, style ...string) {
+func Rect(x, y, w, h VGfloat, style ...string) {
 	C.Rect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
 // Rect draws a rounded rectangle at (x,y) with dimesions (w,h).
 // the corner radii are at (rw, rh)
-func Roundrect(x, y, w, h, rw, rh float64, style ...string) {
+func Roundrect(x, y, w, h, rw, rh VGfloat, style ...string) {
 	C.Roundrect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(rw), C.VGfloat(rh))
 }
 
 // Ellipse draws an ellipse at (x,y) with dimensions (w,h)
-func Ellipse(x, y, w, h float64, style ...string) {
+func Ellipse(x, y, w, h VGfloat, style ...string) {
 	C.Ellipse(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
 // Circle draws a circle centered at (x,y), with radius r
-func Circle(x, y, r float64, style ...string) {
+func Circle(x, y, r VGfloat, style ...string) {
 	C.Circle(C.VGfloat(x), C.VGfloat(y), C.VGfloat(r))
 }
 
 // Qbezier draws a quadratic bezier curve with extrema (sx, sy) and (ex, ey)
 // Control points are at (cx, cy)
-func Qbezier(sx, sy, cx, cy, ex, ey float64, style ...string) {
+func Qbezier(sx, sy, cx, cy, ex, ey VGfloat, style ...string) {
 	C.Qbezier(C.VGfloat(sx), C.VGfloat(sy), C.VGfloat(cx), C.VGfloat(cy), C.VGfloat(ex), C.VGfloat(ey))
 }
 
 // Cbezier draws a cubic bezier curve with extrema (sx, sy) and (ex, ey).
 // Control points at (cx, cy) and (px, py)
-func Cbezier(sx, sy, cx, cy, px, py, ex, ey float64, style ...string) {
+func Cbezier(sx, sy, cx, cy, px, py, ex, ey VGfloat, style ...string) {
 	C.Cbezier(C.VGfloat(sx), C.VGfloat(sy), C.VGfloat(cx), C.VGfloat(cy), C.VGfloat(px), C.VGfloat(py), C.VGfloat(ex), C.VGfloat(ey))
 }
 
 // Arc draws an arc at (x,y) with dimensions (w,h).
 // the arc starts at the angle sa, extended to aext
-func Arc(x, y, w, h, sa, aext float64, style ...string) {
+func Arc(x, y, w, h, sa, aext VGfloat, style ...string) {
 	C.Arc(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(sa), C.VGfloat(aext))
 }
 
 // poly converts coordinate slices
-func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
+func poly(x, y []VGfloat) (*C.VGfloat, *C.VGfloat, C.VGint) {
 	size := len(x)
 	if size != len(y) {
 		return nil, nil, 0
@@ -449,7 +458,7 @@ func poly(x, y []float64) (*C.VGfloat, *C.VGfloat, C.VGint) {
 }
 
 // Polygon draws a polygon with coordinate in x,y
-func Polygon(x, y []float64, style ...string) {
+func Polygon(x, y []VGfloat, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
 		C.Polygon(px, py, np)
@@ -457,7 +466,7 @@ func Polygon(x, y []float64, style ...string) {
 }
 
 // Polyline draws a polyline with coordinates in x, y
-func Polyline(x, y []float64, style ...string) {
+func Polyline(x, y []VGfloat, style ...string) {
 	px, py, np := poly(x, y)
 	if np > 0 {
 		C.Polyline(px, py, np)
@@ -478,52 +487,53 @@ func selectfont(s string) C.Fontinfo {
 }
 
 // Text draws text whose aligment begins (x,y)
-func Text(x, y float64, s string, font string, size int, style ...string) {
+func Text(x, y VGfloat, s string, font string, size int, style ...string) {
 	t := C.CString(s)
 	C.Text(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 	C.free(unsafe.Pointer(t))
 }
 
 // TextMid draws text centered at (x,y)
-func TextMid(x, y float64, s string, font string, size int, style ...string) {
+func TextMid(x, y VGfloat, s string, font string, size int, style ...string) {
 	t := C.CString(s)
 	C.TextMid(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 	C.free(unsafe.Pointer(t))
 }
 
 // TextEnd draws text end-aligned at (x,y)
-func TextEnd(x, y float64, s string, font string, size int, style ...string) {
+func TextEnd(x, y VGfloat, s string, font string, size int, style ...string) {
 	t := C.CString(s)
 	C.TextEnd(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 	C.free(unsafe.Pointer(t))
 }
 
 // TextWidth returns the length of text at a specified font and size
-func TextWidth(s string, font string, size int) float64 {
+func TextWidth(s string, font string, size int) VGfloat {
 	t := C.CString(s)
 	defer C.free(unsafe.Pointer(t))
-	return float64(C.TextWidth(t, selectfont(font), C.int(size)))
+	return VGfloat(C.TextWidth(t, selectfont(font), C.int(size)))
 }
 
 // Translate translates the coordinate system to (x,y)
-func Translate(x, y float64) {
+func Translate(x, y VGfloat) {
 	C.Translate(C.VGfloat(x), C.VGfloat(y))
 }
 
 // Rotate rotates the coordinate system around the specifed angle
-func Rotate(r float64) {
+func Rotate(r VGfloat) {
 	C.Rotate(C.VGfloat(r))
 }
 
 // Shear warps the coordinate system by (x,y)
-func Shear(x, y float64) {
+func Shear(x, y VGfloat) {
 	C.Shear(C.VGfloat(x), C.VGfloat(y))
 }
 
 // Scale scales the coordinate system by (x,y)
-func Scale(x, y float64) {
+func Scale(x, y VGfloat) {
 	C.Scale(C.VGfloat(x), C.VGfloat(y))
 }
+
 // SaveTerm saves terminal settings
 func SaveTerm() {
 	C.saveterm()

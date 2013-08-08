@@ -14,6 +14,9 @@ func rseed() {
 	rand.Seed(int64(time.Now().Nanosecond()) % 1e9)
 }
 
+func randf() openvg.VGfloat {
+	return openvg.VGfloat(rand.Float32())
+}
 func main() {
 	var nr = flag.Int("n", 500, "number of objects")
 	var message = flag.String("m", "Go/OpenVG", "message")
@@ -24,8 +27,8 @@ func main() {
 	rseed()
 
 	width, height := openvg.Init()
-	fw := float64(width)
-	fh := float64(height)
+	fw := openvg.VGfloat(width)
+	fh := openvg.VGfloat(height)
 
 	openvg.Start(width, height)
 	openvg.BackgroundColor(*bgcolor)
@@ -34,18 +37,18 @@ func main() {
 		red := uint8(rand.Intn(255))
 		green := uint8(rand.Intn(255))
 		blue := uint8(rand.Intn(255))
-		alpha := rand.Float64()
+		alpha := randf()
 
-		x := rand.Float64() * fw
-		y := rand.Float64() * fh
-		radius := rand.Float64() * fw / 10
+		x := randf() * fw
+		y := randf() * fh
+		radius := randf() * fw / 10
 
 		openvg.FillRGB(red, green, blue, alpha)
 		openvg.Circle(x, y, radius)
 	}
 	openvg.FillColor(*fgcolor)
 	openvg.TextMid(fw/2, fh/2, *message, "sans", width/25)
-	openvg.SaveEnd("rand.raw")
+	openvg.End()
 
 	bufio.NewReader(os.Stdin).ReadBytes('\n')
 	openvg.Finish()
