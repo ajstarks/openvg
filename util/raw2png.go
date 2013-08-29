@@ -2,11 +2,11 @@
 package main
 
 import (
-	"encoding/binary"
-	// "fmt"
+	"bufio"
 	"image"
-	"image/color"
 	"image/png"
+	"io"
+	"log"
 	"os"
 	"strconv"
 )
@@ -21,13 +21,13 @@ func main() {
 		width, _ = strconv.Atoi(os.Args[1])
 		height, _ = strconv.Atoi(os.Args[2])
 	}
-	scanline := make([]color.NRGBA, width)
-	img := image.NewNRGBA(image.Rect(0, 0, width, height))
-	for y := height; y > 0; y-- { // OpenVG has origin at lower left, y increasing up
-		binary.Read(os.Stdin, binary.LittleEndian, &scanline) // read a row at a time
-		for x := 0; x < width; x++ {
-			img.Set(x, y, scanline[x])
+	r := bufio.NewReader(os.Stdin)
+	m := image.NewNRGBA(image.Rect(0, 0, width, height))
+	for y := height - 1; y >= 0; y-- { // OpenVG has origin at lower left, y increasing up
+		i := m.PixOffset(0, y)
+		if _, err := io.ReadFull(r, m.Pix[i:i+4*width]); err != nil {
+			log.Fatal(err)
 		}
 	}
-	png.Encode(os.Stdout, img)
+	png.Encode(os.Stdout, m)
 }
