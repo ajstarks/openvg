@@ -366,13 +366,13 @@ func Img(x, y VGfloat, im image.Image) {
 	for yp := miny; yp < maxy; yp++ {
 		for xp := minx; xp < maxx; xp++ {
 			r, g, b, a = im.At(xp, (maxy-1)-yp).RGBA() // OpenVG has origin at lower left, y increasing up
-			data[n] = C.VGubyte(r)
+			data[n] = C.VGubyte(r >> 8)
 			n++
-			data[n] = C.VGubyte(g)
+			data[n] = C.VGubyte(g >> 8)
 			n++
-			data[n] = C.VGubyte(b)
+			data[n] = C.VGubyte(b >> 8)
 			n++
-			data[n] = C.VGubyte(a)
+			data[n] = C.VGubyte(a >> 8)
 			n++
 		}
 	}
