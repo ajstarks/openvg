@@ -3,8 +3,12 @@ LIBFLAGS=-L/opt/vc/lib -lGLESv2 -lEGL -ljpeg
 
 all: shapedemo hellovg mouse-hellovg
 
-shapedemo:	shapedemo.c ../libshapes.o ../oglinit.o
-	gcc   -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I.. -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+libshapes.o:
+	cd .. ; make libshapes.o
+
+oglinit.o:
+	cd .. ; make oglinit.o
+
 shapedemo:	shapedemo.c libshapes.o oglinit.o
 	gcc -Wall $(INCLUDEFLAGS) $(LIBFLAGS) -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o
 
