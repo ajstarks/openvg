@@ -185,22 +185,40 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg library.  Install it via:
+<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg and freetype libraries and a couple helper utilities.  Install them via:
 
-	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev
+	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent git freetype6-dev
 
-Next, build the library and test:
+Next, build and test:
 
 	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
 	pi@raspberrypi ~ $ cd openvg
-	pi@raspberrypi ~/openvg $ make
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+	pi@raspberrypi ~/openvg $ make libshapes.o
+	<i>gcc ... -c oglinit.c
+	224 glyphs written
+	...
+	224 glyphs written
+	gcc ... -c libshapes.c
+	indent -linux -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
+	gcc ... -shared -o libshapes.so oglinit.o libshapes.o</i>
 	pi@raspberrypi ~/openvg/client $ cd client
 	pi@raspberrypi ~/openvg/client $ make test
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
-	./shapedemo demo 5
+	<i>gcc ... -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+	./shapedemo demo 5</i>
+	pi@raspberrypi ~/openvg/client $ # Press the enter key to exit.
+	pi@raspberrypi ~/openvg/client $ cd ..
 
+Install shapes library:
+
+	pi@raspberrypi ~/openvg $ make library
+	pi@raspberrypi ~/openvg $ sudo make install
+
+The openvg shapes library can now be utilized in any c code by including shapes.h and fontinfo.h and linking with libshapes.so:
+
+	#include <shapes.h>
+	#include <fontinfo.h>
+
+	pi@raspberrypi ~ $ gcc -lshapes anysource.c
 
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
