@@ -185,22 +185,28 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg library.  Install it via:
+<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg and freetype libraries and a couple helper utilities.  Install them via:
 
-	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev
+	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent git freetype6-dev
 
-Next, build the library and test:
+Next, build and test:
 
 	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
 	pi@raspberrypi ~ $ cd openvg
-	pi@raspberrypi ~/openvg $ make
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+	pi@raspberrypi ~/openvg $ make libshapes.o
+	gcc ... -c oglinit.c
+	224 glyphs written
+	...
+	224 glyphs written
+	gcc ... -c libshapes.c
+	indent -linux -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
+	gcc ... -shared -o libshapes.so oglinit.o libshapes.o
 	pi@raspberrypi ~/openvg/client $ cd client
 	pi@raspberrypi ~/openvg/client $ make test
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+	gcc ... -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
 	./shapedemo demo 5
-
+	pi@raspberrypi ~/openvg/client $ # Press the enter key to exit.
+	pi@raspberrypi ~/openvg/client $ cd ..
 
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
@@ -217,6 +223,28 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	
 	
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
+
+# Shapes Library
+The openvg shapes library can be compiled and installed as a standard shared object library.
+
+	pi@raspberrypi ~/openvg $ make library
+	pi@raspberrypi ~/openvg $ sudo make install
+
+To use the code in any c file, include shapes.h (and optionally: fontinfo.h).
+
+	#include <shapes.h>
+	#include <fontinfo.h>
+
+To use the code in a c++ project, the include statements need to be identified as external C code.
+
+	extern "C" {
+	#include <shapes.h>
+	#include <fontinfo.h>
+	}
+
+Be sure to link with the libshapes.so file.
+
+	pi@raspberrypi ~ $ gcc -lshapes anysource.c
 
 ## Go wrapper
 
