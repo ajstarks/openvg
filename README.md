@@ -194,31 +194,19 @@ Next, build and test:
 	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
 	pi@raspberrypi ~ $ cd openvg
 	pi@raspberrypi ~/openvg $ make libshapes.o
-	<i>gcc ... -c oglinit.c
+	gcc ... -c oglinit.c
 	224 glyphs written
 	...
 	224 glyphs written
 	gcc ... -c libshapes.c
 	indent -linux -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
-	gcc ... -shared -o libshapes.so oglinit.o libshapes.o</i>
+	gcc ... -shared -o libshapes.so oglinit.o libshapes.o
 	pi@raspberrypi ~/openvg/client $ cd client
 	pi@raspberrypi ~/openvg/client $ make test
-	<i>gcc ... -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
-	./shapedemo demo 5</i>
+	gcc ... -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+	./shapedemo demo 5
 	pi@raspberrypi ~/openvg/client $ # Press the enter key to exit.
 	pi@raspberrypi ~/openvg/client $ cd ..
-
-Install shapes library:
-
-	pi@raspberrypi ~/openvg $ make library
-	pi@raspberrypi ~/openvg $ sudo make install
-
-The openvg shapes library can now be utilized in any c code by including shapes.h and fontinfo.h and linking with libshapes.so:
-
-	#include <shapes.h>
-	#include <fontinfo.h>
-
-	pi@raspberrypi ~ $ gcc -lshapes anysource.c
 
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
@@ -235,6 +223,28 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	
 	
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
+
+# Shapes Library
+The openvg shapes library can be compiled and installed as utilized as a standard shared object.
+
+	pi@raspberrypi ~/openvg $ make library
+	pi@raspberrypi ~/openvg $ sudo make install
+
+To use the code in any c file including shapes.h (and optionally: fontinfo.h).
+
+	#include <shapes.h>
+	#include <fontinfo.h>
+
+To use the code in a c++ project, the include statements need to be identified as external C code.
+
+	extern "C" {
+	#include <shapes.h>
+	#include <fontinfo.h>
+	}
+
+Be sure to link with the libshapes.so file.
+
+	pi@raspberrypi ~ $ gcc -lshapes anysource.c
 
 ## Go wrapper
 
