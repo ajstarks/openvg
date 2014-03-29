@@ -2,7 +2,7 @@ LIBFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc
 FONTLIB=/usr/share/fonts/truetype/ttf-dejavu/
 all:	libshapes.o oglinit.o gopenvg
 
-libshapes.o:	libshapes.c shapes.h fontinfo.h oglinit.o
+libshapes.o:	libshapes.c shapes.h fontinfo.h fonts
 	gcc -O2  -Wall $(LIBFLAGS) -c libshapes.c
 gopenvg:	openvg.go
 	go install .
