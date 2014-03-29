@@ -225,12 +225,12 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
 
 # Shapes Library
-The openvg shapes library can be compiled and installed as utilized as a standard shared object.
+The openvg shapes library can be compiled and installed as a standard shared object library.
 
 	pi@raspberrypi ~/openvg $ make library
 	pi@raspberrypi ~/openvg $ sudo make install
 
-To use the code in any c file including shapes.h (and optionally: fontinfo.h).
+To use the code in any c file, include shapes.h (and optionally: fontinfo.h).
 
 	#include <shapes.h>
 	#include <fontinfo.h>
