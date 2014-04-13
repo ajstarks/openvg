@@ -185,17 +185,23 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg library and the indent command to format your code.  Install it via:
+<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg and freetype libraries.
+The indent tool is also useful for code formatting.  Install them via:
 
-	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent
+	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent freetype6-dev
 
 Next, build the library and test:
 
 	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
 	pi@raspberrypi ~ $ cd openvg
 	pi@raspberrypi ~/openvg $ make
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+	g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
+	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
+	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
+	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf DejaVuSerif.inc DejaVuSerif
+	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+	go install .
 	pi@raspberrypi ~/openvg/client $ cd client
 	pi@raspberrypi ~/openvg/client $ make test
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
@@ -215,7 +221,19 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	./shapedemo fontsize             # show a range of font sizes (per <https://speakerdeck.com/u/idangazit/p/better-products-through-typography>)
 	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
 	
+
+To install the shapes library as a system-wide shared library
 	
+	pi@raspberrypi ~/openvg $ make library
+	pi@raspberrypi ~/openvg $ sudo make install
+
+The openvg shapes library can now be used in C code by including shapes.h and fontinfo.h and linking with libshapes.so:
+
+	#include <shapes.h>
+	#include <fontinfo.h>
+
+	pi@raspberrypi ~ $ gcc -lshapes anysource.c
+
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
 
 ## Go wrapper
