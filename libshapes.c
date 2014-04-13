@@ -12,11 +12,11 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "bcm_host.h"
-#include "DejaVuSans.inc"	// font data
+#include "DejaVuSans.inc"				   // font data
 #include "DejaVuSerif.inc"
 #include "DejaVuSansMono.inc"
-#include "eglstate.h"		// data structures for graphics state
-#include "fontinfo.h"		// font data structure
+#include "eglstate.h"					   // data structures for graphics state
+#include "fontinfo.h"					   // font data structure
 static STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 256;
 //
@@ -29,20 +29,23 @@ struct termios orig_term_attr;
 
 // saveterm saves the current terminal settings
 void saveterm() {
-    tcgetattr(fileno(stdin), &orig_term_attr);
+	tcgetattr(fileno(stdin), &orig_term_attr);
 }
+
 // rawterm sets the terminal to raw mode
 void rawterm() {
-    memcpy(&new_term_attr, &orig_term_attr, sizeof(struct termios));
-    new_term_attr.c_lflag &= ~(ICANON| ECHO | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL);
-    new_term_attr.c_cc[VTIME] = 0;
-    new_term_attr.c_cc[VMIN] = 0;
-    tcsetattr(fileno(stdin), TCSANOW, &new_term_attr);
+	memcpy(&new_term_attr, &orig_term_attr, sizeof(struct termios));
+	new_term_attr.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL);
+	new_term_attr.c_cc[VTIME] = 0;
+	new_term_attr.c_cc[VMIN] = 0;
+	tcsetattr(fileno(stdin), TCSANOW, &new_term_attr);
 }
+
 // restore resets the terminal to the previously saved setting
 void restoreterm() {
-    tcsetattr(fileno(stdin), TCSANOW, &orig_term_attr);
+	tcsetattr(fileno(stdin), TCSANOW, &orig_term_attr);
 }
+
 //
 // Font functions
 //
@@ -310,8 +313,6 @@ void StrokeWidth(VGfloat width) {
 //
 //
 
-
-
 // RGBA fills a color vectors from a RGBA quad.
 void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4]) {
 	if (r > 255) {
@@ -351,35 +352,34 @@ void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
 	setfill(color);
 }
 
-
 // setstops sets color stops for gradients
-void setstop(VGPaint paint, VGfloat *stops, int n) {
+void setstop(VGPaint paint, VGfloat * stops, int n) {
 	VGboolean multmode = VG_FALSE;
-	VGColorRampSpreadMode spreadmode = VG_COLOR_RAMP_SPREAD_REPEAT;	
+	VGColorRampSpreadMode spreadmode = VG_COLOR_RAMP_SPREAD_REPEAT;
 	vgSetParameteri(paint, VG_PAINT_COLOR_RAMP_SPREAD_MODE, spreadmode);
 	vgSetParameteri(paint, VG_PAINT_COLOR_RAMP_PREMULTIPLIED, multmode);
-	vgSetParameterfv(paint, VG_PAINT_COLOR_RAMP_STOPS, 5*n, stops);
+	vgSetParameterfv(paint, VG_PAINT_COLOR_RAMP_STOPS, 5 * n, stops);
 	vgSetPaint(paint, VG_FILL_PATH);
 }
 
 // LinearGradient fills with a linear gradient
-void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat *stops, int ns) {
-	VGfloat lgcoord[4] = {x1, y1, x2, y2};
+void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat * stops, int ns) {
+	VGfloat lgcoord[4] = { x1, y1, x2, y2 };
 	VGPaint paint = vgCreatePaint();
 	vgSetParameteri(paint, VG_PAINT_TYPE, VG_PAINT_TYPE_LINEAR_GRADIENT);
 	vgSetParameterfv(paint, VG_PAINT_LINEAR_GRADIENT, 4, lgcoord);
 	setstop(paint, stops, ns);
-	vgDestroyPaint(paint);	
+	vgDestroyPaint(paint);
 }
 
 // RadialGradient fills with a linear gradient
-void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx, VGfloat fy, VGfloat radius, VGfloat *stops, int ns) {
-	VGfloat radialcoord[5] = {cx, cy, fx, fy, radius};
+void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx, VGfloat fy, VGfloat radius, VGfloat * stops, int ns) {
+	VGfloat radialcoord[5] = { cx, cy, fx, fy, radius };
 	VGPaint paint = vgCreatePaint();
 	vgSetParameteri(paint, VG_PAINT_TYPE, VG_PAINT_TYPE_RADIAL_GRADIENT);
 	vgSetParameterfv(paint, VG_PAINT_RADIAL_GRADIENT, 5, radialcoord);
 	setstop(paint, stops, ns);
-	vgDestroyPaint(paint);	
+	vgDestroyPaint(paint);
 }
 
 // Text renders a string of text at a specified location, size, using the specified font glyphs
@@ -393,7 +393,7 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 		unsigned int character = (unsigned int)s[i];
 		int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
-			continue;	//glyph is undefined
+			continue;			   //glyph is undefined
 		}
 		VGfloat mat[9] = {
 			size, 0.0f, 0.0f,
@@ -417,7 +417,7 @@ VGfloat TextWidth(char *s, Fontinfo f, int pointsize) {
 		unsigned int character = (unsigned int)s[i];
 		int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
-			continue;	//glyph is undefined
+			continue;			   //glyph is undefined
 		}
 		tw += size * f.GlyphAdvances[glyph] / 65536.0f;
 	}
