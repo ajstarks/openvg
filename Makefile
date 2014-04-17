@@ -2,7 +2,7 @@ INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/op
 LIBFLAGS=-L/opt/vc/lib -lGLESv2 -lEGL -ljpeg
 FONTLIB=/usr/share/fonts/truetype/ttf-dejavu
 FONTFILES=DejaVuSans.inc  DejaVuSansMono.inc DejaVuSerif.inc
-all:	libshapes.o oglinit.o gopenvg
+all:	libshapes.o oglinit.o
 
 libshapes.o:	libshapes.c shapes.h fontinfo.h fonts
 	gcc -O2 -Wall $(INCLUDEFLAGS) -c libshapes.c

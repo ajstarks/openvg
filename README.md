@@ -185,10 +185,10 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg and freetype libraries.
+<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the DejaVu fonts, and the jpeg and freetype libraries.
 The indent tool is also useful for code formatting.  Install them via:
 
-	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent freetype6-dev
+	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent libfreetype6-dev ttf-dejavu-core
 
 Next, build the library and test:
 
@@ -197,11 +197,13 @@ Next, build the library and test:
 	pi@raspberrypi ~/openvg $ make
 	g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
 	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
+	224 glyphs written
 	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
+	224 glyphs written
 	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf DejaVuSerif.inc DejaVuSerif
+	224 glyphs written
 	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
 	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
-	go install .
 	pi@raspberrypi ~/openvg/client $ cd client
 	pi@raspberrypi ~/openvg/client $ make test
 	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
@@ -273,9 +275,4 @@ To build the wrapper: (make sure GOPATH is set)
 	pi@raspberrypi ~/openvg $ cd go-client/hellovg
 	pi@raspberrypi ~/openvg/go-client/hellovg $ go build .
 	pi@raspberrypi ~/openvg/go-client/hellovg $ ./hellovg 
-
-
-	
-
-
 
