@@ -185,28 +185,30 @@ The unloadfont function releases the path information:
 
 # Build and run
 
-<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the jpeg and freetype libraries and a couple helper utilities.  Install them via:
+<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the DejaVu fonts, and the jpeg and freetype libraries.
+The indent tool is also useful for code formatting.  Install them via:
 
-	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent git freetype6-dev
+	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent libfreetype6-dev ttf-dejavu-core
 
-Next, build and test:
+Next, build the library and test:
 
 	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
 	pi@raspberrypi ~ $ cd openvg
-	pi@raspberrypi ~/openvg $ make libshapes.o
-	gcc ... -c oglinit.c
+	pi@raspberrypi ~/openvg $ make
+	g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
+	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
 	224 glyphs written
-	...
+	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
 	224 glyphs written
-	gcc ... -c libshapes.c
-	indent -linux -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
-	gcc ... -shared -o libshapes.so oglinit.o libshapes.o
+	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf DejaVuSerif.inc DejaVuSerif
+	224 glyphs written
+	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
 	pi@raspberrypi ~/openvg/client $ cd client
 	pi@raspberrypi ~/openvg/client $ make test
-	gcc ... -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
 	./shapedemo demo 5
-	pi@raspberrypi ~/openvg/client $ # Press the enter key to exit.
-	pi@raspberrypi ~/openvg/client $ cd ..
+
 
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
@@ -221,30 +223,20 @@ The program "shapedemo" exercises a high-level API built on OpenVG found in libs
 	./shapedemo fontsize             # show a range of font sizes (per <https://speakerdeck.com/u/idangazit/p/better-products-through-typography>)
 	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
 	
+
+To install the shapes library as a system-wide shared library
 	
-<a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
-
-# Shapes Library
-The openvg shapes library can be compiled and installed as a standard shared object library.
-
 	pi@raspberrypi ~/openvg $ make library
 	pi@raspberrypi ~/openvg $ sudo make install
 
-To use the code in any c file, include shapes.h (and optionally: fontinfo.h).
+The openvg shapes library can now be used in C code by including shapes.h and fontinfo.h and linking with libshapes.so:
 
 	#include <shapes.h>
 	#include <fontinfo.h>
-
-To use the code in a c++ project, the include statements need to be identified as external C code.
-
-	extern "C" {
-	#include <shapes.h>
-	#include <fontinfo.h>
-	}
-
-Be sure to link with the libshapes.so file.
 
 	pi@raspberrypi ~ $ gcc -lshapes anysource.c
+
+<a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
 
 ## Go wrapper
 
@@ -283,9 +275,4 @@ To build the wrapper: (make sure GOPATH is set)
 	pi@raspberrypi ~/openvg $ cd go-client/hellovg
 	pi@raspberrypi ~/openvg/go-client/hellovg $ go build .
 	pi@raspberrypi ~/openvg/go-client/hellovg $ ./hellovg 
-
-
-	
-
-
 

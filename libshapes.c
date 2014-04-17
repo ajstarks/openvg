@@ -12,11 +12,11 @@
 #include "EGL/egl.h"
 #include "GLES/gl.h"
 #include "bcm_host.h"
-#include "DejaVuSans.inc"	// font data
+#include "DejaVuSans.inc"				   // font data
 #include "DejaVuSerif.inc"
 #include "DejaVuSansMono.inc"
-#include "eglstate.h"		// data structures for graphics state
-#include "fontinfo.h"		// font data structure
+#include "eglstate.h"					   // data structures for graphics state
+#include "fontinfo.h"					   // font data structure
 static STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 256;
 //
@@ -393,7 +393,7 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 		unsigned int character = (unsigned int)s[i];
 		int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
-			continue;	//glyph is undefined
+			continue;			   //glyph is undefined
 		}
 		VGfloat mat[9] = {
 			size, 0.0f, 0.0f,
@@ -417,7 +417,7 @@ VGfloat TextWidth(char *s, Fontinfo f, int pointsize) {
 		unsigned int character = (unsigned int)s[i];
 		int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
-			continue;	//glyph is undefined
+			continue;			   //glyph is undefined
 		}
 		tw += size * f.GlyphAdvances[glyph] / 65536.0f;
 	}

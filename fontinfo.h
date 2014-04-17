@@ -1,6 +1,5 @@
 #ifndef OPENVG_FONTINFO_H
 #define OPENVG_FONTINFO_H
-
 typedef struct {
 	const short *CharacterMap;
 	const int *GlyphAdvances;
@@ -9,5 +8,4 @@ typedef struct {
 } Fontinfo;
 
 Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
-
 #endif				// OPENVG_FONTINFO_H

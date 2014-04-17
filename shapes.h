@@ -1,7 +1,6 @@
 #include <VG/openvg.h>
 #include <VG/vgu.h>
 #include "fontinfo.h"
-
 extern void Translate(VGfloat, VGfloat);
 extern void Rotate(VGfloat);
 extern void Shear(VGfloat, VGfloat);

@@ -1,8 +1,8 @@
 INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads
 LIBFLAGS=-L/opt/vc/lib -lGLESv2 -lEGL -ljpeg
-FONTLIB=/usr/share/fonts/truetype/ttf-dejavu/
-
-all:	libshapes.o oglinit.o gopenvg
+FONTLIB=/usr/share/fonts/truetype/ttf-dejavu
+FONTFILES=DejaVuSans.inc  DejaVuSansMono.inc DejaVuSerif.inc
+all:	libshapes.o oglinit.o
 
 libshapes.o:	libshapes.c shapes.h fontinfo.h fonts
 	gcc -O2 -Wall $(INCLUDEFLAGS) -c libshapes.c
@@ -16,14 +16,22 @@ oglinit.o:	oglinit.c
 font2openvg:	fontutil/font2openvg.cpp
 	g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
 
-fonts: font2openvg
-	for f in $(FONTLIB)/*.ttf; do fn=`basename $$f .ttf`; ./font2openvg $$f $$fn.inc $$fn; done
+fonts:	$(FONTFILES)
+
+DejaVuSans.inc: font2openvg $(FONTLIB)/DejaVuSans.ttf
+	./font2openvg $(FONTLIB)/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
+
+DejaVuSerif.inc: font2openvg $(FONTLIB)/DejaVuSerif.ttf
+	./font2openvg $(FONTLIB)/DejaVuSerif.ttf DejaVuSerif.inc DejaVuSerif
+
+DejaVuSansMono.inc: font2openvg $(FONTLIB)/DejaVuSansMono.ttf
+	./font2openvg $(FONTLIB)/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
 
 indent:
 	indent -linux -c 60 -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
 
 clean:
-	rm -f *.o *.inc *.so font2openvg
+	rm -f *.o *.inc *.so font2openvg *.c~ *.h~
 
 library: oglinit.o libshapes.o indent
 	gcc $(LIBFLAGS) -shared -o libshapes.so oglinit.o libshapes.o
