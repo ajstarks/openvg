@@ -386,8 +386,10 @@ void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx, VGfloat fy, VGfloat 
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
 void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 	VGfloat size = (VGfloat) pointsize, xx = x, mm[9];
+	VGfloat strk = vgGetf(VG_STROKE_LINE_WIDTH);
 	int i;
-
+	
+	vgSetf(VG_STROKE_LINE_WIDTH, strk / size); // scaled size
 	vgGetMatrix(mm);
 	for (i = 0; i < (int)strlen(s); i++) {
 		unsigned int character = (unsigned int)s[i];
@@ -402,17 +404,11 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 		};
 		vgLoadMatrix(mm);
 		vgMultMatrix(mat);
-		vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH);
-
-		// "the path is first filled, then stroked", OpenVG Spec 1.1, Section 8.8, pg 88
-		VGfloat w = vgGetf(VG_STROKE_LINE_WIDTH);
-		vgSetf(VG_STROKE_LINE_WIDTH, w / size);
-		vgDrawPath(f.Glyphs[glyph], VG_STROKE_PATH);
-		vgSetf(VG_STROKE_LINE_WIDTH, w);
-
+		vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH | VG_STROKE_PATH);
 		xx += size * f.GlyphAdvances[glyph] / 65536.0f;
 	}
-	vgLoadMatrix(mm);
+	vgLoadMatrix(mm);	
+	vgSetf(VG_STROKE_LINE_WIDTH, strk); // return to unscaled stroke size
 }
 
 // TextWidth returns the width of a text string at the specified font and size.
