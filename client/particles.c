@@ -34,6 +34,7 @@ particle_t particles[NUM_PARTICLES];
 int showTrails = 0;
 int directionRTL = 0;
 int alternate = 1;
+double gravity = 0.5;
 
 // Initialize _all_ the particles
 void initParticles(int w, int h) {
@@ -86,7 +87,7 @@ void draw(int w, int h) {
 			p->vy *= 0.97;
 
 		// Gravity
-		p->vy -= 0.5;
+		p->vy -= gravity;
 
 		// Stop particles leaving the canvas  
 		if (p->x < -50)
@@ -137,11 +138,16 @@ void setOptions(int argc, char **argv) {
 			directionRTL = 0;
 			printf("Displaying in left-to-right mode\n");
 		}
+		if (option == 'g' && i+1 < argc) {
+			gravity = atof(argv[i+1]);
+			printf("Gravity set to %.2f\n", gravity);
+		}
 	}
 }
 
 // Display Options
 // -t  show trails
+// -g[value] gravity
 //
 // Direction (alternates by default)
 // -r  right-to-left
