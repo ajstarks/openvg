@@ -23,7 +23,8 @@ type particle struct {
 
 var (
 	particles                                        []particle
-	nparticles                                       int
+	nparticles, nswitch                              int
+	gravity float64 
 	showTrails, directionRTL, alternate, right, left bool
 )
 
@@ -60,6 +61,7 @@ func draw(w, h openvg.VGfloat) {
 	paintBG(w, h)
 
 	var p particle
+	var grav = openvg.VGfloat(gravity)
 	for i := 0; i < nparticles; i++ {
 		p = particles[i]
 		openvg.FillRGB(p.r, p.g, p.b, 1)
@@ -75,7 +77,7 @@ func draw(w, h openvg.VGfloat) {
 		}
 
 		// Gravty
-		p.vy -= 0.5
+		p.vy -= grav
 
 		// Stop p leavng the canvas
 		if p.x < -50 {
@@ -106,11 +108,13 @@ func draw(w, h openvg.VGfloat) {
 	openvg.End()
 }
 
-func main() {
+func setOptions() {
 	flag.BoolVar(&right, "r", false, "right to left")
 	flag.BoolVar(&left, "l", false, "left to right")
 	flag.BoolVar(&showTrails, "t", false, "show trails")
 	flag.IntVar(&nparticles, "n", 25, "number of particles")
+	flag.IntVar(&nswitch, "s", 100, "iterations to switch direction")
+	flag.Float64Var(&gravity, "g", 0.5, "gravity")
 	flag.Parse()
 	alternate = true
 	if right || left {
@@ -122,6 +126,10 @@ func main() {
 	if left {
 		directionRTL = false
 	}
+}
+
+func main() {
+	setOptions()
 	rand.Seed(time.Now().Unix())
 	w, h := openvg.Init()
 	width, height := openvg.VGfloat(w), openvg.VGfloat(h)
@@ -131,7 +139,7 @@ func main() {
 	for {
 		draw(width, height)
 		i++
-		if alternate && i == 100 { // switch launch direction every 100 draws
+		if alternate && i == nswitch { // switch launch direction every nswitch draws
 			directionRTL = !directionRTL
 			i = 0
 		}
