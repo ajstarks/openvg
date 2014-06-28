@@ -1,5 +1,6 @@
 // particles:  Simple particles example using the OpenVG Testbed
-// via Nick Williams (github.com/nilliams)
+// based the on C verion from Nick Williams (github.com/nilliams)
+// https://gist.githubusercontent.com/nilliams/7705819/raw/9cbb5a1298d6eef858639095148ede2c33cb6d40/particles.c
 
 package main
 
@@ -24,7 +25,7 @@ type particle struct {
 var (
 	particles                                        []particle
 	nparticles, nswitch                              int
-	gravity float64 
+	gravity                                          float64
 	showTrails, directionRTL, alternate, right, left bool
 )
 
@@ -67,7 +68,7 @@ func draw(w, h openvg.VGfloat) {
 		openvg.FillRGB(p.r, p.g, p.b, 1)
 		openvg.Circle(p.x, p.y, p.radius)
 
-		// Apply the velocty
+		// Apply the velocity
 		p.x += p.vx
 		p.y += p.vy
 
@@ -76,10 +77,10 @@ func draw(w, h openvg.VGfloat) {
 			p.vy *= 0.97
 		}
 
-		// Gravty
+		// Gravity
 		p.vy -= grav
 
-		// Stop p leavng the canvas
+		// Stop p leaving the canvas
 		if p.x < -50 {
 			p.x = w + 50
 		}

@@ -1,5 +1,6 @@
 // particles.c - Simple particles example using the OpenVG Testbed
 // via Nick Williams (github.com/nilliams)
+// https://gist.githubusercontent.com/nilliams/7705819/raw/9cbb5a1298d6eef858639095148ede2c33cb6d40/particles.c
 //
 // Usage: ./particles [OPTIONS]
 //
