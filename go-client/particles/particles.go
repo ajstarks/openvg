@@ -62,7 +62,7 @@ func draw(w, h openvg.VGfloat) {
 	var p particle
 	for i := 0; i < nparticles; i++ {
 		p = particles[i]
-		openvg.FillRGB(p.r, p.g, p.b, 0.5)
+		openvg.FillRGB(p.r, p.g, p.b, 1)
 		openvg.Circle(p.x, p.y, p.radius)
 
 		// Apply the velocty
@@ -85,7 +85,7 @@ func draw(w, h openvg.VGfloat) {
 			p.x = -50
 		}
 
-		// When partcle reaches the bottom of screen reset velocity & start posn
+		// When particle reaches the bottom of screen reset velocity & start posn
 		if p.y < -50 {
 			p.x = 0
 			p.y = 0
