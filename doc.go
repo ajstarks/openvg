@@ -1,5 +1,5 @@
 /*
-openvg is a wrapper to a C library of high-level 2D graphics operations built on OpenVG 1.1
+Package openvg is a wrapper to a C library of high-level 2D graphics operations built on OpenVG 1.1
 
 The typical "hello world" program looks like this: 
 

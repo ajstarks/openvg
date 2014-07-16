@@ -1,4 +1,4 @@
-// High-level 2D vector graphics library built on OpenVG
+// Package openvg is a high-level 2D vector graphics library built on OpenVG
 package openvg
 
 /*
@@ -321,7 +321,7 @@ func Start(w, h int, color ...uint8) {
 	}
 }
 
-// Startcolor begins the picture with the specified color background
+// StartColor begins the picture with the specified color background
 func StartColor(w, h int, color string, alpha ...VGfloat) {
 	C.Start(C.int(w), C.int(h))
 	BackgroundColor(color, alpha...)
@@ -408,7 +408,7 @@ func Rect(x, y, w, h VGfloat, style ...string) {
 	C.Rect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
-// Rect draws a rounded rectangle at (x,y) with dimesions (w,h).
+// Roundrect draws a rounded rectangle at (x,y) with dimesions (w,h).
 // the corner radii are at (rw, rh)
 func Roundrect(x, y, w, h, rw, rh VGfloat, style ...string) {
 	C.Roundrect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(rw), C.VGfloat(rh))
@@ -542,7 +542,7 @@ func SaveTerm() {
 func RestoreTerm() {
 	C.restoreterm()
 }
-// func RawTerm() sets the terminal to raw mode
+// RawTerm sets the terminal to raw mode
 func RawTerm() {
 	C.rawterm()
 }
