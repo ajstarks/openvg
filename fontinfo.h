@@ -1,5 +1,8 @@
 #ifndef OPENVG_FONTINFO_H
 #define OPENVG_FONTINFO_H
+
+#include <VG/openvg.h>
+
 typedef struct {
 	const short *CharacterMap;
 	const int *GlyphAdvances;
@@ -7,5 +10,8 @@ typedef struct {
 	VGPath Glyphs[256];
 } Fontinfo;
 
-Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
+extern Fontinfo SansTypeface;
+extern Fontinfo SerifTypeface;
+extern Fontinfo MonoTypeface;
+
 #endif				// OPENVG_FONTINFO_H
