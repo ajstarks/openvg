@@ -2,16 +2,17 @@ INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/op
 LIBFLAGS=-L/opt/vc/lib -lGLESv2 -lEGL -ljpeg
 FONTLIB=/usr/share/fonts/truetype/ttf-dejavu
 FONTFILES=DejaVuSans.inc  DejaVuSansMono.inc DejaVuSerif.inc
-all:	libshapes.o oglinit.o
+
+all:	font2openvg fonts library
 
 libshapes.o:	libshapes.c shapes.h fontinfo.h fonts
-	gcc -O2 -Wall $(INCLUDEFLAGS) -c libshapes.c
+	gcc -g -O2 -Wall $(INCLUDEFLAGS) -c libshapes.c
 
 gopenvg:	openvg.go
 	go install .
 
 oglinit.o:	oglinit.c
-	gcc -O2 -Wall $(INCLUDEFLAGS) -c oglinit.c
+	gcc -g -O2 -Wall $(INCLUDEFLAGS) -c oglinit.c
 
 font2openvg:	fontutil/font2openvg.cpp
 	g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
@@ -34,12 +35,12 @@ clean:
 	rm -f *.o *.inc *.so font2openvg *.c~ *.h~
 
 library: oglinit.o libshapes.o indent
-	gcc $(LIBFLAGS) -shared -o libshapes.so oglinit.o libshapes.o
+	gcc -g $(LIBFLAGS) -shared -o libshapes.so oglinit.o libshapes.o
 
 install:
 	install -m 755 -p font2openvg /usr/bin/
 	install -m 755 -p libshapes.so /usr/lib/libshapes.so.1.0.0
-	strip --strip-unneeded /usr/lib/libshapes.so.1.0.0
+	#strip --strip-unneeded /usr/lib/libshapes.so.1.0.0
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1.0
