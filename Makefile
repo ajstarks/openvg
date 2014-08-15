@@ -2,7 +2,7 @@ INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/op
 LIBFLAGS=-L/opt/vc/lib -lGLESv2 -lEGL -ljpeg
 FONTLIB=/usr/share/fonts/truetype/ttf-dejavu
 FONTFILES=DejaVuSans.inc  DejaVuSansMono.inc DejaVuSerif.inc
-all:	libshapes.o oglinit.o
+all:	font2openvg fonts library	
 
 libshapes.o:	libshapes.c shapes.h fontinfo.h fonts
 	gcc -O2 -Wall $(INCLUDEFLAGS) -c libshapes.c
@@ -27,13 +27,11 @@ DejaVuSerif.inc: font2openvg $(FONTLIB)/DejaVuSerif.ttf
 DejaVuSansMono.inc: font2openvg $(FONTLIB)/DejaVuSansMono.ttf
 	./font2openvg $(FONTLIB)/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
 
-indent:
-	indent -linux -c 60 -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
-
 clean:
 	rm -f *.o *.inc *.so font2openvg *.c~ *.h~
+	indent -linux -c 60 -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
 
-library: oglinit.o libshapes.o indent
+library: oglinit.o libshapes.o
 	gcc $(LIBFLAGS) -shared -o libshapes.so oglinit.o libshapes.o
 
 install:
