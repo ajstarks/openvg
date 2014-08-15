@@ -212,6 +212,8 @@ void dumpscreen(int w, int h, FILE * fp) {
 	free(ScreenBuffer);
 }
 
+Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
+
 // init sets the system to its initial state
 void init(int *w, int *h) {
 	bcm_host_init();
