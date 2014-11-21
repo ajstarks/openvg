@@ -43,7 +43,7 @@ int quitState = 0;
 void *eventThread(void *arg) {
 
 	// Open mouse driver
-	if ((mouse.fd = open("/dev/input/event2", O_RDONLY)) < 0) {
+	if ((mouse.fd = open("/dev/input/event0", O_RDONLY)) < 0) {
 		fprintf(stderr, "Error opening Mouse!\n");
 		quitState = 1;
 		return &quitState;
@@ -53,7 +53,7 @@ void *eventThread(void *arg) {
 
 	while (1) {
 		read(mouse.fd, &mouse.ev, sizeof(struct input_event));
-		//printf("[%4.0f,%4.0f]\r",mouse.x,mouse.y);
+		// printf("[%4.0f,%4.0f]\r",mouse.x,mouse.y);
 
 		// Check events
 		mouse.left = CUR_SIZ * 2;		   // Reset Mouse button states
