@@ -17,6 +17,7 @@ import (
 	"image"
 	_ "image/jpeg"
 	_ "image/png"
+	_ "image/gif"
 	"os"
 	"runtime"
 	"strings"
