@@ -13,7 +13,7 @@
 
 int main(int argc, char **argv) {
 	int w, h, fontsize;
-	VGfloat x, cx, cy, cw, ch, midy, speed;
+	VGint x, cx, cy, cw, ch, midy, speed;
 	char *message = "Now is the time for all good men to come to the aid of the party";
 	char done[3];
 

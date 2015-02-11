@@ -486,6 +486,15 @@ func selectfont(s string) C.Fontinfo {
 	}
 	return C.SerifTypeface
 }
+// ClipRect limits the drawing area to specified rectangle
+func ClipRect(x, y, w, h C.VGint) {
+	C.ClipRect(x, y, w, h)
+}
+
+// ClipEnd stops limiting drawing area to specified rectangle
+func ClipEnd() {
+	C.ClipEnd()
+}
 
 // Text draws text whose aligment begins (x,y)
 func Text(x, y VGfloat, s string, font string, size int, style ...string) {
