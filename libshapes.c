@@ -384,6 +384,18 @@ void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx, VGfloat fy, VGfloat 
 	vgDestroyPaint(paint);
 }
 
+// ClipRect limits the drawing area to specified rectangle
+void ClipRect(VGint x, VGint y, VGint w, VGint h) {
+	vgSeti(VG_SCISSORING, VG_TRUE);
+	VGint coords[4] = { x, y, w, h };
+	vgSetiv(VG_SCISSOR_RECTS, 4, coords);
+}
+
+// ClipEnd stops limiting drawing area to specified rectangle
+void ClipEnd() {
+	vgSeti(VG_SCISSORING, VG_FALSE);
+}
+
 // Text renders a string of text at a specified location, size, using the specified font glyphs
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
 void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
