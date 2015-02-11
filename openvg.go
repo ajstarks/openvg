@@ -31,6 +31,7 @@ type RGB struct {
 
 // VGfloat defines the basic type for coordinates, dimensions and other values
 type VGfloat C.VGfloat 
+type VGint C.VGint
 
 // Offcolor defines the offset, color and alpha values used in gradients
 // the Offset ranges from 0..1, colors as RGB triples, alpha ranges from 0..1
@@ -487,8 +488,8 @@ func selectfont(s string) C.Fontinfo {
 	return C.SerifTypeface
 }
 // ClipRect limits the drawing area to specified rectangle
-func ClipRect(x, y, w, h C.VGint) {
-	C.ClipRect(x, y, w, h)
+func ClipRect(x, y, w, h int) {
+	C.ClipRect(C.VGint(x), C.VGint(y), C.VGint(w), C.VGint(h))
 }
 
 // ClipEnd stops limiting drawing area to specified rectangle
