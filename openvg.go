@@ -2,7 +2,7 @@
 package openvg
 
 /*
-#cgo CFLAGS:   -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads 
+#cgo CFLAGS:   -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads
 #cgo LDFLAGS:  -L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -ljpeg
 #include "VG/openvg.h"
 #include "VG/vgu.h"
@@ -15,9 +15,9 @@ import "C"
 import (
 	"fmt"
 	"image"
+	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
-	_ "image/gif"
 	"os"
 	"runtime"
 	"strings"
@@ -30,7 +30,7 @@ type RGB struct {
 }
 
 // VGfloat defines the basic type for coordinates, dimensions and other values
-type VGfloat C.VGfloat 
+type VGfloat C.VGfloat
 type VGint C.VGint
 
 // Offcolor defines the offset, color and alpha values used in gradients
@@ -40,7 +40,6 @@ type Offcolor struct {
 	RGB
 	Alpha VGfloat
 }
-
 
 // colornames maps SVG color names to RGB triples.
 var colornames = map[string]RGB{
@@ -219,7 +218,7 @@ func BackgroundRGB(r, g, b uint8, alpha VGfloat) {
 
 // BackgroundColor sets the background color
 func BackgroundColor(s string, alpha ...VGfloat) {
-	c := colorlookup(s)
+	c := Colorlookup(s)
 	if len(alpha) == 0 {
 		BackgroundRGB(c.Red, c.Green, c.Blue, 1)
 	} else {
@@ -277,9 +276,9 @@ func StrokeWidth(w VGfloat) {
 	C.StrokeWidth(C.VGfloat(w))
 }
 
-// colorlookup returns a RGB triple corresponding to the named color,
+// Colorlookup returns a RGB triple corresponding to the named color,
 // or "rgb(r,g,b)" string. On error, return black.
-func colorlookup(s string) RGB {
+func Colorlookup(s string) RGB {
 	var rcolor = RGB{0, 0, 0}
 	color, ok := colornames[s]
 	if ok {
@@ -297,7 +296,7 @@ func colorlookup(s string) RGB {
 
 // FillColor sets the fill color using names to specify the color, optionally applying alpha.
 func FillColor(s string, alpha ...VGfloat) {
-	fc := colorlookup(s)
+	fc := Colorlookup(s)
 	if len(alpha) == 0 {
 		FillRGB(fc.Red, fc.Green, fc.Blue, 1)
 	} else {
@@ -307,7 +306,7 @@ func FillColor(s string, alpha ...VGfloat) {
 
 // StrokeColor sets the fill color using names to specify the color, optionally applying alpha.
 func StrokeColor(s string, alpha ...VGfloat) {
-	fc := colorlookup(s)
+	fc := Colorlookup(s)
 	if len(alpha) == 0 {
 		StrokeRGB(fc.Red, fc.Green, fc.Blue, 1)
 	} else {
@@ -355,6 +354,7 @@ func fakeimage(x, y VGfloat, w, h int, s string) {
 	FillColor("black")
 	TextMid(x+(fw/2), y+(fh/2), s, "sans", w/20)
 }
+
 // Img places an image object at (x,y)
 func Img(x, y VGfloat, im image.Image) {
 	bounds := im.Bounds()
@@ -380,8 +380,9 @@ func Img(x, y VGfloat, im image.Image) {
 	}
 	C.makeimage(C.VGfloat(x), C.VGfloat(y), C.int(bounds.Dx()), C.int(bounds.Dy()), &data[0])
 }
+
 // Image places the named image at (x,y) with dimensions (w,h)
-// the derived image dimensions override the specified ones.
+// the specified derived image dimensions override the native ones.
 func Image(x, y VGfloat, w, h int, s string) {
 
 	var img image.Image
@@ -487,6 +488,7 @@ func selectfont(s string) C.Fontinfo {
 	}
 	return C.SerifTypeface
 }
+
 // ClipRect limits the drawing area to specified rectangle
 func ClipRect(x, y, w, h int) {
 	C.ClipRect(C.VGint(x), C.VGint(y), C.VGint(w), C.VGint(h))
@@ -549,10 +551,12 @@ func Scale(x, y VGfloat) {
 func SaveTerm() {
 	C.saveterm()
 }
+
 // RestoreTerm retores terminal settings
 func RestoreTerm() {
 	C.restoreterm()
 }
+
 // RawTerm sets the terminal to raw mode
 func RawTerm() {
 	C.rawterm()
