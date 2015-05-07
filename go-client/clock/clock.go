@@ -2,9 +2,9 @@
 package main
 
 import (
-	"bufio"
 	"math"
 	"os"
+	"os/signal"
 	"time"
 
 	"github.com/ajstarks/openvg"
@@ -78,10 +78,10 @@ func timecoord(x, y, r openvg.VGfloat, hour, min, sec int) (hx, hy, mx, my, sx, 
 var hourdigits = []string{"12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
 
 func face(x, y, r openvg.VGfloat, ts int) {
-	openvg.FillColor("black")
 	var fx, fy, va openvg.VGfloat
 	va = openvg.VGfloat(ts) / 2.0
 	rad := float64(r)
+	openvg.FillColor("black")
 	for h := 12; h > 0; h-- {
 		t := hourangles[h%12] * radians
 		fx = x + openvg.VGfloat(rad*math.Cos(t))
@@ -91,7 +91,6 @@ func face(x, y, r openvg.VGfloat, ts int) {
 }
 
 func main() {
-	r := bufio.NewReader(os.Stdin)
 	width, height := openvg.Init()
 	cx := openvg.VGfloat(width / 2)
 	cy := openvg.VGfloat(height / 2)
@@ -102,52 +101,60 @@ func main() {
 	minstroke := hourstroke / 2
 	secsize := int(textsize * 0.4)
 
-	openvg.SaveTerm()
-	openvg.RawTerm()
+	// set up the ticker and signal handler
+	ticker := time.NewTicker(1 * time.Second)
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+
+	// main loop: for each second, draw the clock components
 	openvg.Start(width, height)
-	for cmd := byte(0); cmd != 'q'; cmd, _ = r.ReadByte() {
-		// get the current time
-		now := time.Now()
-		hr, min, sec := now.Hour(), now.Minute(), now.Second()
+	for {
+		select {
+		case <-ticker.C:
+			// get the current time
+			now := time.Now()
+			hr, min, sec := now.Clock()
 
-		// compute element coordinates
-		hx, hy, mx, my, sx, sy := timecoord(cx, cy, facesize, hr, min, sec)
+			// compute element coordinates
+			hx, hy, mx, my, sx, sy := timecoord(cx, cy, facesize, hr, min, sec)
 
-		openvg.BackgroundColor("black") // reset each frame
+			// reset each frame
+			openvg.BackgroundColor("black")
 
-		// frame and clock face
-		openvg.FillRGB(127, 127, 127, 1)
-		openvg.Roundrect(cx-framesize/2, cy-framesize/2, framesize, framesize, textsize, textsize)
-		openvg.FillRGB(255, 255, 255, 1)
-		openvg.Ellipse(cx, cy, facesize*2.2, facesize*2.2)
-		face(cx, cy, facesize, int(textsize))
+			// frame and clock face
+			openvg.FillRGB(127, 127, 127, 1)
+			openvg.Roundrect(cx-framesize/2, cy-framesize/2, framesize, framesize, textsize, textsize)
+			openvg.FillRGB(255, 255, 255, 1)
+			openvg.Ellipse(cx, cy, facesize*2.2, facesize*2.2)
+			face(cx, cy, facesize, int(textsize))
 
-		// hour hand
-		openvg.StrokeWidth(hourstroke)
-		openvg.StrokeRGB(127, 127, 127, 1)
-		openvg.Line(cx, cy, hx, hy)
-		openvg.StrokeWidth(0)
-		openvg.FillRGB(127, 127, 127, 1)
-		openvg.Ellipse(hx, hy, hourstroke, hourstroke)
+			// hour hand
+			openvg.StrokeWidth(hourstroke)
+			openvg.StrokeRGB(127, 127, 127, 1)
+			openvg.Line(cx, cy, hx, hy)
+			openvg.StrokeWidth(0)
+			openvg.FillRGB(127, 127, 127, 1)
+			openvg.Ellipse(hx, hy, hourstroke, hourstroke)
 
-		// minute hand
-		openvg.StrokeWidth(minstroke)
-		openvg.StrokeRGB(127, 0, 0, 1)
-		openvg.Line(cx, cy, mx, my)
-		openvg.StrokeWidth(0)
-		openvg.FillRGB(127, 0, 0, 1)
-		openvg.Ellipse(mx, my, minstroke, minstroke)
+			// minute hand
+			openvg.StrokeWidth(minstroke)
+			openvg.StrokeRGB(127, 0, 0, 1)
+			openvg.Line(cx, cy, mx, my)
+			openvg.StrokeWidth(0)
+			openvg.FillRGB(127, 0, 0, 1)
+			openvg.Ellipse(mx, my, minstroke, minstroke)
 
-		// center dot
-		openvg.FillColor("black")
-		openvg.Ellipse(cx, cy, textsize, textsize)
+			// center dot
+			openvg.FillColor("black")
+			openvg.Ellipse(cx, cy, textsize, textsize)
 
-		// second indicator
-		openvg.FillRGB(255, 255, 255, 1)
-		openvg.TextMid(sx, sy, mindigits[sec], "sans", secsize)
-		openvg.End()
-		time.Sleep(1 * time.Second)
+			// second indicator
+			openvg.FillRGB(255, 255, 255, 1)
+			openvg.TextMid(sx, sy, mindigits[sec], "sans", secsize)
+			openvg.End()
+		case <-sigint:
+			openvg.Finish()
+			return
+		}
 	}
-	openvg.RestoreTerm()
-	openvg.Finish()
 }
