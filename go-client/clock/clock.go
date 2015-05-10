@@ -36,32 +36,19 @@ var minangles = [60]float64{
 	120, 114, 108, 102, 96, // 55-59
 }
 
-var mindigits = [60]string{
-	"00", "01", "02", "03", "04", "05",
-	"06", "07", "08", "09", "10", "11",
-	"12", "13", "14", "15", "16", "17",
-	"18", "19", "20", "21", "22", "23",
-	"24", "25", "26", "27", "28", "29",
-	"30", "31", "32", "33", "34", "35",
-	"36", "37", "38", "39", "40", "41",
-	"42", "43", "44", "45", "46", "47",
-	"48", "49", "50", "51", "52", "53",
-	"54", "55", "56", "57", "58", "59",
-}
-
 func timecoord(x, y, r openvg.VGfloat, hour, min, sec int) (hx, hy, mx, my, sx, sy openvg.VGfloat) {
 	rad := float64(r)
-	mrad := rad * 0.9 // minute hand is 90% to the edge of the face
-	srad := rad * 1.2 // second hand is outside the edge
-	hrad := rad * 0.6 // hour hand is 60% to the edge
+	hrad := rad * 0.6 // hour hand is 60% to the edge of the face
+	mrad := rad * 0.9 // minute hand is 90% to the edge
+	srad := rad       // second hand is at the edge
 
 	// if the hour is > half-elapsed, adjust the hour angle to
 	// reflect the fraction between the current and subsequent hour
-	a := hourangles[hour%12]
+	t := hourangles[hour%12]
 	if min > 30 {
-		a = a - (30.0 * (float64(min) / 60)) // deflection difference is 30 degrees
+		t = t - (30.0 * (float64(min) / 60)) // deflection difference is 30 degrees
 	}
-	t := a * radians
+	t = t * radians
 	hx = x + openvg.VGfloat(hrad*math.Cos(t))
 	hy = y + openvg.VGfloat(hrad*math.Sin(t))
 
@@ -75,7 +62,7 @@ func timecoord(x, y, r openvg.VGfloat, hour, min, sec int) (hx, hy, mx, my, sx, 
 	return
 }
 
-var hourdigits = []string{"12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
+var hourdigits = [12]string{"12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
 
 func face(x, y, r openvg.VGfloat, ts int) {
 	var fx, fy, va openvg.VGfloat
@@ -97,9 +84,8 @@ func main() {
 	facesize := openvg.VGfloat(cy * 0.5)
 	textsize := facesize / 10.0
 	framesize := facesize * 2.5
-	hourstroke := textsize * 0.75
-	minstroke := hourstroke / 2
-	secsize := int(textsize * 0.4)
+	hourstroke := textsize
+	minstroke := hourstroke * .6
 
 	// set up the ticker and signal handler
 	ticker := time.NewTicker(1 * time.Second)
@@ -112,14 +98,10 @@ func main() {
 		select {
 		case <-ticker.C:
 			// get the current time
-			now := time.Now()
-			hr, min, sec := now.Clock()
+			hr, min, sec := time.Now().Clock()
 
 			// compute element coordinates
 			hx, hy, mx, my, sx, sy := timecoord(cx, cy, facesize, hr, min, sec)
-
-			// reset each frame
-			openvg.BackgroundColor("black")
 
 			// frame and clock face
 			openvg.FillRGB(127, 127, 127, 1)
@@ -144,13 +126,13 @@ func main() {
 			openvg.FillRGB(127, 0, 0, 1)
 			openvg.Ellipse(mx, my, minstroke, minstroke)
 
+			// second indicator
+			openvg.FillRGB(0, 0, 255, 0.3)
+			openvg.Ellipse(sx, sy, textsize, textsize)
+
 			// center dot
 			openvg.FillColor("black")
 			openvg.Ellipse(cx, cy, textsize, textsize)
-
-			// second indicator
-			openvg.FillRGB(255, 255, 255, 1)
-			openvg.TextMid(sx, sy, mindigits[sec], "sans", secsize)
 			openvg.End()
 		case <-sigint:
 			openvg.Finish()
