@@ -11,7 +11,8 @@ import (
 )
 
 const (
-	radians = math.Pi / 180
+	deg2rad = math.Pi / 180
+	edge    = 1.15
 )
 
 var hourangles = [12]float64{
@@ -37,10 +38,10 @@ var minangles = [60]float64{
 }
 
 func timecoord(x, y, r openvg.VGfloat, hour, min, sec int) (hx, hy, mx, my, sx, sy openvg.VGfloat) {
-	rad := float64(r)
-	hrad := rad * 0.6 // hour hand is 60% to the edge of the face
-	mrad := rad * 0.9 // minute hand is 90% to the edge
-	srad := rad       // second hand is at the edge
+	radius := float64(r)
+	hradius := radius * 0.6  // hour hand is 60% to the edge of the face
+	mradius := radius * 0.9  // minute hand is 90% to the edge
+	sradius := radius * edge // second hand is at the edge
 
 	// if the hour is > half-elapsed, adjust the hour angle to
 	// reflect the fraction between the current and subsequent hour
@@ -48,17 +49,17 @@ func timecoord(x, y, r openvg.VGfloat, hour, min, sec int) (hx, hy, mx, my, sx, 
 	if min > 30 {
 		t = t - (30.0 * (float64(min) / 60)) // deflection difference is 30 degrees
 	}
-	t = t * radians
-	hx = x + openvg.VGfloat(hrad*math.Cos(t))
-	hy = y + openvg.VGfloat(hrad*math.Sin(t))
+	t = t * deg2rad
+	hx = x + openvg.VGfloat(hradius*math.Cos(t))
+	hy = y + openvg.VGfloat(hradius*math.Sin(t))
 
-	t = minangles[min] * radians
-	mx = x + openvg.VGfloat(mrad*math.Cos(t))
-	my = y + openvg.VGfloat(mrad*math.Sin(t))
+	t = minangles[min] * deg2rad
+	mx = x + openvg.VGfloat(mradius*math.Cos(t))
+	my = y + openvg.VGfloat(mradius*math.Sin(t))
 
-	t = minangles[sec] * radians
-	sx = x + openvg.VGfloat(srad*math.Cos(t))
-	sy = y + openvg.VGfloat(srad*math.Sin(t))
+	t = minangles[sec] * deg2rad
+	sx = x + openvg.VGfloat(sradius*math.Cos(t))
+	sy = y + openvg.VGfloat(sradius*math.Sin(t))
 	return
 }
 
@@ -67,14 +68,25 @@ var hourdigits = [12]string{"12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "
 func face(x, y, r openvg.VGfloat, ts int) {
 	var fx, fy, va openvg.VGfloat
 	va = openvg.VGfloat(ts) / 2.0
-	rad := float64(r)
-	openvg.FillColor("black")
+	secsize := openvg.VGfloat(ts) / 3
+	radius := float64(r)
+	// hour digits
+	openvg.FillRGB(0, 0, 0, 1)
 	for h := 12; h > 0; h-- {
-		t := hourangles[h%12] * radians
-		fx = x + openvg.VGfloat(rad*math.Cos(t))
-		fy = y + openvg.VGfloat(rad*math.Sin(t))
+		t := hourangles[h%12] * deg2rad
+		fx = x + openvg.VGfloat(radius*math.Cos(t))
+		fy = y + openvg.VGfloat(radius*math.Sin(t))
 		openvg.TextMid(fx, fy-va, hourdigits[h%12], "sans", ts)
 	}
+	// second dots
+	openvg.FillRGB(127, 127, 127, 0.4)
+	for a := 0.0; a < 360; a += 6.0 {
+		t := a * deg2rad
+		sx := x + openvg.VGfloat(radius*edge*math.Cos(t))
+		sy := y + openvg.VGfloat(radius*edge*math.Sin(t))
+		openvg.Ellipse(sx, sy, secsize, secsize)
+	}
+
 }
 
 func main() {
@@ -107,8 +119,8 @@ func main() {
 			openvg.FillRGB(127, 127, 127, 1)
 			openvg.Roundrect(cx-framesize/2, cy-framesize/2, framesize, framesize, textsize, textsize)
 			openvg.FillRGB(255, 255, 255, 1)
-			openvg.Ellipse(cx, cy, facesize*2.2, facesize*2.2)
-			face(cx, cy, facesize, int(textsize))
+			openvg.Ellipse(cx, cy, facesize*2.4, facesize*2.4)
+			face(cx, cy, facesize, int(textsize*1.5))
 
 			// hour hand
 			openvg.StrokeWidth(hourstroke)
