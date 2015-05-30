@@ -2,6 +2,7 @@
 package main
 
 import (
+	"flag"
 	"math"
 	"os"
 	"os/signal"
@@ -14,6 +15,8 @@ const (
 	deg2rad = math.Pi / 180
 	edge    = 1.15
 )
+
+var framecolor, dotcolor, digitcolor, facecolor, hrcolor, mincolor, secolor, centercolor string
 
 var hourangles = [12]float64{
 	90, 60, 30, // 12, 1, 2
@@ -71,7 +74,7 @@ func face(x, y, r openvg.VGfloat, ts int) {
 	secsize := openvg.VGfloat(ts) / 3
 	radius := float64(r)
 	// hour digits
-	openvg.FillRGB(0, 0, 0, 1)
+	openvg.FillColor(digitcolor)
 	for h := 12; h > 0; h-- {
 		t := hourangles[h%12] * deg2rad
 		fx = x + openvg.VGfloat(radius*math.Cos(t))
@@ -79,7 +82,7 @@ func face(x, y, r openvg.VGfloat, ts int) {
 		openvg.TextMid(fx, fy-va, hourdigits[h%12], "sans", ts)
 	}
 	// second dots
-	openvg.FillRGB(127, 127, 127, 0.4)
+	openvg.FillColor(dotcolor)
 	for a := 0.0; a < 360; a += 6.0 {
 		t := a * deg2rad
 		sx := x + openvg.VGfloat(radius*edge*math.Cos(t))
@@ -90,6 +93,16 @@ func face(x, y, r openvg.VGfloat, ts int) {
 }
 
 func main() {
+	flag.StringVar(&mincolor, "mincolor", "maroon", "minute color")
+	flag.StringVar(&facecolor, "facecolor", "white", "face color")
+	flag.StringVar(&hrcolor, "hourcolor", "gray", "hour color")
+	flag.StringVar(&secolor, "secolor", "maroon", "second color")
+	flag.StringVar(&digitcolor, "digitcolor", "black", "digit color")
+	flag.StringVar(&dotcolor, "dotcolor", "gray", "dotcolor")
+	flag.StringVar(&framecolor, "framecolor", "gray", "frame color")
+	flag.StringVar(&centercolor, "centercolor", "black", "center color")
+	flag.Parse()
+
 	width, height := openvg.Init()
 	cx := openvg.VGfloat(width / 2)
 	cy := openvg.VGfloat(height / 2)
@@ -116,34 +129,34 @@ func main() {
 			hx, hy, mx, my, sx, sy := timecoord(cx, cy, facesize, hr, min, sec)
 
 			// frame and clock face
-			openvg.FillRGB(127, 127, 127, 1)
+			openvg.FillColor(framecolor)
 			openvg.Roundrect(cx-framesize/2, cy-framesize/2, framesize, framesize, textsize, textsize)
-			openvg.FillRGB(255, 255, 255, 1)
+			openvg.FillColor(facecolor)
 			openvg.Ellipse(cx, cy, facesize*2.4, facesize*2.4)
 			face(cx, cy, facesize, int(textsize*1.5))
 
 			// hour hand
 			openvg.StrokeWidth(hourstroke)
-			openvg.StrokeRGB(127, 127, 127, 1)
+			openvg.StrokeColor(hrcolor)
 			openvg.Line(cx, cy, hx, hy)
 			openvg.StrokeWidth(0)
-			openvg.FillRGB(127, 127, 127, 1)
+			openvg.FillColor(hrcolor)
 			openvg.Ellipse(hx, hy, hourstroke, hourstroke)
 
 			// minute hand
 			openvg.StrokeWidth(minstroke)
-			openvg.StrokeRGB(127, 0, 0, 1)
+			openvg.StrokeColor(mincolor)
 			openvg.Line(cx, cy, mx, my)
 			openvg.StrokeWidth(0)
-			openvg.FillRGB(127, 0, 0, 1)
+			openvg.FillColor(mincolor)
 			openvg.Ellipse(mx, my, minstroke, minstroke)
 
 			// second indicator
-			openvg.FillRGB(0, 0, 255, 0.3)
+			openvg.FillColor(secolor, 0.4)
 			openvg.Ellipse(sx, sy, textsize, textsize)
 
 			// center dot
-			openvg.FillColor("black")
+			openvg.FillColor(centercolor)
 			openvg.Ellipse(cx, cy, textsize, textsize)
 			openvg.End()
 		case <-sigint:
