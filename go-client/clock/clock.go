@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"os/signal"
+	//	"os/signal"
 	"time"
 
 	"github.com/ajstarks/openvg"
@@ -17,6 +18,7 @@ const (
 )
 
 var framecolor, dotcolor, digitcolor, facecolor, hrcolor, mincolor, secolor, centercolor string
+var showdots, showdigits bool
 
 var hourangles = [12]float64{
 	90, 60, 30, // 12, 1, 2
@@ -73,21 +75,38 @@ func face(x, y, r openvg.VGfloat, ts int) {
 	va = openvg.VGfloat(ts) / 2.0
 	secsize := openvg.VGfloat(ts) / 3
 	radius := float64(r)
-	// hour digits
+	ir := radius * 1.2
+	// hour display
 	openvg.FillColor(digitcolor)
+	openvg.StrokeColor(dotcolor)
+	openvg.StrokeWidth(5)
 	for h := 12; h > 0; h-- {
 		t := hourangles[h%12] * deg2rad
 		fx = x + openvg.VGfloat(radius*math.Cos(t))
 		fy = y + openvg.VGfloat(radius*math.Sin(t))
-		openvg.TextMid(fx, fy-va, hourdigits[h%12], "sans", ts)
+		ix := x + openvg.VGfloat(ir*math.Cos(t))
+		iy := y + openvg.VGfloat(ir*math.Sin(t))
+		if showdigits {
+			openvg.TextMid(fx, fy-va, hourdigits[h%12], "sans", ts)
+		} else {
+			openvg.Line(fx, fy, ix, iy)
+		}
 	}
-	// second dots
+	// second display
 	openvg.FillColor(dotcolor)
+	openvg.StrokeWidth(2)
+	re := radius * edge
 	for a := 0.0; a < 360; a += 6.0 {
 		t := a * deg2rad
-		sx := x + openvg.VGfloat(radius*edge*math.Cos(t))
-		sy := y + openvg.VGfloat(radius*edge*math.Sin(t))
-		openvg.Ellipse(sx, sy, secsize, secsize)
+		sx := x + openvg.VGfloat(re*math.Cos(t))
+		sy := y + openvg.VGfloat(re*math.Sin(t))
+		if showdots {
+			openvg.Ellipse(sx, sy, secsize, secsize)
+		} else {
+			ix := x + openvg.VGfloat(ir*math.Cos(t))
+			iy := y + openvg.VGfloat(ir*math.Sin(t))
+			openvg.Line(sx, sy, ix, iy)
+		}
 	}
 
 }
@@ -101,6 +120,8 @@ func main() {
 	flag.StringVar(&dotcolor, "dotcolor", "gray", "dotcolor")
 	flag.StringVar(&framecolor, "framecolor", "gray", "frame color")
 	flag.StringVar(&centercolor, "centercolor", "black", "center color")
+	flag.BoolVar(&showdigits, "showdigits", true, "show digits")
+	flag.BoolVar(&showdots, "showdots", true, "show dots")
 	flag.Parse()
 
 	width, height := openvg.Init()
