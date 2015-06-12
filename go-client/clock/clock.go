@@ -6,7 +6,6 @@ import (
 	"math"
 	"os"
 	"os/signal"
-	//	"os/signal"
 	"time"
 
 	"github.com/ajstarks/openvg"
@@ -18,7 +17,7 @@ const (
 )
 
 var framecolor, dotcolor, digitcolor, facecolor, hrcolor, mincolor, secolor, centercolor string
-var showdots, showdigits bool
+var secline, showdots, showdigits bool
 
 var hourangles = [12]float64{
 	90, 60, 30, // 12, 1, 2
@@ -78,7 +77,7 @@ func face(x, y, r openvg.VGfloat, ts int) {
 	ir := radius * 1.2
 	// hour display
 	openvg.FillColor(digitcolor)
-	openvg.StrokeColor(dotcolor)
+	openvg.StrokeColor(digitcolor)
 	openvg.StrokeWidth(5)
 	for h := 12; h > 0; h-- {
 		t := hourangles[h%12] * deg2rad
@@ -94,6 +93,7 @@ func face(x, y, r openvg.VGfloat, ts int) {
 	}
 	// second display
 	openvg.FillColor(dotcolor)
+	openvg.StrokeColor(dotcolor)
 	openvg.StrokeWidth(2)
 	re := radius * edge
 	for a := 0.0; a < 360; a += 6.0 {
@@ -108,6 +108,7 @@ func face(x, y, r openvg.VGfloat, ts int) {
 			openvg.Line(sx, sy, ix, iy)
 		}
 	}
+	openvg.StrokeWidth(0)
 
 }
 
@@ -122,6 +123,7 @@ func main() {
 	flag.StringVar(&centercolor, "centercolor", "black", "center color")
 	flag.BoolVar(&showdigits, "showdigits", true, "show digits")
 	flag.BoolVar(&showdots, "showdots", true, "show dots")
+	flag.BoolVar(&secline, "secline", false, "show second hand")
 	flag.Parse()
 
 	width, height := openvg.Init()
@@ -175,6 +177,12 @@ func main() {
 			// second indicator
 			openvg.FillColor(secolor, 0.4)
 			openvg.Ellipse(sx, sy, textsize, textsize)
+			if secline {
+				openvg.StrokeWidth(textsize / 6)
+				openvg.StrokeColor(secolor)
+				openvg.Line(cx, cy, sx, sy)
+				openvg.StrokeWidth(0)
+			}
 
 			// center dot
 			openvg.FillColor(centercolor)
