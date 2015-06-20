@@ -17,7 +17,7 @@ const (
 )
 
 var framecolor, dotcolor, digitcolor, facecolor, hrcolor, mincolor, secolor, centercolor string
-var secline, showdots, showdigits bool
+var secline, showdots, showdigits, round bool
 
 var hourangles = [12]float64{
 	90, 60, 30, // 12, 1, 2
@@ -47,13 +47,8 @@ func timecoord(x, y, r openvg.VGfloat, hour, min, sec int) (hx, hy, mx, my, sx, 
 	mradius := radius * 0.9  // minute hand is 90% to the edge
 	sradius := radius * edge // second hand is at the edge
 
-	// if the hour is > half-elapsed, adjust the hour angle to
-	// reflect the fraction between the current and subsequent hour
 	t := hourangles[hour%12]
-	if min > 30 {
-		t = t - (30.0 * (float64(min) / 60)) // deflection difference is 30 degrees
-	}
-	t = t * deg2rad
+	t = minadjust(t, min) * deg2rad
 	hx = x + openvg.VGfloat(hradius*math.Cos(t))
 	hy = y + openvg.VGfloat(hradius*math.Sin(t))
 
@@ -112,18 +107,51 @@ func face(x, y, r openvg.VGfloat, ts int) {
 
 }
 
+// if the hour is > half-elapsed, adjust the hour angle to
+// reflect the fraction between the current and subsequent hour
+func minadjust(t float64, value int) float64 {
+	if value > 30 {
+		return t - (30.0 * (float64(value) / 60))
+	}
+	return t
+}
+
+func arrowhand(cx, cy, px, py, r openvg.VGfloat, t float64, value int, color string) {
+	ax := []openvg.VGfloat{cx, 0, px, 0, cx}
+	ay := []openvg.VGfloat{cy, 0, py, 0, cy}
+	t = minadjust(t, value) * deg2rad
+	rf := float64(r * 0.9)
+	tf := math.Pi / 45.0
+	ax[1] = cx + openvg.VGfloat(rf*math.Cos(t-tf))
+	ay[1] = cy + openvg.VGfloat(rf*math.Sin(t-tf))
+	ax[3] = cx + openvg.VGfloat(rf*math.Cos(t+tf))
+	ay[3] = cy + openvg.VGfloat(rf*math.Sin(t+tf))
+	openvg.FillColor(color)
+	openvg.Polygon(ax, ay)
+}
+
+func roundhand(cx, cy, px, py, stroke openvg.VGfloat, color string) {
+	openvg.StrokeWidth(stroke)
+	openvg.StrokeColor(color)
+	openvg.Line(cx, cy, px, py)
+	openvg.StrokeWidth(0)
+	openvg.FillColor(color)
+	openvg.Ellipse(px, py, stroke, stroke)
+}
+
 func main() {
 	flag.StringVar(&mincolor, "mincolor", "maroon", "minute color")
 	flag.StringVar(&facecolor, "facecolor", "white", "face color")
 	flag.StringVar(&hrcolor, "hourcolor", "gray", "hour color")
 	flag.StringVar(&secolor, "secolor", "maroon", "second color")
 	flag.StringVar(&digitcolor, "digitcolor", "black", "digit color")
-	flag.StringVar(&dotcolor, "dotcolor", "gray", "dotcolor")
+	flag.StringVar(&dotcolor, "dotcolor", "silver", "dotcolor")
 	flag.StringVar(&framecolor, "framecolor", "gray", "frame color")
 	flag.StringVar(&centercolor, "centercolor", "black", "center color")
 	flag.BoolVar(&showdigits, "showdigits", true, "show digits")
 	flag.BoolVar(&showdots, "showdots", true, "show dots")
 	flag.BoolVar(&secline, "secline", false, "show second hand")
+	flag.BoolVar(&round, "round", false, "round hands")
 	flag.Parse()
 
 	width, height := openvg.Init()
@@ -158,21 +186,14 @@ func main() {
 			openvg.Ellipse(cx, cy, facesize*2.4, facesize*2.4)
 			face(cx, cy, facesize, int(textsize*1.5))
 
-			// hour hand
-			openvg.StrokeWidth(hourstroke)
-			openvg.StrokeColor(hrcolor)
-			openvg.Line(cx, cy, hx, hy)
-			openvg.StrokeWidth(0)
-			openvg.FillColor(hrcolor)
-			openvg.Ellipse(hx, hy, hourstroke, hourstroke)
-
-			// minute hand
-			openvg.StrokeWidth(minstroke)
-			openvg.StrokeColor(mincolor)
-			openvg.Line(cx, cy, mx, my)
-			openvg.StrokeWidth(0)
-			openvg.FillColor(mincolor)
-			openvg.Ellipse(mx, my, minstroke, minstroke)
+			// hour and minute hands
+			if round {
+				roundhand(cx, cy, mx, my, minstroke, mincolor)
+				roundhand(cx, cy, hx, hy, hourstroke, hrcolor)
+			} else {
+				arrowhand(cx, cy, mx, my, facesize*0.9, minangles[min], 0, mincolor)
+				arrowhand(cx, cy, hx, hy, facesize*0.6, hourangles[hr%12], min, hrcolor)
+			}
 
 			// second indicator
 			openvg.FillColor(secolor, 0.4)
