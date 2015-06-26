@@ -64,6 +64,13 @@ func timecoord(x, y, r openvg.VGfloat, hour, min, sec int) (hx, hy, mx, my, sx, 
 
 var hourdigits = [12]string{"12", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"}
 
+func frame(cx, cy, framesize, facesize, textsize openvg.VGfloat, framecolor, facecolor string) {
+	openvg.FillColor(framecolor)
+	openvg.Roundrect(cx-framesize/2, cy-framesize/2, framesize, framesize, textsize, textsize)
+	openvg.FillColor(facecolor)
+	openvg.Ellipse(cx, cy, facesize*2.4, facesize*2.4)
+}
+
 func face(x, y, r openvg.VGfloat, ts int) {
 	var fx, fy, va openvg.VGfloat
 	va = openvg.VGfloat(ts) / 2.0
@@ -139,6 +146,22 @@ func roundhand(cx, cy, px, py, stroke openvg.VGfloat, color string) {
 	openvg.Ellipse(px, py, stroke, stroke)
 }
 
+func secondhand(cx, cy, sx, sy, textsize openvg.VGfloat) {
+	openvg.FillColor(secolor, 0.4)
+	openvg.Ellipse(sx, sy, textsize, textsize)
+	if secline {
+		openvg.StrokeWidth(textsize / 6)
+		openvg.StrokeColor(secolor)
+		openvg.Line(cx, cy, sx, sy)
+		openvg.StrokeWidth(0)
+	}
+}
+
+func centerdot(cx, cy, size openvg.VGfloat) {
+	openvg.FillColor(centercolor)
+	openvg.Ellipse(cx, cy, size, size)
+}
+
 func main() {
 	flag.StringVar(&mincolor, "mincolor", "maroon", "minute color")
 	flag.StringVar(&facecolor, "facecolor", "white", "face color")
@@ -180,10 +203,7 @@ func main() {
 			hx, hy, mx, my, sx, sy := timecoord(cx, cy, facesize, hr, min, sec)
 
 			// frame and clock face
-			openvg.FillColor(framecolor)
-			openvg.Roundrect(cx-framesize/2, cy-framesize/2, framesize, framesize, textsize, textsize)
-			openvg.FillColor(facecolor)
-			openvg.Ellipse(cx, cy, facesize*2.4, facesize*2.4)
+			frame(cx, cy, framesize, facesize, textsize, framecolor, facecolor)
 			face(cx, cy, facesize, int(textsize*1.5))
 
 			// hour and minute hands
@@ -196,18 +216,12 @@ func main() {
 			}
 
 			// second indicator
-			openvg.FillColor(secolor, 0.4)
-			openvg.Ellipse(sx, sy, textsize, textsize)
-			if secline {
-				openvg.StrokeWidth(textsize / 6)
-				openvg.StrokeColor(secolor)
-				openvg.Line(cx, cy, sx, sy)
-				openvg.StrokeWidth(0)
-			}
+			secondhand(cx, cy, sx, sy, textsize)
 
 			// center dot
-			openvg.FillColor(centercolor)
-			openvg.Ellipse(cx, cy, textsize, textsize)
+			centerdot(cx, cy, textsize)
+
+			// make the picture
 			openvg.End()
 		case <-sigint:
 			openvg.Finish()
