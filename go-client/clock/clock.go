@@ -16,8 +16,8 @@ const (
 	edge    = 1.15
 )
 
-var framecolor, dotcolor, digitcolor, facecolor, hrcolor, mincolor, secolor, centercolor string
-var secline, showdots, showdigits, round bool
+var handstyle, framecolor, dotcolor, digitcolor, facecolor, hrcolor, mincolor, secolor, centercolor string
+var secline, showdots, showdigits bool
 
 var hourangles = [12]float64{
 	90, 60, 30, // 12, 1, 2
@@ -137,6 +137,22 @@ func arrowhand(cx, cy, px, py, r openvg.VGfloat, t float64, value int, color str
 	openvg.Polygon(ax, ay)
 }
 
+func combohand(cx, cy, px, py, r, stroke openvg.VGfloat, t float64, value int, color string) {
+	thinr := float64(r * 0.25)
+	t = minadjust(t, value) * deg2rad
+	tx := cx + openvg.VGfloat(thinr*math.Cos(t))
+	ty := cy + openvg.VGfloat(thinr*math.Sin(t))
+	openvg.FillColor(color)
+	openvg.Ellipse(px, py, stroke*2, stroke*2)
+	openvg.Ellipse(tx, ty, stroke*2, stroke*2)
+	openvg.StrokeWidth(stroke)
+	openvg.StrokeColor(color)
+	openvg.Line(cx, cy, tx, ty)
+	openvg.StrokeWidth(stroke * 2)
+	openvg.Line(tx, ty, px, py)
+	openvg.StrokeWidth(0)
+}
+
 func roundhand(cx, cy, px, py, stroke openvg.VGfloat, color string) {
 	openvg.StrokeWidth(stroke)
 	openvg.StrokeColor(color)
@@ -171,10 +187,10 @@ func main() {
 	flag.StringVar(&dotcolor, "dotcolor", "silver", "dotcolor")
 	flag.StringVar(&framecolor, "framecolor", "gray", "frame color")
 	flag.StringVar(&centercolor, "centercolor", "black", "center color")
+	flag.StringVar(&handstyle, "handstyle", "combo", "handstyle (combo, arrow, or round)")
 	flag.BoolVar(&showdigits, "showdigits", true, "show digits")
 	flag.BoolVar(&showdots, "showdots", true, "show dots")
 	flag.BoolVar(&secline, "secline", false, "show second hand")
-	flag.BoolVar(&round, "round", false, "round hands")
 	flag.Parse()
 
 	width, height := openvg.Init()
@@ -207,12 +223,19 @@ func main() {
 			face(cx, cy, facesize, int(textsize*1.5))
 
 			// hour and minute hands
-			if round {
+			switch handstyle {
+			case "round", "r":
 				roundhand(cx, cy, mx, my, minstroke, mincolor)
 				roundhand(cx, cy, hx, hy, hourstroke, hrcolor)
-			} else {
+			case "arrow", "a":
 				arrowhand(cx, cy, mx, my, facesize*0.9, minangles[min], 0, mincolor)
 				arrowhand(cx, cy, hx, hy, facesize*0.6, hourangles[hr%12], min, hrcolor)
+			case "combo", "c":
+				combohand(cx, cy, mx, my, facesize*0.9, minstroke/2, minangles[min], 0, mincolor)
+				combohand(cx, cy, hx, hy, facesize*0.6, minstroke/2, hourangles[hr%12], min, hrcolor)
+			default:
+				combohand(cx, cy, mx, my, facesize*0.9, minstroke/2, minangles[min], 0, mincolor)
+				combohand(cx, cy, hx, hy, facesize*0.6, minstroke/2, hourangles[hr%12], min, hrcolor)
 			}
 
 			// second indicator
