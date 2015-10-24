@@ -396,6 +396,41 @@ void ClipEnd() {
 	vgSeti(VG_SCISSORING, VG_FALSE);
 }
 
+
+unsigned char *next_utf8_char(const unsigned char *utf8, int *codepoint)
+{
+    int seqlen;
+    int datalen = strlen(utf8);
+    unsigned char *p = utf8;
+
+    if (datalen < 1 || *utf8==0) {
+        // End of sfring
+        return NULL;
+    }
+
+      if(!(utf8[0] & 0x80))      // 0xxxxxxx
+      {
+        *codepoint= (wchar_t)utf8[0];
+         seqlen = 1;
+      }
+      else if((utf8[0] & 0xE0) == 0xC0)  // 110xxxxx
+      {
+        *codepoint= (int)(((utf8[0] & 0x1F) << 6) | (utf8[1] & 0x3F));
+         seqlen = 2;
+      }
+      else if((utf8[0] & 0xF0) == 0xE0)  // 1110xxxx
+      {
+        *codepoint= (int)(((utf8[0] & 0x0F) << 12) | ((utf8[1] & 0x3F) << 6) | (utf8[2] & 0x3F));
+         seqlen = 3;
+      }
+      else
+        return NULL;  // No code points this high here
+
+      p += seqlen;
+      return p;
+}
+
+
 // Text renders a string of text at a specified location, size, using the specified font glyphs
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
 void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
@@ -403,8 +438,10 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 	int i;
 
 	vgGetMatrix(mm);
-	for (i = 0; i < (int)strlen(s); i++) {
-		unsigned int character = (unsigned int)s[i];
+    int character;
+    unsigned char *ss = s;
+
+    while ((ss = next_utf8_char(ss, &character)) != NULL) {
 		int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
 			continue;			   //glyph is undefined
@@ -427,9 +464,10 @@ VGfloat TextWidth(char *s, Fontinfo f, int pointsize) {
 	int i;
 	VGfloat tw = 0.0;
 	VGfloat size = (VGfloat) pointsize;
-	for (i = 0; i < (int)strlen(s); i++) {
-		unsigned int character = (unsigned int)s[i];
-		int glyph = f.CharacterMap[character];
+        int character;
+	unsigned char *ss = s;
+        while ((ss = next_utf8_char(ss, &character)) != NULL) {
+        int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
 			continue;			   //glyph is undefined
 		}
