@@ -122,16 +122,18 @@ Draw an elliptical arc centered at (x, y), with width and height at (w, h).  Sta
 ### Text and Images
 
 	void Text(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
-Draw a the text srtring (s) at location (x,y), using pointsize.
+Draw the text string (s) at location (x,y), using pointsize.
 
 	void TextMid(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
-Draw a the text srtring (s) at centered at location (x,y), using pointsize.
+Draw the text string (s) centered at location (x,y), using pointsize.
 
 	void TextEnd(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
-Draw a the text srtring (s) at with its lend aligned to location (x,y), using pointsize
+Draw the text string (s) with its left end aligned to location (x,y), using pointsize.
 
 	VGfloat TextWidth(char *s, Fontinfo f, int pointsize)
 Return the width of text
+
+Outlined text can be drawn by setting the appropriate Fill, Stroke, and Stroke Width [attributes](#attributes).
 
 	void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
 place a JPEG image with dimensions (w,h) at (x,y).
