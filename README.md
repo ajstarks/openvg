@@ -234,7 +234,7 @@ The openvg shapes library can now be used in C code by including shapes.h and fo
 	#include <shapes.h>
 	#include <fontinfo.h>
 
-	pi@raspberrypi ~ $ gcc -I/opt/vc/include anysource.c -o anysource -lshapes
+	pi@raspberrypi ~ $ gcc -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads anysource.c -o anysource -lshapes
 	pi@raspberrypi ~ $ ./anysource
 
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>

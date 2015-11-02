@@ -402,46 +402,46 @@ func Image(x, y VGfloat, w, h int, s string) {
 }
 
 // Line draws a line between two points
-func Line(x1, y1, x2, y2 VGfloat, style ...string) {
+func Line(x1, y1, x2, y2 VGfloat) {
 	C.Line(C.VGfloat(x1), C.VGfloat(y1), C.VGfloat(x2), C.VGfloat(y2))
 }
 
 // Rect draws a rectangle at (x,y) with dimesions (w,h)
-func Rect(x, y, w, h VGfloat, style ...string) {
+func Rect(x, y, w, h VGfloat) {
 	C.Rect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
 // Roundrect draws a rounded rectangle at (x,y) with dimesions (w,h).
 // the corner radii are at (rw, rh)
-func Roundrect(x, y, w, h, rw, rh VGfloat, style ...string) {
+func Roundrect(x, y, w, h, rw, rh VGfloat) {
 	C.Roundrect(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(rw), C.VGfloat(rh))
 }
 
 // Ellipse draws an ellipse at (x,y) with dimensions (w,h)
-func Ellipse(x, y, w, h VGfloat, style ...string) {
+func Ellipse(x, y, w, h VGfloat) {
 	C.Ellipse(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
 // Circle draws a circle centered at (x,y), with radius r
-func Circle(x, y, r VGfloat, style ...string) {
+func Circle(x, y, r VGfloat) {
 	C.Circle(C.VGfloat(x), C.VGfloat(y), C.VGfloat(r))
 }
 
 // Qbezier draws a quadratic bezier curve with extrema (sx, sy) and (ex, ey)
 // Control points are at (cx, cy)
-func Qbezier(sx, sy, cx, cy, ex, ey VGfloat, style ...string) {
+func Qbezier(sx, sy, cx, cy, ex, ey VGfloat) {
 	C.Qbezier(C.VGfloat(sx), C.VGfloat(sy), C.VGfloat(cx), C.VGfloat(cy), C.VGfloat(ex), C.VGfloat(ey))
 }
 
 // Cbezier draws a cubic bezier curve with extrema (sx, sy) and (ex, ey).
 // Control points at (cx, cy) and (px, py)
-func Cbezier(sx, sy, cx, cy, px, py, ex, ey VGfloat, style ...string) {
+func Cbezier(sx, sy, cx, cy, px, py, ex, ey VGfloat) {
 	C.Cbezier(C.VGfloat(sx), C.VGfloat(sy), C.VGfloat(cx), C.VGfloat(cy), C.VGfloat(px), C.VGfloat(py), C.VGfloat(ex), C.VGfloat(ey))
 }
 
 // Arc draws an arc at (x,y) with dimensions (w,h).
 // the arc starts at the angle sa, extended to aext
-func Arc(x, y, w, h, sa, aext VGfloat, style ...string) {
+func Arc(x, y, w, h, sa, aext VGfloat) {
 	C.Arc(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h), C.VGfloat(sa), C.VGfloat(aext))
 }
 
@@ -461,7 +461,7 @@ func poly(x, y []VGfloat) (*C.VGfloat, *C.VGfloat, C.VGint) {
 }
 
 // Polygon draws a polygon with coordinate in x,y
-func Polygon(x, y []VGfloat, style ...string) {
+func Polygon(x, y []VGfloat) {
 	px, py, np := poly(x, y)
 	if np > 0 {
 		C.Polygon(px, py, np)
@@ -469,7 +469,7 @@ func Polygon(x, y []VGfloat, style ...string) {
 }
 
 // Polyline draws a polyline with coordinates in x, y
-func Polyline(x, y []VGfloat, style ...string) {
+func Polyline(x, y []VGfloat) {
 	px, py, np := poly(x, y)
 	if np > 0 {
 		C.Polyline(px, py, np)
@@ -500,21 +500,21 @@ func ClipEnd() {
 }
 
 // Text draws text whose aligment begins (x,y)
-func Text(x, y VGfloat, s string, font string, size int, style ...string) {
+func Text(x, y VGfloat, s string, font string, size int) {
 	t := C.CString(s)
 	C.Text(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 	C.free(unsafe.Pointer(t))
 }
 
 // TextMid draws text centered at (x,y)
-func TextMid(x, y VGfloat, s string, font string, size int, style ...string) {
+func TextMid(x, y VGfloat, s string, font string, size int) {
 	t := C.CString(s)
 	C.TextMid(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 	C.free(unsafe.Pointer(t))
 }
 
 // TextEnd draws text end-aligned at (x,y)
-func TextEnd(x, y VGfloat, s string, font string, size int, style ...string) {
+func TextEnd(x, y VGfloat, s string, font string, size int) {
 	t := C.CString(s)
 	C.TextEnd(C.VGfloat(x), C.VGfloat(y), t, selectfont(font), C.int(size))
 	C.free(unsafe.Pointer(t))
