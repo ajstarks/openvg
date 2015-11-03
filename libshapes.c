@@ -18,7 +18,11 @@
 #include "eglstate.h"					   // data structures for graphics state
 #include "fontinfo.h"					   // font data structure
 static STATE_T _state, *state = &_state;	// global graphics state
-static const int MAXFONTPATH = 500;
+static const int MAXFONTPATH = 256;	// consistent with fontinfo.h
+static int init_x = 0;		// Initial window position and size
+static int init_y = 0;
+static unsigned int init_w = 0;
+static unsigned int init_h = 0;
 //
 // Terminal settings
 //
@@ -214,10 +218,24 @@ void dumpscreen(int w, int h, FILE * fp) {
 
 Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
 
+// initWindowSize requests a specific window size & position, if not called
+// then init() will open a full screen window.
+// Done this way to preserve the original init() behaviour.
+void initWindowSize(int x, int y, unsigned int w, unsigned int h) {
+	init_x = x;
+	init_y = y;
+	init_w = w;
+	init_h = h;
+}
+
 // init sets the system to its initial state
 void init(int *w, int *h) {
 	bcm_host_init();
 	memset(state, 0, sizeof(*state));
+	state->window_x = init_x;
+	state->window_y = init_y;
+	state->window_width = init_w;
+	state->window_height = init_h;
 	oglinit(state);
 	SansTypeface = loadfont(DejaVuSans_glyphPoints,
 				DejaVuSans_glyphPointIndices,
@@ -240,8 +258,8 @@ void init(int *w, int *h) {
 				DejaVuSansMono_glyphInstructionCounts,
 				DejaVuSansMono_glyphAdvances, DejaVuSansMono_characterMap, DejaVuSansMono_glyphCount);
 
-	*w = state->screen_width;
-	*h = state->screen_height;
+	*w = state->window_width;
+	*h = state->window_height;
 }
 
 // finish cleans up
@@ -249,7 +267,7 @@ void finish() {
 	unloadfont(SansTypeface.Glyphs, SansTypeface.Count);
 	unloadfont(SerifTypeface.Glyphs, SerifTypeface.Count);
 	unloadfont(MonoTypeface.Glyphs, MonoTypeface.Count);
-	glClear(GL_COLOR_BUFFER_BIT);
+//	glClear(GL_COLOR_BUFFER_BIT);	// Superfluous, no gl context to affect
 	eglSwapBuffers(state->display, state->surface);
 	eglMakeCurrent(state->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	eglDestroySurface(state->display, state->surface);
@@ -478,8 +496,10 @@ void TextEnd(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 //
 
 // newpath creates path data
+// Changed capabilities as others not needed at the moment - allows possible
+// driver optimisations.
 VGPath newpath() {
-	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
+	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_APPEND_TO);
 }
 
 // makecurve makes path data using specified segments and coordinates
@@ -615,12 +635,43 @@ void SaveEnd(char *filename) {
 
 // clear the screen to a solid background color
 void Background(unsigned int r, unsigned int g, unsigned int b) {
+	VGfloat colour[4];
+	RGB(r, g, b, colour);
+	vgSetfv(VG_CLEAR_COLOR, 4, colour);
+	vgClear(0, 0, state->window_width, state->window_height);
+/*
+	Replaced - above is the proper way to clear the window rather than
+	creating a fill and drawing a rectangle which is subject to
+	transformations and blend modes.
+
 	Fill(r, g, b, 1);
 	Rect(0, 0, state->screen_width, state->screen_height);
+*/
 }
 
 // clear the screen to a background color with alpha
 void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
+	VGfloat colour[4];
+	RGBA(r, g, b, a, colour);
+	vgSetfv(VG_CLEAR_COLOR, 4, colour);
+	vgClear(0, 0, state->window_width, state->window_height);
+/*
 	Fill(r, g, b, a);
 	Rect(0, 0, state->screen_width, state->screen_height);
+*/
+}
+
+// Clear the window to previously set background colour
+void WindowClear() {
+	vgClear(0, 0, state->window_width, state->window_height);
+}
+
+// Change window opacity
+void WindowOpacity(unsigned int a) {
+	dispmanChangeWindowOpacity(state, a);
+}
+
+// Move window to given position
+void WindowPosition(int x, int y) {
+	dispmanMoveWindow(state, x, y);
 }

@@ -48,6 +48,11 @@ extern "C" {
 	extern void saveterm();
 	extern void restoreterm();
 	extern void rawterm();
+
+	extern void initWindowSize(int x, int y, unsigned int w, unsigned int h);
+	extern void WindowClear();
+	extern void WindowOpacity(unsigned int alpha);
+	extern void WindowPosition(int x, int y);
 #if defined(__cplusplus)
 }
 #endif
