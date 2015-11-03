@@ -396,6 +396,7 @@ void ClipEnd() {
 	vgSeti(VG_SCISSORING, VG_FALSE);
 }
 
+
 unsigned char *next_utf8_char(unsigned char *utf8, int *codepoint) {
 	int seqlen;
 	int datalen = (int)strlen((const char *)utf8);
@@ -419,6 +420,7 @@ unsigned char *next_utf8_char(unsigned char *utf8, int *codepoint) {
 	p += seqlen;
 	return p;
 }
+
 
 // Text renders a string of text at a specified location, size, using the specified font glyphs
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
