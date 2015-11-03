@@ -398,7 +398,7 @@ void ClipEnd() {
 
 unsigned char *next_utf8_char(unsigned char *utf8, int *codepoint) {
 	int seqlen;
-	int datalen = (int)strlen(utf8);
+	int datalen = (int)strlen((const char *)utf8);
 	unsigned char *p = utf8;
 
 	if (datalen < 1 || *utf8 == 0) { // End of string
@@ -426,7 +426,7 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 	VGfloat size = (VGfloat) pointsize, xx = x, mm[9];
 	vgGetMatrix(mm);
 	int character;
-	unsigned char *ss = s;
+	unsigned char *ss = (unsigned char *)s;
 	while ((ss = next_utf8_char(ss, &character)) != NULL) {
 		int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
@@ -450,7 +450,7 @@ VGfloat TextWidth(char *s, Fontinfo f, int pointsize) {
 	VGfloat tw = 0.0;
 	VGfloat size = (VGfloat) pointsize;
 	int character;
-	unsigned char *ss = s;
+	unsigned char *ss = (unsigned char *)s;
 	while ((ss = next_utf8_char(ss, &character)) != NULL) {
 		int glyph = f.CharacterMap[character];
 		if (glyph == -1) {
