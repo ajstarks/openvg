@@ -31,9 +31,7 @@ Here is the graphics equivalent of "hello, world"
 		//Start(width, height);					// Start the picture
 		Background(0, 0, 0);					// Black background
 		Fill(44, 77, 232, 1);					// Big blue marble
-		Circle(width / 2, 0, width / 3);			// The "world" (made smaller)
-		Stroke(25, 125, 232, 1)				// Halo Colour
-		CircleOutline(width / 2, 0, (width / 3) + 5)	// Halo
+		Circle(width / 2, 0, width);			// The "world"
 
 		Fill(255, 255, 255, 1);					// White text
 		TextMid(width / 2, height / 2, "hello, world", SerifTypeface, width / 10);	// Greetings 
