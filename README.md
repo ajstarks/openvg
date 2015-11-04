@@ -28,7 +28,7 @@ Here is the graphics equivalent of "hello, world"
 		init(&width, &height);					// Graphics initialization
 	
 		// Remove Start as it sets up things we change anyway
-		Start(width, height);					// Start the picture
+		//Start(width, height);					// Start the picture
 		Background(0, 0, 0);					// Black background
 		Fill(44, 77, 232, 1);					// Big blue marble
 		Circle(width / 2, 0, width / 3);			// The "world" (made smaller)
