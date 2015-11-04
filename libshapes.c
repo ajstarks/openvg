@@ -10,7 +10,7 @@
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"
-#include "GLES/gl.h"
+//#include "GLES/gl.h"
 #include "bcm_host.h"
 #include "DejaVuSans.inc"				   // font data
 #include "DejaVuSerif.inc"
@@ -18,7 +18,7 @@
 #include "eglstate.h"					   // data structures for graphics state
 #include "fontinfo.h"					   // font data structure
 static STATE_T _state, *state = &_state;	// global graphics state
-static const int MAXFONTPATH = 256;	// consistent with fontinfo.h
+static const int MAXFONTPATH = 500;
 static int init_x = 0;		// Initial window position and size
 static int init_y = 0;
 static unsigned int init_w = 0;
