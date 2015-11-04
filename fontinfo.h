@@ -8,7 +8,7 @@ extern "C" {
 		const short *CharacterMap;
 		const int *GlyphAdvances;
 		int Count;
-		VGPath Glyphs[256];
+		VGPath Glyphs[500];
 	} Fontinfo;
 
 	extern Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
