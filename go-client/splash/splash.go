@@ -38,6 +38,10 @@ func getimage(image_path string, w, h int, resized bool) (image.Image, error) {
 func main() {
 	var resize = flag.Bool("resize", false, `Resize image to fit the screen.`)
 	var bgcolor = flag.String("bg", "black", `Background color (named color or rgb(r,g,b)).`)
+	var fgcolor = flag.String("fg", "white", `text color (named color or rgb(r,g,b)).`)
+	var title = flag.String("t", "", "text annotation")
+	var fontsize = flag.Float64("fp", 2.0, "fontsize %")
+	var texty = flag.Float64("ty", 0, "text y %")
 	var exit_code int
 	defer func() {
 		os.Exit(exit_code)
@@ -82,6 +86,17 @@ Default is to put this image to the center.
 	openvg.BackgroundColor(*bgcolor)
 	x, y := openvg.VGfloat(w)/2-openvg.VGfloat(imw)/2, openvg.VGfloat(h)/2-openvg.VGfloat(imh)/2
 	openvg.Img(x, y, img)
+	if len(*title) > 0 {
+		var yp openvg.VGfloat
+		fs := openvg.VGfloat(*fontsize/100.0) * openvg.VGfloat(w)
+		if *texty == 0 {
+			yp = y - fs*1.5
+		} else {
+			yp = openvg.VGfloat(h) * openvg.VGfloat(*texty/100)
+		}
+		openvg.FillColor(*fgcolor)
+		openvg.TextMid(x+openvg.VGfloat(imw)/2, yp, *title, "sans", int(fs))
+	}
 	openvg.End()
 
 	_ = <-sig_chan
