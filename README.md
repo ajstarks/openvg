@@ -151,6 +151,12 @@ Scale by x,y.
 	void Shear(VGfloat x, VGfloat y)
 Shear by the angles x,y.
 
+## Clipping
+	void ClipRect(VGint x, VGint y, VGint w, VGint h)
+Limit drawing the drawing area to the specified rectangle, end with ClipEnd()
+
+	void ClipEnd()
+Ends clipping area
 
 ## Using fonts
 
