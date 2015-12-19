@@ -34,6 +34,7 @@ func getimage(image_path string, w, h int, resized bool) (image.Image, error) {
 }
 
 func main() {
+	var loop = flag.Bool("loop", false, "loop the show")
 	var resize = flag.Bool("resize", false, `Resize image to fit the screen.`)
 	var bgcolor = flag.String("bg", "black", `Background color (named color or rgb(r,g,b)).`)
 	var delay = flag.Duration("delay", 2*time.Second, "delay between pictures")
@@ -45,18 +46,32 @@ func main() {
 
 	flag.Parse()
 	w, h := openvg.Init()
+	images := []image.Image{}
+	imgcount := 0
 	for _, imgfile := range flag.Args() {
+		fmt.Fprintf(os.Stderr, "loading %q ", imgfile)
 		img, err := getimage(imgfile, w, h, *resize)
 		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			continue
 		}
-		ib := img.Bounds()
-		imw, imh := ib.Max.X-ib.Min.X, ib.Max.Y-ib.Min.Y
-		openvg.Start(w, h)
-		openvg.BackgroundColor(*bgcolor)
-		x, y := openvg.VGfloat(w)/2-openvg.VGfloat(imw)/2, openvg.VGfloat(h)/2-openvg.VGfloat(imh)/2
-		openvg.Img(x, y, img)
-		openvg.End()
-		time.Sleep(*delay)
+		images = append(images, img)
+		imgcount++
+		fmt.Fprintln(os.Stderr, "ok")
+	}
+	for {
+		for _, img := range images {
+			ib := img.Bounds()
+			imw, imh := ib.Max.X-ib.Min.X, ib.Max.Y-ib.Min.Y
+			openvg.Start(w, h)
+			openvg.BackgroundColor(*bgcolor)
+			x, y := openvg.VGfloat(w)/2-openvg.VGfloat(imw)/2, openvg.VGfloat(h)/2-openvg.VGfloat(imh)/2
+			openvg.Img(x, y, img)
+			openvg.End()
+			time.Sleep(*delay)
+		}
+		if !*loop {
+			break
+		}
 	}
 }
