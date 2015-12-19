@@ -34,10 +34,10 @@ func getimage(image_path string, w, h int, resized bool) (image.Image, error) {
 }
 
 func main() {
-	var loop = flag.Bool("loop", false, "loop the show")
+	var loop = flag.Bool("loop", false, "Loop the show")
 	var resize = flag.Bool("resize", false, `Resize image to fit the screen.`)
 	var bgcolor = flag.String("bg", "black", `Background color (named color or rgb(r,g,b)).`)
-	var delay = flag.Duration("delay", 2*time.Second, "delay between pictures")
+	var delay = flag.Duration("delay", 2*time.Second, "Delay between pictures")
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "usage: %s [ flags ] images...\n", os.Args[0])
 		flag.PrintDefaults()
