@@ -48,6 +48,18 @@ extern "C" {
 	extern void saveterm();
 	extern void restoreterm();
 	extern void rawterm();
+
+	extern void initWindowSize(int x, int y, unsigned int w, unsigned int h);
+	extern void WindowClear();
+	extern void WindowOpacity(unsigned int alpha);
+	extern void WindowPosition(int x, int y);
+	extern void CbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void QbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void RectOutline(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void RoundrectOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void EllipseOutline(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void CircleOutline(VGfloat, VGfloat, VGfloat);
+	extern void ArcOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 #if defined(__cplusplus)
 }
 #endif

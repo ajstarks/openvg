@@ -10,7 +10,7 @@
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"
-#include "GLES/gl.h"
+//#include "GLES/gl.h"
 #include "bcm_host.h"
 #include "DejaVuSans.inc"				   // font data
 #include "DejaVuSerif.inc"
@@ -19,6 +19,10 @@
 #include "fontinfo.h"					   // font data structure
 static STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 500;
+static int init_x = 0;		// Initial window position and size
+static int init_y = 0;
+static unsigned int init_w = 0;
+static unsigned int init_h = 0;
 //
 // Terminal settings
 //
@@ -214,10 +218,24 @@ void dumpscreen(int w, int h, FILE * fp) {
 
 Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
 
+// initWindowSize requests a specific window size & position, if not called
+// then init() will open a full screen window.
+// Done this way to preserve the original init() behaviour.
+void initWindowSize(int x, int y, unsigned int w, unsigned int h) {
+	init_x = x;
+	init_y = y;
+	init_w = w;
+	init_h = h;
+}
+
 // init sets the system to its initial state
 void init(int *w, int *h) {
 	bcm_host_init();
 	memset(state, 0, sizeof(*state));
+	state->window_x = init_x;
+	state->window_y = init_y;
+	state->window_width = init_w;
+	state->window_height = init_h;
 	oglinit(state);
 	SansTypeface = loadfont(DejaVuSans_glyphPoints,
 				DejaVuSans_glyphPointIndices,
@@ -240,8 +258,8 @@ void init(int *w, int *h) {
 				DejaVuSansMono_glyphInstructionCounts,
 				DejaVuSansMono_glyphAdvances, DejaVuSansMono_characterMap, DejaVuSansMono_glyphCount);
 
-	*w = state->screen_width;
-	*h = state->screen_height;
+	*w = state->window_width;
+	*h = state->window_height;
 }
 
 // finish cleans up
@@ -249,7 +267,7 @@ void finish() {
 	unloadfont(SansTypeface.Glyphs, SansTypeface.Count);
 	unloadfont(SerifTypeface.Glyphs, SerifTypeface.Count);
 	unloadfont(MonoTypeface.Glyphs, MonoTypeface.Count);
-	glClear(GL_COLOR_BUFFER_BIT);
+//	glClear(GL_COLOR_BUFFER_BIT);	// Superfluous, no gl context to affect
 	eglSwapBuffers(state->display, state->surface);
 	eglMakeCurrent(state->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	eglDestroySurface(state->display, state->surface);
@@ -478,15 +496,17 @@ void TextEnd(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 //
 
 // newpath creates path data
+// Changed capabilities as others not needed at the moment - allows possible
+// driver optimisations.
 VGPath newpath() {
-	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
+	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_APPEND_TO);  // Other capabilities not needed
 }
 
 // makecurve makes path data using specified segments and coordinates
-void makecurve(VGubyte * segments, VGfloat * coords) {
+void makecurve(VGubyte * segments, VGfloat * coords, VGbitfield flags) {
 	VGPath path = newpath();
 	vgAppendPathData(path, 2, segments, coords);
-	vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+	vgDrawPath(path, flags);
 	vgDestroyPath(path);
 }
 
@@ -494,14 +514,14 @@ void makecurve(VGubyte * segments, VGfloat * coords) {
 void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
 	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
 	VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
-	makecurve(segments, coords);
+	makecurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
 // QBezier makes a quadratic bezier curve
 void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
 	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
 	VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
-	makecurve(segments, coords);
+	makecurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
 // interleave interleaves arrays of x, y into a single array
@@ -615,12 +635,97 @@ void SaveEnd(char *filename) {
 
 // clear the screen to a solid background color
 void Background(unsigned int r, unsigned int g, unsigned int b) {
+	VGfloat colour[4];
+	RGB(r, g, b, colour);
+	vgSetfv(VG_CLEAR_COLOR, 4, colour);
+	vgClear(0, 0, state->window_width, state->window_height);
+/*
+	Replaced - above is the proper way to clear the window rather than
+	creating a fill and drawing a rectangle which is subject to
+	transformations and blend modes.
+
 	Fill(r, g, b, 1);
 	Rect(0, 0, state->screen_width, state->screen_height);
+*/
 }
 
 // clear the screen to a background color with alpha
 void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
+	VGfloat colour[4];
+	RGBA(r, g, b, a, colour);
+	vgSetfv(VG_CLEAR_COLOR, 4, colour);
+	vgClear(0, 0, state->window_width, state->window_height);
+/*
 	Fill(r, g, b, a);
 	Rect(0, 0, state->screen_width, state->screen_height);
+*/
+}
+
+// Clear the window to previously set background colour
+void WindowClear() {
+	vgClear(0, 0, state->window_width, state->window_height);
+}
+
+// Change window opacity
+void WindowOpacity(unsigned int a) {
+	dispmanChangeWindowOpacity(state, a);
+}
+
+// Move window to given position
+void WindowPosition(int x, int y) {
+	dispmanMoveWindow(state, x, y);
+}
+
+// Hollow shapes -because filling still happens even with a fill of 0,0,0,0
+// unlike where using a strokewidth of 0 disables the stroke.
+// Either this or change the original functions to require the VG_x_PATH flags
+
+// CBezier makes a quadratic bezier curve
+void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
+	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
+	VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
+	makecurve(segments, coords, VG_STROKE_PATH);
+}
+
+// QBezier makes a quadratic bezier curve
+void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
+	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
+	VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
+	makecurve(segments, coords, VG_STROKE_PATH);
+}
+// Rect makes a rectangle at the specified location and dimensions
+void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+	VGPath path = newpath();
+	vguRect(path, x, y, w, h);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
+}
+
+// Roundrect makes an rounded rectangle at the specified location and dimensions
+void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh) {
+	VGPath path = newpath();
+	vguRoundRect(path, x, y, w, h, rw, rh);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
+}
+
+// Ellipse makes an ellipse at the specified location and dimensions
+void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+	VGPath path = newpath();
+	vguEllipse(path, x, y, w, h);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
+}
+
+// Circle makes a circle at the specified location and dimensions
+void CircleOutline(VGfloat x, VGfloat y, VGfloat r) {
+	EllipseOutline(x, y, r, r);
+}
+
+// Arc makes an elliptical arc at the specified location and dimensions
+void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
+	VGPath path = newpath();
+	vguArc(path, x, y, w, h, sa, aext, VGU_ARC_OPEN);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
 }

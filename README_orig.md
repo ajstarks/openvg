@@ -1,6 +1,4 @@
 #Testbed for exploring OpenVG on the Raspberry Pi.
-Forked version of ajstarks' libshapes. Windowed mode and outline shapes
-functions by paeryn (paeryn@gmail.com).
 
 <a href="http://www.flickr.com/photos/ajstarks/7811750326/" title="rotext by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg" width="500" height="281" alt="rotext"></a>
 
@@ -10,7 +8,6 @@ Here is the graphics equivalent of "hello, world"
 
 	// first OpenVG program
 	// Anthony Starks (ajstarks@gmail.com)
-	// Adapted for paeryn's fork by paeryn
 	#include <stdio.h>
 	#include <stdlib.h>
 	#include <unistd.h>
@@ -23,20 +20,16 @@ Here is the graphics equivalent of "hello, world"
 		int width, height;
 		char s[3];
 	
-		// Request a window size of 600x360 with top-left at 20,20
-		initWindowSize(20, 20, 600, 360);
 		init(&width, &height);					// Graphics initialization
 	
 		Start(width, height);					// Start the picture
 		Background(0, 0, 0);					// Black background
 		Fill(44, 77, 232, 1);					// Big blue marble
 		Circle(width / 2, 0, width);			// The "world"
-
 		Fill(255, 255, 255, 1);					// White text
 		TextMid(width / 2, height / 2, "hello, world", SerifTypeface, width / 10);	// Greetings 
 		End();						   			// End the picture
-		WindowOpacity(128);	// Make the window half opacity
-					// Can now see what is behind it	
+	
 		fgets(s, 2, stdin);				   		// look at the pic, end with [RETURN]
 		finish();					            // Graphics cleanup
 		exit(0);
@@ -51,37 +44,11 @@ Here is the graphics equivalent of "hello, world"
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
 OpenVG specifies colors as a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0, but typically colors are specified as RGBA (0-255 for RGB, A from 0.0 to 1.0)
 
-	void initWindowSize(int x, int y, unsigned int w, unsigned int h)
-Define how big to make the window, and where to place the top-left corner (as
-measured from the top-left of the screen). If the width and height requested
-are larger than the screen size then the window size will be reduced to fit
-the screen. The x,y coordinate can be negative so that the window appears
-partially off screen, but will be clipped so that at least one pixel in each
-direction will be on the screen. The window won't be created until init() is
-called. If initWindowSize() isn't called first then the window will default to
-being at 0,0 with a width,height the same as the screen.
-
-	void init(&width, &height)
-Initialize the window and OpenVG. width and height will be filled with the
-window's size.
-
 	void Start(int width, int height)
 Begin the picture, clear the screen with a default white, set the stroke and fill to black.
 
-	void WindowClear()
-Clears the window to the colour set by Background() (or White if Start() was
-called and no subsequent Background() or BackgroundRGB() call has been made).
-Use this rather than Start() to avoid having to set the background colour every
-time if you want anything other than White and don't want the stroke, fill
-and stroke width settings reset.
-
 	void End()
 End the picture, rendering to the screen.
-
-	void WindowOpacity(unsigned int alpha)
-Sets the global alpha value of the window for display purposes (doesn't affect
-the alpha channel of the drawing surface).
-The alpha value can be between 0 (fully transparent) and 255 (fully opaque).
 
 	void SaveEnd(char *filename)
 End the picture, rendering to the screen, save the raster to the named file as 4-byte RGBA words, with a stride of
@@ -97,13 +64,6 @@ Set the fill color
 
 	void Background(unsigned int r, unsigned int g, unsigned int b)
 Fill the screen with the background color defined from RGB values.
-
-	void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, float a)
-Fill the screen with the background color defined from RGBA values.
-NOTE: in this (paeryn's) version the background alpha is ignored for display
-purposes - instead a global alpha is used for the whole window. This doesn't
-affect the usage of the alpha channel for blending purposes, only for display
-purposes.
 
 	void StrokeWidth(float width)
 Set the stroke width.
@@ -159,17 +119,6 @@ Draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy
 	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
 Draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
-
-Outlined versions of above shapes (omitting the need to set a transparent fill)
-
-	void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-	void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
-	void CircleOutline(VGfloat x, VGfloat y, VGfloat r)
-	void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-	void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
-	void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
-	void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
-
 ### Text and Images
 
 	void Text(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
@@ -202,12 +151,6 @@ Scale by x,y.
 	void Shear(VGfloat x, VGfloat y)
 Shear by the angles x,y.
 
-## Clipping
-	void ClipRect(VGint x, VGint y, VGint w, VGint h)
-Limit drawing the drawing area to the specified rectangle, end with ClipEnd()
-
-	void ClipEnd()
-Ends clipping area
 
 ## Using fonts
 
@@ -297,8 +240,6 @@ The openvg shapes library can now be used in C code by including shapes.h and fo
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
 
 ## Go wrapper
-
-NOTE: Due to paeryn's lack of Go knowledge this version hasn't currently updadted the Go wrapper so the added functionality is not there.
 
 A Go programming language wrapper for the library is found in openvg.go. Sample clients are in the directory go-client.  The API closely follows the C API; here is the "hello, world" program in Go:
 
