@@ -401,10 +401,10 @@ unsigned char *next_utf8_char(unsigned char *utf8, int *codepoint) {
 	int datalen = (int)strlen((const char *)utf8);
 	unsigned char *p = utf8;
 
-	if (datalen < 1 || *utf8 == 0) { // End of string
+	if (datalen < 1 || *utf8 == 0) {		   // End of string
 		return NULL;
 	}
-	if (!(utf8[0] & 0x80)) {			 // 0xxxxxxx
+	if (!(utf8[0] & 0x80)) {			   // 0xxxxxxx
 		*codepoint = (wchar_t) utf8[0];
 		seqlen = 1;
 	} else if ((utf8[0] & 0xE0) == 0xC0) {		   // 110xxxxx 
@@ -579,7 +579,7 @@ void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
 
 // Start begins the picture, clearing a rectangular region with a specified color
 void Start(int width, int height) {
-	VGfloat color[4] = { 255, 255, 255, 1 };
+	VGfloat color[4] = { 1,1,1, 1 };
 	vgSetfv(VG_CLEAR_COLOR, 4, color);
 	vgClear(0, 0, width, height);
 	color[0] = 0, color[1] = 0, color[2] = 0;
