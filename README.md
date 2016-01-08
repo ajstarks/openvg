@@ -44,6 +44,31 @@ Here is the graphics equivalent of "hello, world"
 Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
 OpenVG specifies colors as a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0, but typically colors are specified as RGBA (0-255 for RGB, A from 0.0 to 1.0)
 
+### Window (canvas) functions
+
+	void WindowClear() 
+WindowClear clears the window to previously set background colour
+
+	void AreaClear(unsigned int x, unsigned int y, unsigned int w, unsigned int h)
+AreaClear clears a given rectangle in window coordinates
+
+	void WindowOpacity(unsigned int a)
+WindowOpacity sets the  window opacity
+
+	void WindowPosition(int x, int y)
+WindowPosition moves the window to given position
+
+### Setup and shutdown
+
+	void finish() 
+Shutdown the graphics. This should end every program.
+
+	void init(int *w, int *h)
+Initialize the graphics: width and height of the canvas are returned.  This should begin every program.
+
+	void initWindowSize(int x, int y, unsigned int w, unsigned int h)
+Initialize with specific dimensions
+
 	void Start(int width, int height)
 Begin the picture, clear the screen with a default white, set the stroke and fill to black.
 
@@ -64,6 +89,9 @@ Set the fill color
 
 	void Background(unsigned int r, unsigned int g, unsigned int b)
 Fill the screen with the background color defined from RGB values.
+
+	void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
+clears the screen to a background color with alpha
 
 	void StrokeWidth(float width)
 Set the stroke width.
@@ -107,17 +135,32 @@ Draw a polyline using the coordinates in arrays pointed to by x and y.  The numb
 	void Circle(VGfloat x, VGfloat y, VGfloat r)
 Draw a circle centered at (x,y) with radius r.
 
+	void CircleOutline(VGfloat x, VGfloat y, VGfloat r)
+Outlined version
+
 	void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 Draw an ellipse centered at (x,y) with radii (w, h).
+
+	void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
+Outlined version
 
 	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
 Draw a quadratic bezier curve beginning at (sx, sy), using control points at (cx, cy), ending at (ex, ey).
 
+	QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
+Outlined version
+
 	void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
 Draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey).
 
+	void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) 
+Outlined version
+
 	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
 Draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
+
+	void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
+Outlined version
 
 ### Text and Images
 
@@ -132,6 +175,12 @@ Draw a the text srtring (s) at with its lend aligned to location (x,y), using po
 
 	VGfloat TextWidth(char *s, Fontinfo f, int pointsize)
 Return the width of text
+
+	VGfloat TextHeight(Fontinfo f, int pointsize)
+Return a font's height
+
+	TextDepth(Fontinfo f, int pointsize)
+Return a font's distance beyond the baseline.
 
 	void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
 place a JPEG image with dimensions (w,h) at (x,y).
