@@ -2,6 +2,9 @@
 // libshapes: high-level OpenVG API
 // Anthony Starks (ajstarks@gmail.com)
 //
+// Additional outline / windowing functions
+// Paeryn (github.com/paeryn)
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
@@ -10,15 +13,19 @@
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "EGL/egl.h"
-#include "GLES/gl.h"
 #include "bcm_host.h"
 #include "DejaVuSans.inc"				   // font data
 #include "DejaVuSerif.inc"
 #include "DejaVuSansMono.inc"
 #include "eglstate.h"					   // data structures for graphics state
 #include "fontinfo.h"					   // font data structure
+
 static STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 500;
+static int init_x = 0;		// Initial window position and size
+static int init_y = 0;
+static unsigned int init_w = 0;
+static unsigned int init_h = 0;
 //
 // Terminal settings
 //
@@ -79,6 +86,8 @@ Fontinfo loadfont(const int *Points,
 	f.CharacterMap = cmap;
 	f.GlyphAdvances = adv;
 	f.Count = ng;
+	f.descender_height = 0;
+	f.font_height = 0;
 	return f;
 }
 
@@ -214,10 +223,24 @@ void dumpscreen(int w, int h, FILE * fp) {
 
 Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
 
+// initWindowSize requests a specific window size & position, if not called
+// then init() will open a full screen window.
+// Done this way to preserve the original init() behaviour.
+void initWindowSize(int x, int y, unsigned int w, unsigned int h) {
+	init_x = x;
+	init_y = y;
+	init_w = w;
+	init_h = h;
+}
+
 // init sets the system to its initial state
 void init(int *w, int *h) {
 	bcm_host_init();
 	memset(state, 0, sizeof(*state));
+	state->window_x = init_x;
+	state->window_y = init_y;
+	state->window_width = init_w;
+	state->window_height = init_h;
 	oglinit(state);
 	SansTypeface = loadfont(DejaVuSans_glyphPoints,
 				DejaVuSans_glyphPointIndices,
@@ -225,6 +248,8 @@ void init(int *w, int *h) {
 				DejaVuSans_glyphInstructionIndices,
 				DejaVuSans_glyphInstructionCounts,
 				DejaVuSans_glyphAdvances, DejaVuSans_characterMap, DejaVuSans_glyphCount);
+	SansTypeface.descender_height = DejaVuSans_descender_height;
+	SansTypeface.font_height = DejaVuSans_font_height;
 
 	SerifTypeface = loadfont(DejaVuSerif_glyphPoints,
 				 DejaVuSerif_glyphPointIndices,
@@ -232,6 +257,8 @@ void init(int *w, int *h) {
 				 DejaVuSerif_glyphInstructionIndices,
 				 DejaVuSerif_glyphInstructionCounts,
 				 DejaVuSerif_glyphAdvances, DejaVuSerif_characterMap, DejaVuSerif_glyphCount);
+	SerifTypeface.descender_height = DejaVuSerif_descender_height;
+	SerifTypeface.font_height = DejaVuSerif_font_height;
 
 	MonoTypeface = loadfont(DejaVuSansMono_glyphPoints,
 				DejaVuSansMono_glyphPointIndices,
@@ -239,9 +266,11 @@ void init(int *w, int *h) {
 				DejaVuSansMono_glyphInstructionIndices,
 				DejaVuSansMono_glyphInstructionCounts,
 				DejaVuSansMono_glyphAdvances, DejaVuSansMono_characterMap, DejaVuSansMono_glyphCount);
+	MonoTypeface.descender_height = DejaVuSansMono_descender_height;
+	MonoTypeface.font_height = DejaVuSansMono_font_height;
 
-	*w = state->screen_width;
-	*h = state->screen_height;
+	*w = state->window_width;
+	*h = state->window_height;
 }
 
 // finish cleans up
@@ -249,7 +278,6 @@ void finish() {
 	unloadfont(SansTypeface.Glyphs, SansTypeface.Count);
 	unloadfont(SerifTypeface.Glyphs, SerifTypeface.Count);
 	unloadfont(MonoTypeface.Glyphs, MonoTypeface.Count);
-	glClear(GL_COLOR_BUFFER_BIT);
 	eglSwapBuffers(state->display, state->surface);
 	eglMakeCurrent(state->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
 	eglDestroySurface(state->display, state->surface);
@@ -396,6 +424,9 @@ void ClipEnd() {
 	vgSeti(VG_SCISSORING, VG_FALSE);
 }
 
+// Text Functions
+
+// next_utf_char handles UTF encoding
 unsigned char *next_utf8_char(unsigned char *utf8, int *codepoint) {
 	int seqlen;
 	int datalen = (int)strlen((const char *)utf8);
@@ -473,20 +504,32 @@ void TextEnd(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 	Text(x - tw, y, s, f, pointsize);
 }
 
+// TextHeight reports a font's height
+VGfloat TextHeight(Fontinfo f, int pointsize) {
+	return (f.font_height * pointsize) / 65536;
+}
+
+// TextDepth reports a font's depth (how far under the baseline it goes)
+VGfloat TextDepth(Fontinfo f, int pointsize) {
+	return (-f.descender_height * pointsize) / 65536;
+}
+
 //
 // Shape functions
 //
 
 // newpath creates path data
+// Changed capabilities as others not needed at the moment - allows possible
+// driver optimisations.
 VGPath newpath() {
-	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_ALL);
+	return vgCreatePath(VG_PATH_FORMAT_STANDARD, VG_PATH_DATATYPE_F, 1.0f, 0.0f, 0, 0, VG_PATH_CAPABILITY_APPEND_TO);	// Other capabilities not needed
 }
 
 // makecurve makes path data using specified segments and coordinates
-void makecurve(VGubyte * segments, VGfloat * coords) {
+void makecurve(VGubyte * segments, VGfloat * coords, VGbitfield flags) {
 	VGPath path = newpath();
 	vgAppendPathData(path, 2, segments, coords);
-	vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+	vgDrawPath(path, flags);
 	vgDestroyPath(path);
 }
 
@@ -494,14 +537,14 @@ void makecurve(VGubyte * segments, VGfloat * coords) {
 void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
 	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
 	VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
-	makecurve(segments, coords);
+	makecurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
 // QBezier makes a quadratic bezier curve
 void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
 	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
 	VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
-	makecurve(segments, coords);
+	makecurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
 // interleave interleaves arrays of x, y into a single array
@@ -579,7 +622,7 @@ void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
 
 // Start begins the picture, clearing a rectangular region with a specified color
 void Start(int width, int height) {
-	VGfloat color[4] = { 1,1,1, 1 };
+	VGfloat color[4] = { 1, 1, 1, 1 };
 	vgSetfv(VG_CLEAR_COLOR, 4, color);
 	vgClear(0, 0, width, height);
 	color[0] = 0, color[1] = 0, color[2] = 0;
@@ -613,14 +656,95 @@ void SaveEnd(char *filename) {
 	assert(eglGetError() == EGL_SUCCESS);
 }
 
-// clear the screen to a solid background color
+// Backgroud clears the screen to a solid background color
 void Background(unsigned int r, unsigned int g, unsigned int b) {
-	Fill(r, g, b, 1);
-	Rect(0, 0, state->screen_width, state->screen_height);
+	VGfloat colour[4];
+	RGB(r, g, b, colour);
+	vgSetfv(VG_CLEAR_COLOR, 4, colour);
+	vgClear(0, 0, state->window_width, state->window_height);
 }
 
-// clear the screen to a background color with alpha
+// BackgroundRGB clears the screen to a background color with alpha
 void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
-	Fill(r, g, b, a);
-	Rect(0, 0, state->screen_width, state->screen_height);
+	VGfloat colour[4];
+	RGBA(r, g, b, a, colour);
+	vgSetfv(VG_CLEAR_COLOR, 4, colour);
+	vgClear(0, 0, state->window_width, state->window_height);
+}
+
+// WindowClear clears the window to previously set background colour
+void WindowClear() {
+	vgClear(0, 0, state->window_width, state->window_height);
+}
+
+// AreaClear clears a given rectangle in window coordinates (not affected by
+// transformations)
+void AreaClear(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
+	vgClear(x, y, w, h);
+}
+
+// WindowOpacity sets the  window opacity
+void WindowOpacity(unsigned int a) {
+	dispmanChangeWindowOpacity(state, a);
+}
+
+// WindowPosition moves the window to given position
+void WindowPosition(int x, int y) {
+	dispmanMoveWindow(state, x, y);
+}
+
+// Outlined shapes
+// Hollow shapes -because filling still happens even with a fill of 0,0,0,0
+// unlike where using a strokewidth of 0 disables the stroke.
+// Either this or change the original functions to require the VG_x_PATH flags
+
+// CBezier makes a quadratic bezier curve, stroked
+void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
+	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
+	VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
+	makecurve(segments, coords, VG_STROKE_PATH);
+}
+
+// QBezierOutline makes a quadratic bezier curve, outlined 
+void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
+	VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
+	VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
+	makecurve(segments, coords, VG_STROKE_PATH);
+}
+
+// RectOutline makes a rectangle at the specified location and dimensions, outlined 
+void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+	VGPath path = newpath();
+	vguRect(path, x, y, w, h);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
+}
+
+// RoundrectOutline  makes an rounded rectangle at the specified location and dimensions, outlined 
+void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh) {
+	VGPath path = newpath();
+	vguRoundRect(path, x, y, w, h, rw, rh);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
+}
+
+// EllipseOutline makes an ellipse at the specified location and dimensions, outlined
+void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+	VGPath path = newpath();
+	vguEllipse(path, x, y, w, h);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
+}
+
+// CircleOutline makes a circle at the specified location and dimensions, outlined
+void CircleOutline(VGfloat x, VGfloat y, VGfloat r) {
+	EllipseOutline(x, y, r, r);
+}
+
+// ArcOutline makes an elliptical arc at the specified location and dimensions, outlined
+void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
+	VGPath path = newpath();
+	vguArc(path, x, y, w, h, sa, aext, VGU_ARC_OPEN);
+	vgDrawPath(path, VG_STROKE_PATH);
+	vgDestroyPath(path);
 }

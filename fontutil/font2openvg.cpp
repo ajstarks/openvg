@@ -34,7 +34,7 @@
 #include FT_OUTLINE_H
 
 #define OUTPUT_INTS
-
+#define NGLYPHS 500
 class Vector2
 {
 public:
@@ -109,9 +109,12 @@ int main (int argc, char * const argv[])
 	std::vector<float>		gbbox;
 	std::vector<float>		advances;
 
-	unsigned int characterMap[256];
+        float                           global_miny = 1000000.0f;
+        float                           global_maxy = -10000000.0f;
+        
+	unsigned int characterMap[NGLYPHS];
 	int glyphs = 0;
-	for(int cc=0;cc<256;cc++)
+	for(int cc=0;cc<NGLYPHS;cc++)
 	{
 		characterMap[cc] = 0xffffffffu;	//initially nonexistent
 
@@ -224,6 +227,13 @@ int main (int argc, char * const argv[])
 			gbbox.push_back( maxy );
 			advances.push_back(advance);
 
+                        if (miny < global_miny) {
+                            global_miny = miny;
+                        }
+                        if (maxy > global_maxy) {
+                            global_maxy = maxy;
+                        }
+                        
 			int size;
 			size = gpvec.size();
 			gpvec.resize( size + pvec.size() );
@@ -320,6 +330,9 @@ int main (int argc, char * const argv[])
 	}
 	fprintf (f,"};\n\n");
 */
+        //print minimum and maximum y values over the whole font
+        fprintf (f,"static const int %s_descender_height = %d;\n",argv[3],(int)(65536.0f*global_miny));
+        fprintf (f,"static const int %s_font_height = %d;\n",argv[3],(int)(65536.0f*global_maxy));
 #else
 	//print points
 	fprintf (f,"static const float %s_glyphPoints[%d*2] = {", argv[3],gpvec.size());
@@ -352,17 +365,19 @@ int main (int argc, char * const argv[])
 	}
 	fprintf (f,"};\n\n");
 */
+        fprintf (f,"static const float %s_descender_height = %d;\n",argv[3],global_miny));
+        fprintf (f,"static const float %s_font_height = %d;\n",argv[3],global_maxy));
 #endif
 
 
 	//print the number of glyphs and the character map
 	fprintf (f,"static const int %s_glyphCount = %d;\n",argv[3],glyphs);
-	fprintf (f,"static const short %s_characterMap[256] = {", argv[3]);
-	for(int i=0;i<256;i++)
+	fprintf (f,"static const short %s_characterMap[500] = {", argv[3]);
+	for(int i=0;i<NGLYPHS;i++)
 	{
 		if ((i % 20)==0)
 			fprintf (f,"\n    ");
-		fprintf (f,"%d%c",characterMap[i],(i==(256-1))?' ':',');
+		fprintf (f,"%d%c",characterMap[i],(i==(NGLYPHS-1))?' ':',');
 	}
 	fprintf (f,"};\n\n");
 	fclose(f);
