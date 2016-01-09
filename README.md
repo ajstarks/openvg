@@ -60,14 +60,14 @@ WindowPosition moves the window to given position
 
 ### Setup and shutdown
 
-	void finish() 
-Shutdown the graphics. This should end every program.
-
 	void init(int *w, int *h)
 Initialize the graphics: width and height of the canvas are returned.  This should begin every program.
 
 	void initWindowSize(int x, int y, unsigned int w, unsigned int h)
 Initialize with specific dimensions
+
+	void finish() 
+Shutdown the graphics. This should end every program.
 
 	void Start(int width, int height)
 Begin the picture, clear the screen with a default white, set the stroke and fill to black.
@@ -122,9 +122,15 @@ Draw a line between (x1, y1) and (x2, y2).
 	void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 Draw a rectangle with its origin (lower left) at (x,y), and size is (width,height).
 
+	void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
+Outlined version
+
 	void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
 Draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).  
 The width and height of the corners are specified with (rw,rh).
+
+	void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
+Outlined version
 
 	void Polygon(VGfloat *x, VGfloat *y, VGint n)
 Draw a polygon using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
@@ -147,7 +153,7 @@ Outlined version
 	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
 Draw a quadratic bezier curve beginning at (sx, sy), using control points at (cx, cy), ending at (ex, ey).
 
-	QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
+	void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
 Outlined version
 
 	void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
@@ -297,6 +303,8 @@ The openvg shapes library can now be used in C code by including shapes.h and fo
 ## Go wrapper
 
 A Go programming language wrapper for the library is found in openvg.go. Sample clients are in the directory go-client.  The API closely follows the C API; here is the "hello, world" program in Go:
+
+<a href="https://godoc.org/github.com/ajstarks/openvg">The Go API</a>
 
 	package main
 
