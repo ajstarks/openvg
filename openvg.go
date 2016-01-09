@@ -200,6 +200,31 @@ func Init() (int, int) {
 	return int(rw), int(rh)
 }
 
+// InitWidowSize initialized the graphics subsystem with specified dimensions
+func InitWindowSize(x, y, w, h int) {
+	C.initWindowSize(C.int(x), C.int(y), C.uint(w), C.uint(h))
+}
+
+// WindowClear clears the window to previously set background color
+func WindowClear() {
+	C.WindowClear()
+}
+
+// WindowPostion places a window
+func WindowPosition(x, y int) {
+	C.WindowPosition(C.int(x), C.int(y))
+}
+
+// WindowOpacity sets the window's opacity
+func WindowOpacity(a uint) {
+	C.WindowOpacity(C.uint(a))
+}
+
+// AreaClear clears a given rectangle in window coordinates
+func AreaClear(x, y, w, h int) {
+	C.AreaClear(C.uint(x), C.uint(y), C.uint(w), C.uint(h))
+}
+
 // Finish shuts down the graphics subsystem
 func Finish() {
 	C.finish()
@@ -525,6 +550,16 @@ func TextWidth(s string, font string, size int) VGfloat {
 	t := C.CString(s)
 	defer C.free(unsafe.Pointer(t))
 	return VGfloat(C.TextWidth(t, selectfont(font), C.int(size)))
+}
+
+// TextHeight returns a font's height (ascent)
+func TextHeight(font string, size int) VGfloat {
+	return VGfloat(C.TextHeight(selectfont(font), C.int(size)))
+}
+
+// TextDepth returns the distance below the baseline for a specified font
+func TextDepth(font string, size int) VGfloat {
+	return VGfloat(C.TextDepth(selectfont(font), C.int(size)))
 }
 
 // Translate translates the coordinate system to (x,y)
