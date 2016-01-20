@@ -1,7 +1,7 @@
 INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -I..
-LIBFLAGS=-L/opt/vc/lib -lGLESv2 -lEGL -lbcm_host -lpthread  -ljpeg
+LIBFLAGS=-L/opt/vc/lib -lEGL -lGLESv2 -lbcm_host -lpthread  -ljpeg
 
-all: shapedemo hellovg mouse-hellovg particles screensize clip
+all: shapedemo hellovg mouse-hellovg particles screensize clip textmetrics
 
 shapedemo:	shapedemo.c ../libshapes.o ../oglinit.o
 	gcc -Wall $(INCLUDEFLAGS) $(LIBFLAGS) -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o
@@ -26,6 +26,9 @@ screensize:	screensize.c ../libshapes.o ../oglinit.o
 
 clip:	clip.c ../libshapes.o ../oglinit.o
 	gcc -Wall $(INCLUDEFLAGS) -o  clip clip.c ../libshapes.o ../oglinit.o $(LIBFLAGS)
+
+textmetrics:	textmetrics.c ../libshapes.o ../oglinit.o
+	gcc -Wall $(INCLUDEFLAGS) -o  textmetrics textmetrics.c ../libshapes.o ../oglinit.o $(LIBFLAGS)
 
 indent:
 	indent -linux -c 60 -brf -l 132 shapedemo.c hellovg.c mouse-hellovg.c particles.c screensize.c
