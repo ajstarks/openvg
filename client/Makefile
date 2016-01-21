@@ -4,7 +4,7 @@ LIBFLAGS=-L/opt/vc/lib -lEGL -lGLESv2 -lbcm_host -lpthread  -ljpeg
 all: shapedemo hellovg mouse-hellovg particles screensize clip
 
 shapedemo:	shapedemo.c ../libshapes.o ../oglinit.o
-	gcc -Wall $(INCLUDEFLAGS) $(LIBFLAGS) -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o
+	gcc -Wall $(INCLUDEFLAGS)  -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o $(LIBFLAGS)
 
 test:	shapedemo
 	./shapedemo demo 5
