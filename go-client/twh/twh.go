@@ -43,7 +43,7 @@ type Current struct {
 
 const (
 	weatherURL = "https://api.forecast.io/forecast"
-	APIkey     = "/-key-here-/"
+	APIkey     = "/-api-key-/"
 	options    = "?exclude=hourly,daily,minutely,flags"
 )
 
@@ -64,7 +64,8 @@ var feeds = map[string]string{
 
 // netread derefernces a URL, returning the Reader, with an error
 func netread(url string) (io.ReadCloser, error) {
-	resp, err := http.Get(url)
+	conn := &http.Client{Timeout: 1 * time.Minute}
+	resp, err := conn.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +83,7 @@ func regionFill(x, y, w, h openvg.VGfloat, color string) {
 }
 
 // headlines retrieves data from the AP API, decodes and formats it.
-func headlines(w, h int, name string) {
+func headlines(w, h openvg.VGfloat, name string) {
 	var data Feed
 	url, ok := feeds[name]
 	if !ok {
@@ -100,20 +101,20 @@ func headlines(w, h int, name string) {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
-	regionFill(0, 0, openvg.VGfloat(w), openvg.VGfloat(h)*.50, "steelblue")
-	headsize := w / 75
-	x := openvg.VGfloat(w) * 0.25
-	y := openvg.VGfloat(h) * 0.45
-	spacing := openvg.VGfloat(headsize) * 2.0
+	regionFill(0, 0, w, h*.50, "steelblue")
+	headsize := w / 65
+	x := w * 0.20
+	y := h * 0.45
+	spacing := headsize * 2.0
 	for _, e := range data.Entries {
-		openvg.Text(x, y, e.Title, "sans", headsize)
+		openvg.Text(x, y, e.Title, "sans", int(headsize))
 		y = y - spacing
 	}
 	openvg.End()
 }
 
 // weather retrieves data from the forecast.io API, decodes and formats it.
-func weather(w, h int, latlong string) {
+func weather(w, h openvg.VGfloat, latlong string) {
 	var data Forecast
 	r, err := netread(weatherURL + APIkey + latlong + options)
 	if err != nil {
@@ -126,55 +127,57 @@ func weather(w, h int, latlong string) {
 		fmt.Fprintln(os.Stderr, err)
 		return
 	}
-	regionFill(0, openvg.VGfloat(h)*0.50, openvg.VGfloat(w)*.50, openvg.VGfloat(h)*.50, "steelblue")
-	x := openvg.VGfloat(w) * 0.10
-	y := openvg.VGfloat(h) * 0.75
-	wsize := w / 25
-	spacing := openvg.VGfloat(wsize) * 2.0
+	x := w * 0.05
+	y := h * 0.70
+	wsize := w / 20
+	spacing := wsize * 2.0
+	w1 := int(wsize)
+	w2 := w1 / 2
+	w3 := w1 / 3
 	temp := fmt.Sprintf("%0.f°", data.Currently.Temperature)
-	tw := openvg.TextWidth(temp, "sans", wsize)
-	openvg.Text(x, y, temp, "sans", wsize)
+	tw := openvg.TextWidth(temp, "sans", w1)
+
+	regionFill(0, h*0.50, w*.50, h*.50, "steelblue")
+	openvg.Text(x, y, temp, "sans", w1)
 	if data.Currently.Temperature-data.Currently.FeelsLike > 1 {
-		openvg.Text(x+tw+10, y, fmt.Sprintf("(feels like %0.f°)", data.Currently.FeelsLike), "sans", wsize/3)
+		openvg.Text(x+tw+10, y, fmt.Sprintf("(feels like %0.f°)", data.Currently.FeelsLike), "sans", w3)
 	}
-	openvg.Text(x, y+spacing, data.Currently.Summary, "sans", wsize/2)
+	openvg.Text(x, y+spacing, data.Currently.Summary, "sans", w2)
 	if data.Currently.PrecipProb > 0 {
-		openvg.Text(x, y-(spacing/2), fmt.Sprintf("%0.f%% Chance of precipitation", data.Currently.PrecipProb*100), "sans", wsize/3)
+		openvg.Text(x, y-(spacing/2), fmt.Sprintf("%0.f%% Chance of precipitation", data.Currently.PrecipProb*100), "sans", w3)
 	}
 	openvg.End()
 }
 
 // clock formats the current time
-func clock(w, h int) {
+func clock(w, h openvg.VGfloat) {
+	regionFill(w*0.50, h*0.50, w*.50, h*.50, "steelblue")
+	clocksize := w / 20
+	cs := int(clocksize)
+	x := w * 0.95
+	y := h * 0.70
+
 	now := time.Now()
-	hour, min, _ := now.Clock()
-	_, mon, day := now.Date()
-	ampm := ""
-	if hour >= 12 {
-		ampm = "pm"
-	} else {
-		ampm = "am"
-	}
-	regionFill(openvg.VGfloat(w)*0.50, openvg.VGfloat(h)*0.50, openvg.VGfloat(w)*.50, openvg.VGfloat(h)*.50, "steelblue")
-	clocksize := w / 25
-	x := openvg.VGfloat(w) * 0.90
-	y := openvg.VGfloat(h) * 0.75
-	spacing := openvg.VGfloat(clocksize) * 2.0
-	openvg.TextEnd(x, y, fmt.Sprintf("%2d:%02d %s", hour%12, min, ampm), "sans", clocksize)
-	openvg.TextEnd(x, y+(spacing), fmt.Sprintf("%s %s %d", now.Weekday(), mon, day), "sans", clocksize/2)
+	openvg.TextEnd(x, y, now.Format("3:04 pm"), "sans", cs)
+	openvg.TextEnd(x, y+(clocksize*2), now.Format("Monday January _2"), "sans", cs/2)
 	openvg.End()
 }
 
 // show the current time, weather and headlines
 func main() {
-	var headtype = flag.String("h", "us", "headline type (top, us, health, science, politics, world, entertain, sports, business, tech)")
+	var headtype = flag.String("h", "us", "headline type (business, entertain, health, politics, sports, science, strange, tech, top, us, world)")
 	var location = flag.String("loc", "40.6213,-74.4395", "lat,long for weather")
 	flag.Parse()
 
 	// initial display
-	w, h := openvg.Init()
-	openvg.Start(w, h)
-	regionFill(0, 0, openvg.VGfloat(w), openvg.VGfloat(h), "steelblue")
+	dw, dh := openvg.Init()
+	openvg.Start(dw, dh)
+	w, h := openvg.VGfloat(dw), openvg.VGfloat(dh)
+	pause := time.Duration(60-time.Now().Second()) * time.Second
+	regionFill(0, 0, w, h, "steelblue")
+	openvg.TextMid(w/2, h/2, fmt.Sprintf("Syncing the clock (%v)", pause), "mono", dw/30)
+	openvg.End()
+	<-time.After(pause) // wait until the beginning of the minute
 	clock(w, h)
 	weather(w, h, *location)
 	headlines(w, h, *headtype)
