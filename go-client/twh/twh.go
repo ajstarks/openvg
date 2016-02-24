@@ -3,7 +3,6 @@ package main
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"flag"
 	"fmt"
 	"io"
@@ -12,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"time"
 
 	"github.com/ajstarks/openvg"
@@ -43,30 +43,32 @@ type Current struct {
 	FeelsLike   float64 `json:"apparentTemperature"`
 }
 
+type NYTHeadlines struct {
+	Status     string   `json:"status"`
+	Copyright  string   `json:"copyright"`
+	NumResults int      `json:"num_results"`
+	Results    []result `json:"results"`
+}
+
+type result struct {
+	Section    string `json:"section"`
+	Subsection string `json:"subsection"`
+	Title      string `json:"title"`
+	Abstract   string `json:"abstract"`
+}
+
 const (
-	weatherURL = "https://api.forecast.io/forecast"
-	APIkey     = "/-api-key-here/"
-	options    = "?exclude=hourly,daily,minutely,flags"
+	weatherfmt    = "https://api.forecast.io/forecast/%s/%s/?exclude=hourly,daily,minutely,flags"
+	weatherAPIkey = "-api-key-"
+	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
+	NYTAPIkey     = "-api-key-"
 )
 
-// Mapping of headline types to AP API URLs
-var feeds = map[string]string{
-	"top":       "http://hosted2.ap.org/atom/APDEFAULT/3d281c11a96b4ad082fe88aa0db04305",
-	"us":        "http://hosted2.ap.org/atom/APDEFAULT/386c25518f464186bf7a2ac026580ce7",
-	"world":     "http://hosted2.ap.org/atom/APDEFAULT/cae69a7523db45408eeb2b3a98c0c9c5",
-	"politics":  "http://hosted2.ap.org/atom/APDEFAULT/89ae8247abe8493fae24405546e9a1aa",
-	"business":  "http://hosted2.ap.org/atom/APDEFAULT/f70471f764144b2fab526d39972d37b3",
-	"sports":    "http://hosted2.ap.org/atom/APDEFAULT/347875155d53465d95cec892aeb06419",
-	"tech":      "http://hosted2.ap.org/atom/APDEFAULT/495d344a0d10421e9baa8ee77029cfbd",
-	"entertain": "http://hosted2.ap.org/atom/APDEFAULT/4e67281c3f754d0696fbfdee0f3f1469",
-	"health":    "http://hosted2.ap.org/atom/APDEFAULT/bbd825583c8542898e6fa7d440b9febc",
-	"science":   "http://hosted2.ap.org/atom/APDEFAULT/b2f0ca3a594644ee9e50a8ec4ce2d6de",
-	"strange":   "http://hosted2.ap.org/atom/APDEFAULT/aa9398e6757a46fa93ed5dea7bd3729e",
-}
+var fromHTML = strings.NewReplacer("&#8217;", "'", "&#8216;", "'", "’", "'")
 
 // netread derefernces a URL, returning the Reader, with an error
 func netread(url string) (io.ReadCloser, error) {
-	conn := &http.Client{Timeout: 1 * time.Minute}
+	conn := &http.Client{Timeout: 30 * time.Second}
 	resp, err := conn.Get(url)
 	if err != nil {
 		return nil, err
@@ -77,6 +79,7 @@ func netread(url string) (io.ReadCloser, error) {
 	return resp.Body, nil
 }
 
+// countdown shows a countdown display to the top of minute
 func countdown(w, h openvg.VGfloat) {
 	tick := time.NewTicker(1 * time.Second)
 	for delay := 60 - time.Now().Second(); delay > 0; delay-- {
@@ -98,37 +101,44 @@ func regionFill(x, y, w, h openvg.VGfloat, color string) {
 	openvg.FillColor("white")
 }
 
-// headlines retrieves data from the Associated Press API, decodes and displays it.
-func headlines(w, h openvg.VGfloat, name string) {
-	var data Feed
-	url, ok := feeds[name]
-	if !ok {
-		fmt.Fprintf(os.Stderr, "%s headlines not supported\n", name)
-		return
-	}
-	r, err := netread(url)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		return
-	}
-	defer r.Close()
-	err = xml.NewDecoder(r).Decode(&data)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		return
-	}
-	regionFill(0, 0, w, h*.50, "gray")
-	headsize := w / 50
-	x := w * 0.10
-	y := h * 0.45
-	spacing := headsize * 2.0
-	for _, e := range data.Entries {
-		openvg.Text(x, y, e.Title, "sans", int(headsize))
-		y = y - spacing
-	}
+// gerror makes a graphical error message
+func gerror(x, y, w, h openvg.VGfloat, s string) {
+	regionFill(x, y, w, h, "gray")
+	openvg.TextMid(x+w/2, y+h/2, s, "sans", int(w/30))
 	openvg.End()
 }
 
+// headlines retrieves data from the Associated Press API, decodes and displays it.
+func headlines(w, h openvg.VGfloat, section string) {
+	x := w * 0.05
+	y := h * 0.45
+	nytURL := fmt.Sprintf(NYTfmt, section, NYTAPIkey)
+	r, err := netread(nytURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "headline read error: %v (%s)\n", err, nytURL)
+		gerror(x, y, w, h, "no headlines")
+		return
+	}
+	defer r.Close()
+	var data NYTHeadlines
+	err = json.NewDecoder(r).Decode(&data)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "decode: %v\n", err)
+		gerror(x, y, w, h, "no headlines")
+		return
+	}
+	regionFill(0, 0, w, h*.50, "gray")
+	headsize := w / 65
+	spacing := headsize * 2.0
+	for _, r := range data.Results {
+		openvg.Text(x, y, fromHTML.Replace(r.Title), "sans", int(headsize))
+		y = y - spacing
+	}
+	openvg.Image(15, 15, 30, 30, "poweredby_nytimes_30a.png")
+	openvg.End()
+}
+
+// fog shows the fog icon
 func fog(x, y, w, h openvg.VGfloat, color string) {
 	radius := w / 3
 	r2 := radius * 1.8
@@ -138,6 +148,7 @@ func fog(x, y, w, h openvg.VGfloat, color string) {
 	openvg.Circle(x+w*0.60, y+h*0.40, r2)
 }
 
+// cloud shows the cloudy icon
 func cloud(x, y, w, h openvg.VGfloat, color string) {
 	radius := w / 3
 	r2 := radius * 1.8
@@ -147,6 +158,7 @@ func cloud(x, y, w, h openvg.VGfloat, color string) {
 	openvg.Circle(x+w*0.60, y+h*0.40, r2)
 }
 
+// flake shows the snowflake icon
 func flake(x, y, w, h openvg.VGfloat, color string) {
 	cx := x + (w / 2)
 	cy := y + (h / 2)
@@ -163,6 +175,7 @@ func flake(x, y, w, h openvg.VGfloat, color string) {
 	openvg.StrokeWidth(0)
 }
 
+// drop shows the raindrop icon
 func drop(x, y, w, h openvg.VGfloat, color string) {
 	openvg.FillColor(color)
 	openvg.Ellipse(x+(w/2), y+(h*0.40), w*0.52, h*0.65)
@@ -171,6 +184,7 @@ func drop(x, y, w, h openvg.VGfloat, color string) {
 	openvg.Polygon(xp, yp)
 }
 
+// rain shows a raindrops
 func rain(x, y, w, h openvg.VGfloat, color string) {
 	for i := 0; i < 20; i++ {
 		rx := openvg.VGfloat(rand.Float64())
@@ -179,6 +193,7 @@ func rain(x, y, w, h openvg.VGfloat, color string) {
 	}
 }
 
+// snow shows snow
 func snow(x, y, w, h openvg.VGfloat, color string) {
 	for i := 0; i < 20; i++ {
 		rx := openvg.VGfloat(rand.Float64())
@@ -187,6 +202,7 @@ func snow(x, y, w, h openvg.VGfloat, color string) {
 	}
 }
 
+// sun shows the icon for clear weather
 func sun(x, y, w, h openvg.VGfloat, color string) {
 	cx := x + (w / 2)
 	cy := y + (h / 2)
@@ -209,6 +225,7 @@ func sun(x, y, w, h openvg.VGfloat, color string) {
 	openvg.StrokeWidth(0)
 }
 
+// moon shows the icon for clear weather at night
 func moon(x, y, w, h openvg.VGfloat, bg, fg string) {
 	cx := x + w/2
 	cy := y + h/2
@@ -219,16 +236,19 @@ func moon(x, y, w, h openvg.VGfloat, bg, fg string) {
 	openvg.Circle(x+w*0.65, cy, w2)
 }
 
+// pcloud shows the icon for partly cloudy
 func pcloud(x, y, w, h openvg.VGfloat, color string) {
 	sun(x+w*.2, y+h*.35, w*.7, h*.7, "orange")
 	cloud(x, y, w, h, color)
 }
 
+// npcloud shows the partly cloudy icon at night
 func npcloud(x, y, w, h openvg.VGfloat, ccolor, mcolor string) {
 	cloud(x, y, w, h, ccolor)
 	moon(x+w*0.2, y+h*0.05, w*.7, h*.7, ccolor, mcolor)
 }
 
+// wind shows the windy icon
 func wind(x, y, w, h openvg.VGfloat, bg, color string) {
 	openvg.FillColor(bg, 0)
 	openvg.StrokeWidth(w / 25)
@@ -241,20 +261,23 @@ func wind(x, y, w, h openvg.VGfloat, bg, color string) {
 
 // weather retrieves data from the forecast.io API, decodes and displays it.
 func weather(w, h openvg.VGfloat, latlong string) {
-	var data Forecast
-	r, err := netread(weatherURL + APIkey + latlong + options)
+	x := w * 0.05
+	y := h * 0.70
+	weatherURL := fmt.Sprintf(weatherfmt, weatherAPIkey, latlong)
+	r, err := netread(weatherURL)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Weather read error (%v)\n", err)
+		fmt.Fprintf(os.Stderr, "Weather read error %v (%s)\n", err, weatherURL)
+		gerror(x, y, w, h, "no weather")
 		return
 	}
 	defer r.Close()
+	var data Forecast
 	err = json.NewDecoder(r).Decode(&data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
+		gerror(x, y, w, h, "no weather")
 		return
 	}
-	x := w * 0.05
-	y := h * 0.70
 	wsize := w / 20
 	spacing := wsize * 2.0
 	w1 := int(wsize)
@@ -296,7 +319,6 @@ func weather(w, h openvg.VGfloat, latlong string) {
 	case "partly-cloudy-night":
 		npcloud(ix, y, iw, ih, "darkgray", "white")
 	}
-
 	openvg.End()
 }
 
@@ -316,7 +338,7 @@ func clock(w, h openvg.VGfloat) {
 
 // show the current time, weather and headlines
 func main() {
-	var headtype = flag.String("h", "us", "headline type (business, entertain, health, politics, sports, science, strange, tech, top, us, world)")
+	var headtype = flag.String("h", "u.s.", "headline type (arts, health, sports, science, technology, u.s., world)")
 	var location = flag.String("loc", "40.6213,-74.4395", "lat,long for weather")
 	flag.Parse()
 
@@ -333,7 +355,7 @@ func main() {
 	// update on specific intervals, shutdown on interrupt
 	dateticker := time.NewTicker(1 * time.Minute)
 	weatherticker := time.NewTicker(5 * time.Minute)
-	headticker := time.NewTicker(30 * time.Minute)
+	headticker := time.NewTicker(10 * time.Minute)
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt)
 
