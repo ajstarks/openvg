@@ -60,8 +60,8 @@ type result struct {
 const (
 	weatherfmt    = "https://api.forecast.io/forecast/%s/%s/?exclude=hourly,daily,minutely,flags"
 	weatherAPIkey = "-api-key-"
-	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 	NYTAPIkey     = "-api-key-"
+	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 )
 
 var fromHTML = strings.NewReplacer("&#8217;", "'", "&#8216;", "'", "’", "'")
@@ -104,19 +104,16 @@ func regionFill(x, y, w, h openvg.VGfloat, color string) {
 // gerror makes a graphical error message
 func gerror(x, y, w, h openvg.VGfloat, s string) {
 	regionFill(x, y, w, h, "gray")
-	openvg.TextMid(x+w/2, y+h/2, s, "sans", int(w/30))
+	openvg.TextMid(x+w/2, y+h/2, s, "sans", int(w/20))
 	openvg.End()
 }
 
 // headlines retrieves data from the Associated Press API, decodes and displays it.
 func headlines(w, h openvg.VGfloat, section string) {
-	x := w * 0.05
-	y := h * 0.45
-	nytURL := fmt.Sprintf(NYTfmt, section, NYTAPIkey)
-	r, err := netread(nytURL)
+	r, err := netread(fmt.Sprintf(NYTfmt, section, NYTAPIkey))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "headline read error: %v (%s)\n", err, nytURL)
-		gerror(x, y, w, h, "no headlines")
+		fmt.Fprintf(os.Stderr, "headline read error: %v\n", err)
+		gerror(0, 0, w, h*0.5, "no headlines")
 		return
 	}
 	defer r.Close()
@@ -124,9 +121,11 @@ func headlines(w, h openvg.VGfloat, section string) {
 	err = json.NewDecoder(r).Decode(&data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "decode: %v\n", err)
-		gerror(x, y, w, h, "no headlines")
+		gerror(0, 0, w, h*0.5, "no headlines")
 		return
 	}
+	x := w * 0.05
+	y := h * 0.45
 	regionFill(0, 0, w, h*.50, "gray")
 	headsize := w / 65
 	spacing := headsize * 2.0
@@ -193,7 +192,7 @@ func rain(x, y, w, h openvg.VGfloat, color string) {
 	}
 }
 
-// snow shows snow
+// snow shows the snow icon
 func snow(x, y, w, h openvg.VGfloat, color string) {
 	for i := 0; i < 20; i++ {
 		rx := openvg.VGfloat(rand.Float64())
@@ -261,13 +260,10 @@ func wind(x, y, w, h openvg.VGfloat, bg, color string) {
 
 // weather retrieves data from the forecast.io API, decodes and displays it.
 func weather(w, h openvg.VGfloat, latlong string) {
-	x := w * 0.05
-	y := h * 0.70
-	weatherURL := fmt.Sprintf(weatherfmt, weatherAPIkey, latlong)
-	r, err := netread(weatherURL)
+	r, err := netread(fmt.Sprintf(weatherfmt, weatherAPIkey, latlong))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Weather read error %v (%s)\n", err, weatherURL)
-		gerror(x, y, w, h, "no weather")
+		fmt.Fprintf(os.Stderr, "Weather read error %v\n", err)
+		gerror(0, h*0.5, w*0.5, h*0.5, "no weather")
 		return
 	}
 	defer r.Close()
@@ -275,9 +271,11 @@ func weather(w, h openvg.VGfloat, latlong string) {
 	err = json.NewDecoder(r).Decode(&data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
-		gerror(x, y, w, h, "no weather")
+		gerror(0, h*0.5, w*0.5, h*0.5, "no weather")
 		return
 	}
+	x := w * 0.05
+	y := h * 0.70
 	wsize := w / 20
 	spacing := wsize * 2.0
 	w1 := int(wsize)
