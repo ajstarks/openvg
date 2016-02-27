@@ -244,6 +244,9 @@ The unloadfont function releases the path information:
 	
 	unloadfont(DejaFont.Glyphs, DejaFont.Count);
 
+Note that the location of the font files may differ.  (The current location for Jessie is /usr/share/fonts/truetype/ttf-dejavu)
+Use the FONTLIB makefile variable to adjust this location.
+
 # Build and run
 
 <i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the DejaVu fonts, and the jpeg and freetype libraries.
