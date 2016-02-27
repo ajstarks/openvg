@@ -207,7 +207,7 @@ void makeimage(VGfloat x, VGfloat y, int w, int h, VGubyte * data) {
 }
 
 // Image places an image at the specifed location
-void Image(VGfloat x, VGfloat y, int w, int h, char *filename) {
+void Image(VGfloat x, VGfloat y, int w, int h, const char *filename) {
 	VGImage img = createImageFromJpeg(filename);
 	vgSetPixels(x, y, img, 0, 0, w, h);
 	vgDestroyImage(img);
@@ -453,7 +453,7 @@ unsigned char *next_utf8_char(unsigned char *utf8, int *codepoint) {
 
 // Text renders a string of text at a specified location, size, using the specified font glyphs
 // derived from http://web.archive.org/web/20070808195131/http://developer.hybrid.fi/font2openvg/renderFont.cpp.txt
-void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
+void Text(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) {
 	VGfloat size = (VGfloat) pointsize, xx = x, mm[9];
 	vgGetMatrix(mm);
 	int character;
@@ -477,7 +477,7 @@ void Text(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
 }
 
 // TextWidth returns the width of a text string at the specified font and size.
-VGfloat TextWidth(char *s, Fontinfo f, int pointsize) {
+VGfloat TextWidth(const char *s, Fontinfo f, int pointsize) {
 	VGfloat tw = 0.0;
 	VGfloat size = (VGfloat) pointsize;
 	int character;
@@ -493,13 +493,13 @@ VGfloat TextWidth(char *s, Fontinfo f, int pointsize) {
 }
 
 // TextMid draws text, centered on (x,y)
-void TextMid(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
+void TextMid(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) {
 	VGfloat tw = TextWidth(s, f, pointsize);
 	Text(x - (tw / 2.0), y, s, f, pointsize);
 }
 
 // TextEnd draws text, with its end aligned to (x,y)
-void TextEnd(VGfloat x, VGfloat y, char *s, Fontinfo f, int pointsize) {
+void TextEnd(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) {
 	VGfloat tw = TextWidth(s, f, pointsize);
 	Text(x - tw, y, s, f, pointsize);
 }
@@ -640,7 +640,7 @@ void End() {
 }
 
 // SaveEnd dumps the raster before rendering to the display 
-void SaveEnd(char *filename) {
+void SaveEnd(const char *filename) {
 	FILE *fp;
 	assert(vgGetError() == VG_NO_ERROR);
 	if (strlen(filename) == 0) {

@@ -22,10 +22,10 @@ extern "C" {
 	extern void Ellipse(VGfloat, VGfloat, VGfloat, VGfloat);
 	extern void Circle(VGfloat, VGfloat, VGfloat);
 	extern void Arc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Image(VGfloat, VGfloat, int, int, char *);
+	extern void Image(VGfloat, VGfloat, int, int, const char *);
 	extern void Start(int, int);
 	extern void End();
-	extern void SaveEnd(char *);
+	extern void SaveEnd(const char *);
 	extern void Background(unsigned int, unsigned int, unsigned int);
 	extern void BackgroundRGB(unsigned int, unsigned int, unsigned int, VGfloat);
 	extern void init(int *, int *);
