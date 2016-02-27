@@ -17,17 +17,6 @@ import (
 	"github.com/ajstarks/openvg"
 )
 
-// Feed is the Atom feed from the Associated Press
-type Feed struct {
-	Title   string  `xml:"title"`
-	Updated string  `xml:"updated"`
-	Entries []Entry `xml:"entry"`
-}
-
-type Entry struct {
-	Title string `xml:"title"`
-}
-
 // Forecast is weather information from forecast.io
 type Forecast struct {
 	Lat       float64 `json:"latitude"`
@@ -63,14 +52,22 @@ const (
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 	weatherAPIkey = "-api-key-"
 	NYTAPIkey     = "-api-key-"
+	bgcolor       = "gray"
 )
 
-var fromHTML = strings.NewReplacer("&amp;", "&", "&rsquo;", "'", "&lsquo;", "'", "&#8217;", "'", "&#8216;", "'", "’", "'")
+var fromHTML = strings.NewReplacer(
+	"‘", "'",
+	"’", "'",
+	"&rsquo;", "'",
+	"&lsquo;", "'",
+	"&#8217;", "'",
+	"&#8216;", "'",
+	"&amp;", "&")
 
 // netread derefernces a URL, returning the Reader, with an error
 func netread(url string) (io.ReadCloser, error) {
-	//	conn := &http.Client{Timeout: 30 * time.Second}
-	resp, err := http.Get(url) // conn.Get(url)
+	client := &http.Client{Timeout: 30 * time.Second}
+	resp, err := client.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -87,12 +84,12 @@ func countdown(w, h openvg.VGfloat) {
 		select {
 		case <-tick.C:
 			openvg.FillColor("white")
-			openvg.BackgroundColor("gray")
-			openvg.TextMid(w/2, h/2, fmt.Sprintf("starting in %2d seconds", delay), "sans", int(w/20))
+			openvg.BackgroundColor(bgcolor)
+			openvg.Circle(w*(openvg.VGfloat(60-delay)/60), h/2, w/50)
 			openvg.End()
 		}
 	}
-	openvg.BackgroundColor("gray")
+	openvg.BackgroundColor(bgcolor)
 }
 
 // regionFill colors a rectangular region, and sets the fill color for subsequent text
@@ -104,12 +101,12 @@ func regionFill(x, y, w, h openvg.VGfloat, color string) {
 
 // gerror makes a graphical error message
 func gerror(x, y, w, h openvg.VGfloat, s string) {
-	regionFill(x, y, w, h, "gray")
+	regionFill(x, y, w, h, bgcolor)
 	openvg.TextMid(x+w/2, y+h/2, s, "sans", int(w/20))
 	openvg.End()
 }
 
-// headlines retrieves data from the Associated Press API, decodes and displays it.
+// headlines retrieves data from the New York Times API, decodes and displays it.
 func headlines(w, h openvg.VGfloat, section string) {
 	r, err := netread(fmt.Sprintf(NYTfmt, section, NYTAPIkey))
 	if err != nil {
@@ -126,15 +123,15 @@ func headlines(w, h openvg.VGfloat, section string) {
 		return
 	}
 	x := w * 0.50
-	y := h * 0.45
-	regionFill(0, 0, w, h*.50, "gray")
-	headsize := w / 65
+	y := h * 0.10
+	regionFill(0, 0, w, h*.50, bgcolor)
+	headsize := w / 70
 	spacing := headsize * 2.0
-	for _, r := range data.Results {
-		openvg.TextMid(x, y, fromHTML.Replace(r.Title), "sans", int(headsize))
-		y = y - spacing
+	for i := len(data.Results) - 1; i >= 0; i-- {
+		openvg.TextMid(x, y, fromHTML.Replace(data.Results[i].Title), "sans", int(headsize))
+		y = y + spacing
 	}
-	openvg.Image(w*0.5, 15, 30, 30, "poweredby_nytimes_30a.png")
+	openvg.Image(w*0.05, 15, 30, 30, "poweredby_nytimes_30a.png")
 	openvg.End()
 }
 
@@ -282,33 +279,33 @@ func weather(w, h openvg.VGfloat, latlong string) {
 	w1 := int(wsize)
 	w2 := w1 / 2
 	w3 := w1 / 4
-	temp := fmt.Sprintf("%0.f°", data.Currently.Temperature)
+	c := data.Currently
+	temp := fmt.Sprintf("%0.f°", c.Temperature)
 	tw := openvg.TextWidth(temp, "sans", w1)
-
-	regionFill(0, h*0.50, w*.50, h*.50, "gray")
+	regionFill(0, h*0.50, w*.50, h*.50, bgcolor)
 	openvg.Text(x, y, temp, "sans", w1)
-	if data.Currently.Temperature-data.Currently.FeelsLike > 1 {
-		openvg.Text(x, y-(spacing/3), fmt.Sprintf("(feels like %0.f°)", data.Currently.FeelsLike), "sans", w3)
+	if c.Temperature-c.FeelsLike > 1 {
+		openvg.Text(x, y-(spacing/3), fmt.Sprintf("(feels like %0.f°)", c.FeelsLike), "sans", w3)
 	}
-	openvg.Text(x, y+spacing, data.Currently.Summary, "sans", w2)
-	if data.Currently.PrecipProb > 0 {
-		openvg.Text(x, y-(spacing*.6), fmt.Sprintf("%0.f%% Chance of precipitation", data.Currently.PrecipProb*100), "sans", w3)
+	openvg.Text(x, y+spacing, c.Summary, "sans", w2)
+	if c.PrecipProb > 0 {
+		openvg.Text(x, y-(spacing*.6), fmt.Sprintf("%0.f%% Chance of precipitation", c.PrecipProb*100), "sans", w3)
 	}
 	iw := w / 10
 	ih := iw // h / 10
 	ix := x + tw + w*0.010
 
-	switch data.Currently.Icon {
+	switch c.Icon {
 	case "clear-day":
 		sun(ix, y, iw, ih, "orange")
 	case "clear-night":
-		moon(ix, y, iw, ih, "gray", "white")
+		moon(ix, y, iw, ih, bgcolor, "white")
 	case "rain":
 		rain(ix, y, iw, ih, "skyblue")
 	case "snow":
 		snow(ix, y, iw, ih, "white")
 	case "wind":
-		wind(ix, y, iw, ih, "gray", "white")
+		wind(ix, y, iw, ih, bgcolor, "white")
 	case "fog":
 		fog(ix, y, iw, ih, "white")
 	case "cloudy":
@@ -323,7 +320,7 @@ func weather(w, h openvg.VGfloat, latlong string) {
 
 // clock displays the current time
 func clock(w, h openvg.VGfloat) {
-	regionFill(w*0.50, h*0.50, w*.50, h*.50, "gray")
+	regionFill(w*0.50, h*0.50, w*.50, h*.50, bgcolor)
 	clocksize := w / 20
 	cs := int(clocksize)
 	x := w * 0.95
