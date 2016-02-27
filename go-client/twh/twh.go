@@ -43,6 +43,7 @@ type Current struct {
 	FeelsLike   float64 `json:"apparentTemperature"`
 }
 
+// NYTHeadlines is the headline info from the New York Times
 type NYTHeadlines struct {
 	Status     string   `json:"status"`
 	Copyright  string   `json:"copyright"`
@@ -59,17 +60,17 @@ type result struct {
 
 const (
 	weatherfmt    = "https://api.forecast.io/forecast/%s/%s/?exclude=hourly,daily,minutely,flags"
+	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 	weatherAPIkey = "-api-key-"
 	NYTAPIkey     = "-api-key-"
-	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 )
 
-var fromHTML = strings.NewReplacer("&#8217;", "'", "&#8216;", "'", "’", "'")
+var fromHTML = strings.NewReplacer("&amp;", "&", "&rsquo;", "'", "&lsquo;", "'", "&#8217;", "'", "&#8216;", "'", "’", "'")
 
 // netread derefernces a URL, returning the Reader, with an error
 func netread(url string) (io.ReadCloser, error) {
-	conn := &http.Client{Timeout: 30 * time.Second}
-	resp, err := conn.Get(url)
+	//	conn := &http.Client{Timeout: 30 * time.Second}
+	resp, err := http.Get(url) // conn.Get(url)
 	if err != nil {
 		return nil, err
 	}
@@ -124,16 +125,16 @@ func headlines(w, h openvg.VGfloat, section string) {
 		gerror(0, 0, w, h*0.5, "no headlines")
 		return
 	}
-	x := w * 0.05
+	x := w * 0.50
 	y := h * 0.45
 	regionFill(0, 0, w, h*.50, "gray")
 	headsize := w / 65
 	spacing := headsize * 2.0
 	for _, r := range data.Results {
-		openvg.Text(x, y, fromHTML.Replace(r.Title), "sans", int(headsize))
+		openvg.TextMid(x, y, fromHTML.Replace(r.Title), "sans", int(headsize))
 		y = y - spacing
 	}
-	openvg.Image(15, 15, 30, 30, "poweredby_nytimes_30a.png")
+	openvg.Image(w*0.5, 15, 30, 30, "poweredby_nytimes_30a.png")
 	openvg.End()
 }
 
@@ -237,7 +238,7 @@ func moon(x, y, w, h openvg.VGfloat, bg, fg string) {
 
 // pcloud shows the icon for partly cloudy
 func pcloud(x, y, w, h openvg.VGfloat, color string) {
-	sun(x+w*.2, y+h*.35, w*.7, h*.7, "orange")
+	sun(x+w*.2, y+h*.33, w*.7, h*.7, "orange")
 	cloud(x, y, w, h, color)
 }
 
