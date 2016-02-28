@@ -50,18 +50,21 @@ type result struct {
 const (
 	weatherfmt    = "https://api.forecast.io/forecast/%s/%s/?exclude=hourly,daily,minutely,flags"
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
+	bgcolor       = "gray"
+	textcolor     = "white"
 	weatherAPIkey = "-api-key-"
 	NYTAPIkey     = "-api-key-"
-	bgcolor       = "gray"
 )
 
 var fromHTML = strings.NewReplacer(
 	"‘", "'",
 	"’", "'",
-	"&rsquo;", "'",
-	"&lsquo;", "'",
-	"&#8217;", "'",
 	"&#8216;", "'",
+	"&#8217;", "'",
+	"&#8220;", `"`,
+	"&#8221;", `"`,
+	"&lsquo;", "'",
+	"&rsquo;", "'",
 	"&amp;", "&")
 
 // netread derefernces a URL, returning the Reader, with an error
@@ -80,12 +83,17 @@ func netread(url string) (io.ReadCloser, error) {
 // countdown shows a countdown display to the top of minute
 func countdown(w, h openvg.VGfloat) {
 	tick := time.NewTicker(1 * time.Second)
+	ty := h / 2
+	th := h / 20
 	for delay := 60 - time.Now().Second(); delay > 0; delay-- {
 		select {
 		case <-tick.C:
-			openvg.FillColor("white")
+			tx := w * (openvg.VGfloat(60-delay) / 60)
 			openvg.BackgroundColor(bgcolor)
-			openvg.Circle(w*(openvg.VGfloat(60-delay)/60), h/2, w/50)
+			openvg.FillColor("black")
+			openvg.Rect(0, ty, w, th)
+			openvg.FillColor("white")
+			openvg.Rect(tx, ty, w-tx, th)
 			openvg.End()
 		}
 	}
@@ -96,7 +104,7 @@ func countdown(w, h openvg.VGfloat) {
 func regionFill(x, y, w, h openvg.VGfloat, color string) {
 	openvg.FillColor(color)
 	openvg.Rect(x, y, w, h)
-	openvg.FillColor("white")
+	openvg.FillColor(textcolor)
 }
 
 // gerror makes a graphical error message
@@ -299,21 +307,21 @@ func weather(w, h openvg.VGfloat, latlong string) {
 	case "clear-day":
 		sun(ix, y, iw, ih, "orange")
 	case "clear-night":
-		moon(ix, y, iw, ih, bgcolor, "white")
+		moon(ix, y, iw, ih, bgcolor, textcolor)
 	case "rain":
 		rain(ix, y, iw, ih, "skyblue")
 	case "snow":
-		snow(ix, y, iw, ih, "white")
+		snow(ix, y, iw, ih, textcolor)
 	case "wind":
-		wind(ix, y, iw, ih, bgcolor, "white")
+		wind(ix, y, iw, ih, bgcolor, textcolor)
 	case "fog":
-		fog(ix, y, iw, ih, "white")
+		fog(ix, y, iw, ih, textcolor)
 	case "cloudy":
-		cloud(ix, y, iw, ih, "white")
+		cloud(ix, y, iw, ih, textcolor)
 	case "partly-cloudy-day":
-		pcloud(ix, y, iw, ih, "white")
+		pcloud(ix, y, iw, ih, textcolor)
 	case "partly-cloudy-night":
-		npcloud(ix, y, iw, ih, "darkgray", "white")
+		npcloud(ix, y, iw, ih, "darkgray", textcolor)
 	}
 	openvg.End()
 }
