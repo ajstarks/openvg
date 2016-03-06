@@ -59,12 +59,15 @@ const (
 var fromHTML = strings.NewReplacer(
 	"‘", "'",
 	"’", "'",
+	"—", "--",
 	"&#8216;", "'",
 	"&#8217;", "'",
 	"&#8220;", `"`,
 	"&#8221;", `"`,
 	"&lsquo;", "'",
 	"&rsquo;", "'",
+	"&ndash;", "-",
+	"&mdash;", "--",
 	"&amp;", "&")
 
 // netread derefernces a URL, returning the Reader, with an error
@@ -85,12 +88,14 @@ func countdown(w, h openvg.VGfloat) {
 	tick := time.NewTicker(1 * time.Second)
 	ty := h / 2
 	th := h / 20
+	size := w / 70
 	for delay := 60 - time.Now().Second(); delay > 0; delay-- {
 		select {
 		case <-tick.C:
 			tx := w * (openvg.VGfloat(60-delay) / 60)
 			openvg.BackgroundColor(bgcolor)
 			openvg.FillColor("black")
+			openvg.TextMid(tx, ty+(size*2.5), fmt.Sprintf("%d", delay), "sans", int(size))
 			openvg.Rect(0, ty, w, th)
 			openvg.FillColor("white")
 			openvg.Rect(tx, ty, w-tx, th)
