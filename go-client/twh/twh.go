@@ -95,9 +95,9 @@ func countdown(w, h openvg.VGfloat) {
 			tx := w * (openvg.VGfloat(60-delay) / 60)
 			openvg.BackgroundColor(bgcolor)
 			openvg.FillColor("black")
-			openvg.TextMid(tx, ty+(size*2.5), fmt.Sprintf("%d", delay), "sans", int(size))
 			openvg.Rect(0, ty, w, th)
 			openvg.FillColor("white")
+			openvg.TextEnd(tx, ty+(th/4), fmt.Sprintf("start in %d ", delay), "sans", int(size))
 			openvg.Rect(tx, ty, w-tx, th)
 			openvg.End()
 		}
@@ -307,6 +307,7 @@ func weather(w, h openvg.VGfloat, latlong string) {
 	iw := w / 10
 	ih := iw // h / 10
 	ix := x + tw + w*0.010
+	y = h * 0.65
 
 	switch c.Icon {
 	case "clear-day":
