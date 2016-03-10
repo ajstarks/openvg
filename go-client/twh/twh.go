@@ -68,6 +68,7 @@ var fromHTML = strings.NewReplacer(
 	"&rsquo;", "'",
 	"&ndash;", "-",
 	"&mdash;", "--",
+	"&#8212;", "--",
 	"&amp;", "&")
 
 // netread derefernces a URL, returning the Reader, with an error
