@@ -59,8 +59,8 @@ type dimen struct {
 const (
 	weatherfmt    = "https://api.forecast.io/forecast/%s/%s/?exclude=hourly,daily,minutely,flags"
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
-	weatherAPIkey = "-api-key-"
-	NYTAPIkey     = "-api-key-"
+        weatherAPIkey = "-api-key-"
+        NYTAPIkey     = "-api-key-"
 )
 
 var fromHTML = strings.NewReplacer(
@@ -76,6 +76,7 @@ var fromHTML = strings.NewReplacer(
 	"&ndash;", "-",
 	"&mdash;", "--",
 	"&#8212;", "--",
+	"&#8230;", "...",
 	"&amp;", "&")
 
 // netread derefernces a URL, returning the Reader, with an error
@@ -124,6 +125,7 @@ func (d dimen) regionFill(bgcolor, textcolor string) {
 func (d dimen) gerror(bgcolor, textcolor, message string) {
 	d.regionFill(bgcolor, textcolor)
 	openvg.TextMid(d.x+d.width/2, d.y+d.height/2, message, "sans", int(d.width/20))
+	openvg.End()
 }
 
 // headlines retrieves data from the New York Times API, decodes and displays it.
@@ -178,8 +180,29 @@ func (d dimen) cloud(color string) {
 	openvg.Circle(x+w*0.60, y+h*0.40, r2)
 }
 
+// drop shows the raindrop icon
+func (d dimen) drop(color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
+	openvg.FillColor(color)
+	openvg.Ellipse(x+(w/2), y+(h*0.40), w*0.52, h*0.65)
+	xp := []openvg.VGfloat{x + (w / 2), x + (w * 0.25), x + (w * 0.75)}
+	yp := []openvg.VGfloat{y + h, y + (h / 2), y + (h / 2)}
+	openvg.Polygon(xp, yp)
+}
+
+// rain shows raindrops
+func (d dimen) rain(color string) {
+	dd := dimen{x: 0, y: 0, width: d.width / 6, height: d.height / 6}
+	for i := 0; i < 20; i++ {
+		dd.x = d.x + d.width*openvg.VGfloat(rand.Float64())
+		dd.y = d.y + d.height*openvg.VGfloat(rand.Float64())
+		dd.drop(color)
+	}
+}
+
 // flake shows the snowflake icon
-func flake(x, y, w, h openvg.VGfloat, color string) {
+func (d dimen) flake(color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
 	cx := x + (w / 2)
 	cy := y + (h / 2)
 	r := w * 0.30
@@ -195,32 +218,13 @@ func flake(x, y, w, h openvg.VGfloat, color string) {
 	openvg.StrokeWidth(0)
 }
 
-// drop shows the raindrop icon
-func drop(x, y, w, h openvg.VGfloat, color string) {
-	openvg.FillColor(color)
-	openvg.Ellipse(x+(w/2), y+(h*0.40), w*0.52, h*0.65)
-	xp := []openvg.VGfloat{x + (w / 2), x + (w * 0.25), x + (w * 0.75)}
-	yp := []openvg.VGfloat{y + h, y + (h / 2), y + (h / 2)}
-	openvg.Polygon(xp, yp)
-}
-
-// rain shows a raindrops
-func (d dimen) rain(color string) {
-	x, y, w, h := d.x, d.y, d.width, d.height
-	for i := 0; i < 20; i++ {
-		rx := openvg.VGfloat(rand.Float64())
-		ry := openvg.VGfloat(rand.Float64())
-		drop(x+w*rx, y+h*ry, w/6, h/6, color)
-	}
-}
-
 // snow shows the snow icon
 func (d dimen) snow(color string) {
-	x, y, w, h := d.x, d.y, d.width, d.height
+	df := dimen{x: 0, y: 0, width: d.width / 6, height: d.height / 6}
 	for i := 0; i < 20; i++ {
-		rx := openvg.VGfloat(rand.Float64())
-		ry := openvg.VGfloat(rand.Float64())
-		flake(x+w*rx, y+h*ry, w/6, h/6, color)
+		df.x = d.x + d.width*openvg.VGfloat(rand.Float64())
+		df.y = d.y + d.height*openvg.VGfloat(rand.Float64())
+		df.flake(color)
 	}
 }
 
