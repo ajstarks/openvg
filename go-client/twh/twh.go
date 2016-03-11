@@ -47,11 +47,18 @@ type result struct {
 	Abstract   string `json:"abstract"`
 }
 
+type display struct {
+	width, height      openvg.VGfloat
+	bgcolor, textcolor string
+}
+
+type dimen struct {
+	x, y, width, height openvg.VGfloat
+}
+
 const (
 	weatherfmt    = "https://api.forecast.io/forecast/%s/%s/?exclude=hourly,daily,minutely,flags"
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
-	bgcolor       = "gray"
-	textcolor     = "white"
 	weatherAPIkey = "-api-key-"
 	NYTAPIkey     = "-api-key-"
 )
@@ -85,47 +92,47 @@ func netread(url string) (io.ReadCloser, error) {
 }
 
 // countdown shows a countdown display to the top of minute
-func countdown(w, h openvg.VGfloat) {
+func (d display) countdown() {
 	tick := time.NewTicker(1 * time.Second)
-	ty := h / 2
-	th := h / 20
-	size := w / 70
+	ty := d.height / 2
+	th := d.height / 20
+	size := d.width / 70
 	for delay := 60 - time.Now().Second(); delay > 0; delay-- {
 		select {
 		case <-tick.C:
-			tx := w * (openvg.VGfloat(60-delay) / 60)
-			openvg.BackgroundColor(bgcolor)
+			tx := d.width * (openvg.VGfloat(60-delay) / 60)
+			openvg.BackgroundColor(d.bgcolor)
 			openvg.FillColor("black")
-			openvg.Rect(0, ty, w, th)
+			openvg.Rect(0, ty, d.width, th)
 			openvg.FillColor("white")
 			openvg.TextEnd(tx, ty+(th/4), fmt.Sprintf("start in %d ", delay), "sans", int(size))
-			openvg.Rect(tx, ty, w-tx, th)
+			openvg.Rect(tx, ty, d.width-tx, th)
 			openvg.End()
 		}
 	}
-	openvg.BackgroundColor(bgcolor)
+	openvg.BackgroundColor(d.bgcolor)
 }
 
 // regionFill colors a rectangular region, and sets the fill color for subsequent text
-func regionFill(x, y, w, h openvg.VGfloat, color string) {
-	openvg.FillColor(color)
-	openvg.Rect(x, y, w, h)
+func (d dimen) regionFill(bgcolor, textcolor string) {
+	openvg.FillColor(bgcolor)
+	openvg.Rect(d.x, d.y, d.width, d.height)
 	openvg.FillColor(textcolor)
 }
 
 // gerror makes a graphical error message
-func gerror(x, y, w, h openvg.VGfloat, s string) {
-	regionFill(x, y, w, h, bgcolor)
-	openvg.TextMid(x+w/2, y+h/2, s, "sans", int(w/20))
-	openvg.End()
+func (d dimen) gerror(bgcolor, textcolor, message string) {
+	d.regionFill(bgcolor, textcolor)
+	openvg.TextMid(d.x+d.width/2, d.y+d.height/2, message, "sans", int(d.width/20))
 }
 
 // headlines retrieves data from the New York Times API, decodes and displays it.
-func headlines(w, h openvg.VGfloat, section string) {
+func (d display) headlines(section string) {
+	hdim := dimen{x: 0, y: 0, width: d.width, height: d.height / 2}
 	r, err := netread(fmt.Sprintf(NYTfmt, section, NYTAPIkey))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "headline read error: %v\n", err)
-		gerror(0, 0, w, h*0.5, "no headlines")
+		hdim.gerror(d.bgcolor, d.textcolor, "no headlines")
 		return
 	}
 	defer r.Close()
@@ -133,25 +140,26 @@ func headlines(w, h openvg.VGfloat, section string) {
 	err = json.NewDecoder(r).Decode(&data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "decode: %v\n", err)
-		gerror(0, 0, w, h*0.5, "no headlines")
+		hdim.gerror(d.bgcolor, d.textcolor, "no headlines")
 		return
 	}
-	x := w * 0.50
-	y := h * 0.10
-	regionFill(0, 0, w, h*.50, bgcolor)
-	headsize := w / 70
+	x := d.width / 2
+	y := d.height * 0.10
+	hdim.regionFill(d.bgcolor, d.textcolor)
+	headsize := d.width / 70
 	spacing := headsize * 2.0
 	for i := len(data.Results) - 1; i >= 0; i-- {
 		openvg.TextMid(x, y, fromHTML.Replace(data.Results[i].Title), "sans", int(headsize))
 		y = y + spacing
 	}
-	openvg.Image(w*0.05, 15, 30, 30, "poweredby_nytimes_30a.png")
+	openvg.Image(d.width*0.05, 15, 30, 30, "poweredby_nytimes_30a.png")
 	openvg.End()
 }
 
 // fog shows the fog icon
-func fog(x, y, w, h openvg.VGfloat, color string) {
-	radius := w / 3
+func (d dimen) fog(color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
+	radius := d.width / 3
 	r2 := radius * 1.8
 	openvg.FillColor(color, 0.5)
 	openvg.Circle(x+w*0.25, y+h*0.25, radius)
@@ -160,8 +168,9 @@ func fog(x, y, w, h openvg.VGfloat, color string) {
 }
 
 // cloud shows the cloudy icon
-func cloud(x, y, w, h openvg.VGfloat, color string) {
-	radius := w / 3
+func (d dimen) cloud(color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
+	radius := d.width / 3
 	r2 := radius * 1.8
 	openvg.FillColor(color)
 	openvg.Circle(x+w*0.25, y+h*0.25, radius)
@@ -196,7 +205,8 @@ func drop(x, y, w, h openvg.VGfloat, color string) {
 }
 
 // rain shows a raindrops
-func rain(x, y, w, h openvg.VGfloat, color string) {
+func (d dimen) rain(color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
 	for i := 0; i < 20; i++ {
 		rx := openvg.VGfloat(rand.Float64())
 		ry := openvg.VGfloat(rand.Float64())
@@ -205,7 +215,8 @@ func rain(x, y, w, h openvg.VGfloat, color string) {
 }
 
 // snow shows the snow icon
-func snow(x, y, w, h openvg.VGfloat, color string) {
+func (d dimen) snow(color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
 	for i := 0; i < 20; i++ {
 		rx := openvg.VGfloat(rand.Float64())
 		ry := openvg.VGfloat(rand.Float64())
@@ -214,7 +225,8 @@ func snow(x, y, w, h openvg.VGfloat, color string) {
 }
 
 // sun shows the icon for clear weather
-func sun(x, y, w, h openvg.VGfloat, color string) {
+func (d dimen) sun(color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
 	cx := x + (w / 2)
 	cy := y + (h / 2)
 	r0 := w * 0.50
@@ -237,7 +249,8 @@ func sun(x, y, w, h openvg.VGfloat, color string) {
 }
 
 // moon shows the icon for clear weather at night
-func moon(x, y, w, h openvg.VGfloat, bg, fg string) {
+func (d dimen) moon(bg, fg string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
 	cx := x + w/2
 	cy := y + h/2
 	w2 := w / 2
@@ -248,19 +261,22 @@ func moon(x, y, w, h openvg.VGfloat, bg, fg string) {
 }
 
 // pcloud shows the icon for partly cloudy
-func pcloud(x, y, w, h openvg.VGfloat, color string) {
-	sun(x+w*.2, y+h*.33, w*.7, h*.7, "orange")
-	cloud(x, y, w, h, color)
+func (d dimen) pcloud(color string) {
+	sd := dimen{x: d.x + d.width*.2, y: d.y + d.height*.33, width: d.width * .7, height: d.height * .7}
+	sd.sun("orange")
+	d.cloud(color)
 }
 
 // npcloud shows the partly cloudy icon at night
-func npcloud(x, y, w, h openvg.VGfloat, ccolor, mcolor string) {
-	cloud(x, y, w, h, ccolor)
-	moon(x+w*0.2, y+h*0.05, w*.7, h*.7, ccolor, mcolor)
+func (d dimen) npcloud(ccolor, mcolor string) {
+	d.cloud(ccolor)
+	md := dimen{x: d.x + d.width*.2, y: d.y + d.height*0.05, width: d.width * .7, height: d.height * .7}
+	md.moon(ccolor, mcolor)
 }
 
 // wind shows the windy icon
-func wind(x, y, w, h openvg.VGfloat, bg, color string) {
+func (d dimen) wind(bg, color string) {
+	x, y, w, h := d.x, d.y, d.width, d.height
 	openvg.FillColor(bg, 0)
 	openvg.StrokeWidth(w / 25)
 	openvg.StrokeColor(color)
@@ -271,11 +287,12 @@ func wind(x, y, w, h openvg.VGfloat, bg, color string) {
 }
 
 // weather retrieves data from the forecast.io API, decodes and displays it.
-func weather(w, h openvg.VGfloat, latlong string) {
+func (d display) weather(latlong string) {
+	wdim := dimen{x: 0, y: d.height / 2, width: d.width / 2, height: d.height / 2}
 	r, err := netread(fmt.Sprintf(weatherfmt, weatherAPIkey, latlong))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Weather read error %v\n", err)
-		gerror(0, h*0.5, w*0.5, h*0.5, "no weather")
+		wdim.gerror(d.bgcolor, d.textcolor, "no weather")
 		return
 	}
 	defer r.Close()
@@ -283,12 +300,12 @@ func weather(w, h openvg.VGfloat, latlong string) {
 	err = json.NewDecoder(r).Decode(&data)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
-		gerror(0, h*0.5, w*0.5, h*0.5, "no weather")
+		wdim.gerror(d.bgcolor, d.textcolor, "no weather")
 		return
 	}
-	x := w * 0.05
-	y := h * 0.70
-	wsize := w / 20
+	x := d.width * 0.05
+	y := d.height * 0.70
+	wsize := d.width / 20
 	spacing := wsize * 2.0
 	w1 := int(wsize)
 	w2 := w1 / 2
@@ -296,50 +313,51 @@ func weather(w, h openvg.VGfloat, latlong string) {
 	c := data.Currently
 	temp := fmt.Sprintf("%0.f°", c.Temperature)
 	tw := openvg.TextWidth(temp, "sans", w1)
-	regionFill(0, h*0.50, w*.50, h*.50, bgcolor)
+	wdim.regionFill(d.bgcolor, d.textcolor)
 	openvg.Text(x, y, temp, "sans", w1)
 	if c.Temperature-c.FeelsLike > 1 {
-		openvg.Text(x, y-(spacing/3), fmt.Sprintf("(feels like %0.f°)", c.FeelsLike), "sans", w3)
+		openvg.Text(x, y-(spacing/3),
+			fmt.Sprintf("(feels like %0.f°)", c.FeelsLike), "sans", w3)
 	}
 	openvg.Text(x, y+spacing, c.Summary, "sans", w2)
 	if c.PrecipProb > 0 {
-		openvg.Text(x, y-(spacing*.6), fmt.Sprintf("%0.f%% Chance of precipitation", c.PrecipProb*100), "sans", w3)
+		openvg.Text(x, y-(spacing*.6),
+			fmt.Sprintf("%0.f%% Chance of precipitation", c.PrecipProb*100), "sans", w3)
 	}
-	iw := w / 10
-	ih := iw // h / 10
-	ix := x + tw + w*0.010
-	y = h * 0.65
+
+	ic := dimen{x: x + tw + d.width*0.01, y: d.height * 0.67, width: d.width / 10, height: d.width / 10}
 
 	switch c.Icon {
 	case "clear-day":
-		sun(ix, y, iw, ih, "orange")
+		ic.sun("orange")
 	case "clear-night":
-		moon(ix, y, iw, ih, bgcolor, textcolor)
+		ic.moon(d.bgcolor, d.textcolor)
 	case "rain":
-		rain(ix, y, iw, ih, "skyblue")
+		ic.rain("skyblue")
 	case "snow":
-		snow(ix, y, iw, ih, textcolor)
+		ic.snow(d.textcolor)
 	case "wind":
-		wind(ix, y, iw, ih, bgcolor, textcolor)
+		ic.wind(d.bgcolor, d.textcolor)
 	case "fog":
-		fog(ix, y, iw, ih, textcolor)
+		ic.fog(d.textcolor)
 	case "cloudy":
-		cloud(ix, y, iw, ih, textcolor)
+		ic.cloud(d.textcolor)
 	case "partly-cloudy-day":
-		pcloud(ix, y, iw, ih, textcolor)
+		ic.pcloud(d.textcolor)
 	case "partly-cloudy-night":
-		npcloud(ix, y, iw, ih, "darkgray", textcolor)
+		ic.npcloud("darkgray", d.textcolor)
 	}
 	openvg.End()
 }
 
 // clock displays the current time
-func clock(w, h openvg.VGfloat) {
-	regionFill(w*0.50, h*0.50, w*.50, h*.50, bgcolor)
-	clocksize := w / 20
+func (d display) clock() {
+	cdim := dimen{x: d.width / 2, y: d.height / 2, width: d.width / 2, height: d.height / 2}
+	cdim.regionFill(d.bgcolor, d.textcolor)
+	clocksize := d.width / 20
 	cs := int(clocksize)
-	x := w * 0.95
-	y := h * 0.70
+	x := d.width * 0.95
+	y := d.height * 0.70
 
 	now := time.Now()
 	openvg.TextEnd(x, y, now.Format("3:04 pm"), "sans", cs)
@@ -349,19 +367,23 @@ func clock(w, h openvg.VGfloat) {
 
 // show the current time, weather and headlines
 func main() {
-	var headtype = flag.String("h", "u.s.", "headline type (arts, health, sports, science, technology, u.s., world)")
-	var location = flag.String("loc", "40.6213,-74.4395", "lat,long for weather")
+	var (
+		section   = flag.String("h", "u.s.", "headline type (arts, health, sports, science, technology, u.s., world)")
+		location  = flag.String("loc", "40.6213,-74.4395", "lat,long for weather")
+		bgcolor   = flag.String("bg", "gray", "background color")
+		textcolor = flag.String("tc", "white", "text color")
+	)
 	flag.Parse()
 
 	// initial display
 	dw, dh := openvg.Init()
 	openvg.Start(dw, dh)
-	w, h := openvg.VGfloat(dw), openvg.VGfloat(dh)
-	countdown(w, h)
+	canvas := display{width: openvg.VGfloat(dw), height: openvg.VGfloat(dh), bgcolor: *bgcolor, textcolor: *textcolor}
+	canvas.countdown()
 	openvg.End()
-	clock(w, h)
-	weather(w, h, *location)
-	headlines(w, h, *headtype)
+	canvas.clock()
+	canvas.weather(*location)
+	canvas.headlines(*section)
 
 	// update on specific intervals, shutdown on interrupt
 	dateticker := time.NewTicker(1 * time.Minute)
@@ -373,11 +395,11 @@ func main() {
 	for {
 		select {
 		case <-dateticker.C:
-			clock(w, h)
+			canvas.clock()
 		case <-weatherticker.C:
-			weather(w, h, *location)
+			canvas.weather(*location)
 		case <-headticker.C:
-			headlines(w, h, *headtype)
+			canvas.headlines(*section)
 		case <-sigint:
 			openvg.Finish()
 			os.Exit(0)
