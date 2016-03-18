@@ -21,10 +21,10 @@ import (
 type Forecast struct {
 	Lat       float64 `json:"latitude"`
 	Long      float64 `json:"longitude"`
-	Currently Current `json:"currently"`
+	Currently current `json:"currently"`
 }
 
-type Current struct {
+type current struct {
 	Summary     string  `json:"summary"`
 	Icon        string  `json:"icon"`
 	PrecipProb  float64 `json:"precipProbability"`
@@ -85,7 +85,7 @@ func main() {
 	var (
 		section    = flag.String("h", "u.s.", "headline type (arts, health, sports, science, technology, u.s., world)")
 		location   = flag.String("loc", "40.6213,-74.4395", "lat,long for weather")
-		bgcolor    = flag.String("bg", "darkgray", "background color")
+		bgcolor    = flag.String("bg", "slateblue", "background color")
 		textcolor  = flag.String("tc", "white", "text color")
 		width      = flag.Int("width", 0, "screen width")
 		height     = flag.Int("height", 0, "screen height")
@@ -99,7 +99,12 @@ func main() {
 		dw, dh = *width, *height
 	}
 	openvg.Start(dw, dh)
-	canvas := display{width: openvg.VGfloat(dw), height: openvg.VGfloat(dh), bgcolor: *bgcolor, textcolor: *textcolor}
+	canvas := display{
+		width:     openvg.VGfloat(dw),
+		height:    openvg.VGfloat(dh),
+		bgcolor:   *bgcolor,
+		textcolor: *textcolor,
+	}
 	canvas.countdown()
 	openvg.End()
 	canvas.clock(*smartcolor)
@@ -130,10 +135,10 @@ func main() {
 
 // clock displays the current time
 func (d *display) clock(smartcolor bool) {
-	cdim := dimen{x: d.width / 2, y: d.height / 2, width: d.width / 2, height: d.height / 2}
 	if smartcolor {
 		d.bgcolor = daycolor()
 	}
+	cdim := dimen{x: d.width / 2, y: d.height / 2, width: d.width / 2, height: d.height / 2}
 	cdim.regionFill(d.bgcolor, d.textcolor)
 	clocksize := d.width / 20
 	cs := int(clocksize)
@@ -151,7 +156,7 @@ func (d *display) weather(latlong string) {
 	wdim := dimen{x: 0, y: d.height / 2, width: d.width / 2, height: d.height / 2}
 	r, err := netread(fmt.Sprintf(weatherfmt, weatherAPIkey, latlong))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Weather read error %v\n", err)
+		fmt.Fprintf(os.Stderr, "Weather read error: %v\n", err)
 		wdim.gerror(d.bgcolor, d.textcolor, "no weather")
 		return
 	}
@@ -185,7 +190,12 @@ func (d *display) weather(latlong string) {
 			fmt.Sprintf("%0.f%% Chance of precipitation", c.PrecipProb*100), "sans", w3)
 	}
 
-	ic := dimen{x: x + tw + d.width*0.01, y: d.height * 0.67, width: d.width / 10, height: d.width / 10}
+	ic := dimen{
+		x:      x + tw + d.width*0.01,
+		y:      d.height * 0.67,
+		width:  d.width / 10,
+		height: d.width / 10,
+	}
 
 	switch c.Icon {
 	case "clear-day":
@@ -248,7 +258,7 @@ func netread(url string) (io.ReadCloser, error) {
 		return nil, err
 	}
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("unable to retreive network data for %s (%s)", url, resp.Status)
+		return nil, fmt.Errorf("unable to get network data for %s (%s)", url, resp.Status)
 	}
 	return resp.Body, nil
 }
@@ -430,7 +440,7 @@ func daycolor() string {
 	case hour <= 17 && hour >= 12:
 		return "blue"
 	case hour <= 19 && hour >= 18:
-		return "lightslategray"
+		return "slategray"
 	default:
 		return "midnightblue"
 	}
