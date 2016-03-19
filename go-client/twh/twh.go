@@ -47,11 +47,21 @@ type result struct {
 	Abstract   string `json:"abstract"`
 }
 
+// HNtop and HNitem are Hacker News top stories list and items
+type HNTop []int
+
+type HNitem struct {
+	By    string `json:"by"`
+	Title string `json:"title"`
+}
+
+// display is the dispaly context
 type display struct {
 	width, height      openvg.VGfloat
 	bgcolor, textcolor string
 }
 
+// dimen define a rectangular region
 type dimen struct {
 	x, y, width, height openvg.VGfloat
 }
@@ -59,6 +69,8 @@ type dimen struct {
 const (
 	weatherfmt    = "https://api.forecast.io/forecast/%s/%s/?exclude=hourly,daily,minutely,flags"
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
+	HNTopURL      = "https://hacker-news.firebaseio.com/v0/topstories.json"
+	HNItemfmt     = "https://hacker-news.firebaseio.com/v0/item/%d.json"
 	weatherAPIkey = "-api-key-"
 	NYTAPIkey     = "-api-key-"
 )
@@ -83,7 +95,7 @@ var fromHTML = strings.NewReplacer(
 // show the current time, weather and headlines
 func main() {
 	var (
-		section    = flag.String("h", "u.s.", "headline type (arts, health, sports, science, technology, u.s., world)")
+		section    = flag.String("h", "u.s.", "headline type (arts, health, sports, science, technology, u.s., world, hn)")
 		location   = flag.String("loc", "40.6213,-74.4395", "lat,long for weather")
 		bgcolor    = flag.String("bg", "slateblue", "background color")
 		textcolor  = flag.String("tc", "white", "text color")
@@ -220,8 +232,63 @@ func (d *display) weather(latlong string) {
 	openvg.End()
 }
 
+// headlines shows hacker news or NYT headlines
+func (d *display) headlines(headlinetype string) {
+	if headlinetype == "hn" {
+		d.hackernews(5)
+	} else {
+		d.nytheadlines(headlinetype)
+	}
+}
+
+// hackernews shows the top n articles from Hackernews
+func (d *display) hackernews(n int) {
+	hdim := dimen{x: 0, y: 0, width: d.width, height: d.height / 2}
+	r, err := netread(HNTopURL)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "headline read error: %v\n", err)
+		hdim.gerror(d.bgcolor, d.textcolor, "no headlines")
+		return
+	}
+	var hnid HNTop
+	err = json.NewDecoder(r).Decode(&hnid)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "decode: %v\n", err)
+		hdim.gerror(d.bgcolor, d.textcolor, "no headlines")
+		r.Close()
+		return
+	}
+	r.Close()
+
+	var item HNitem
+	x := d.width / 2
+	y := d.height * 0.10
+	headsize := d.width / 100
+	spacing := headsize * 2.0
+	hdim.regionFill(d.bgcolor, d.textcolor)
+	for i := n - 1; i >= 0; i-- {
+		hnr, err := netread(fmt.Sprintf(HNItemfmt, hnid[i]))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v: getting id %d\n", err, hnid[i])
+			hnr.Close()
+			continue
+		}
+		err = json.NewDecoder(hnr).Decode(&item)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v: decoding id %d\n", err, hnid[i])
+			hnr.Close()
+			continue
+		}
+		openvg.TextMid(x, y, item.Title, "sans", int(headsize))
+		y += spacing
+		hnr.Close()
+	}
+	openvg.Image(d.width*0.05, 15, 32, 32, "hn.png")
+	openvg.End()
+}
+
 // headlines retrieves data from the New York Times API, decodes and displays it.
-func (d *display) headlines(section string) {
+func (d *display) nytheadlines(section string) {
 	hdim := dimen{x: 0, y: 0, width: d.width, height: d.height / 2}
 	r, err := netread(fmt.Sprintf(NYTfmt, section, NYTAPIkey))
 	if err != nil {
