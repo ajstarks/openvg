@@ -71,8 +71,8 @@ const (
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 	HNTopURL      = "https://hacker-news.firebaseio.com/v0/topstories.json"
 	HNItemfmt     = "https://hacker-news.firebaseio.com/v0/item/%d.json"
-	weatherAPIkey = "-api-key-"
-	NYTAPIkey     = "-api-key-"
+	weatherAPIkey = "9e8884a6cb0ca79da18d2d629a9dee72"
+	NYTAPIkey     = "ef13cfb185a95335e0aaefd20934c29c:17:11048"
 )
 
 var fromHTML = strings.NewReplacer(
@@ -263,7 +263,7 @@ func (d *display) hackernews(n int) {
 	var item HNitem
 	x := d.width / 2
 	y := d.height * 0.10
-	headsize := d.width / 100
+	headsize := d.width / 80
 	spacing := headsize * 2.0
 	hdim.regionFill(d.bgcolor, d.textcolor)
 	for i := n - 1; i >= 0; i-- {
@@ -279,7 +279,7 @@ func (d *display) hackernews(n int) {
 			hnr.Close()
 			continue
 		}
-		openvg.TextMid(x, y, item.Title, "sans", int(headsize))
+		openvg.TextMid(x, y, item.Title, "serif", int(headsize))
 		y += spacing
 		hnr.Close()
 	}
@@ -287,7 +287,7 @@ func (d *display) hackernews(n int) {
 	openvg.End()
 }
 
-// headlines retrieves data from the New York Times API, decodes and displays it.
+// nytheadlines retrieves data from the New York Times API, decodes and displays it.
 func (d *display) nytheadlines(section string) {
 	hdim := dimen{x: 0, y: 0, width: d.width, height: d.height / 2}
 	r, err := netread(fmt.Sprintf(NYTfmt, section, NYTAPIkey))
@@ -307,10 +307,10 @@ func (d *display) nytheadlines(section string) {
 	x := d.width / 2
 	y := d.height * 0.10
 	hdim.regionFill(d.bgcolor, d.textcolor)
-	headsize := d.width / 100
+	headsize := d.width / 80
 	spacing := headsize * 2.0
 	for i := len(data.Results) - 1; i >= 0; i-- {
-		openvg.TextMid(x, y, fromHTML.Replace(data.Results[i].Title), "sans", int(headsize))
+		openvg.TextMid(x, y, fromHTML.Replace(data.Results[i].Title), "serif", int(headsize))
 		y = y + spacing
 	}
 	openvg.Image(d.width*0.05, 15, 30, 30, "poweredby_nytimes_30a.png")
