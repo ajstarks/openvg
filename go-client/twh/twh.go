@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"image"
+	_ "image/jpeg"
 	"io"
 	"math"
 	"math/rand"
@@ -15,6 +17,7 @@ import (
 	"time"
 
 	"github.com/ajstarks/openvg"
+	"github.com/disintegration/gift"
 )
 
 // Forecast is weather information from forecast.io
@@ -45,6 +48,7 @@ type result struct {
 	Subsection string `json:"subsection"`
 	Title      string `json:"title"`
 	Abstract   string `json:"abstract"`
+	Thumbnail  string `json:"thumbnail_standard"`
 }
 
 // HNtop and HNitem are Hacker News top stories list and items
@@ -71,8 +75,8 @@ const (
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 	HNTopURL      = "https://hacker-news.firebaseio.com/v0/topstories.json"
 	HNItemfmt     = "https://hacker-news.firebaseio.com/v0/item/%d.json"
-	weatherAPIkey = "9e8884a6cb0ca79da18d2d629a9dee72"
-	NYTAPIkey     = "ef13cfb185a95335e0aaefd20934c29c:17:11048"
+	weatherAPIkey = "-api-key-"
+	NYTAPIkey     = "-api-key-"
 )
 
 var fromHTML = strings.NewReplacer(
@@ -102,6 +106,7 @@ func main() {
 		width      = flag.Int("width", 0, "screen width")
 		height     = flag.Int("height", 0, "screen height")
 		smartcolor = flag.Bool("sc", false, "smart colors")
+		thumb      = flag.Bool("tn", false, "show thumbnails")
 	)
 	flag.Parse()
 
@@ -121,7 +126,7 @@ func main() {
 	openvg.End()
 	canvas.clock(*smartcolor)
 	canvas.weather(*location)
-	canvas.headlines(*section)
+	canvas.headlines(*section, *thumb)
 
 	// update on specific intervals, shutdown on interrupt
 	dateticker := time.NewTicker(1 * time.Minute)
@@ -137,7 +142,7 @@ func main() {
 		case <-weatherticker.C:
 			canvas.weather(*location)
 		case <-headticker.C:
-			canvas.headlines(*section)
+			canvas.headlines(*section, *thumb)
 		case <-sigint:
 			openvg.Finish()
 			os.Exit(0)
@@ -233,11 +238,11 @@ func (d *display) weather(latlong string) {
 }
 
 // headlines shows hacker news or NYT headlines
-func (d *display) headlines(headlinetype string) {
+func (d *display) headlines(headlinetype string, thumb bool) {
 	if headlinetype == "hn" {
 		d.hackernews(5)
 	} else {
-		d.nytheadlines(headlinetype)
+		d.nytheadlines(headlinetype, thumb)
 	}
 }
 
@@ -288,7 +293,7 @@ func (d *display) hackernews(n int) {
 }
 
 // nytheadlines retrieves data from the New York Times API, decodes and displays it.
-func (d *display) nytheadlines(section string) {
+func (d *display) nytheadlines(section string, thumb bool) {
 	hdim := dimen{x: 0, y: 0, width: d.width, height: d.height / 2}
 	r, err := netread(fmt.Sprintf(NYTfmt, section, NYTAPIkey))
 	if err != nil {
@@ -304,17 +309,41 @@ func (d *display) nytheadlines(section string) {
 		hdim.gerror(d.bgcolor, d.textcolor, "no headlines")
 		return
 	}
-	x := d.width / 2
+	x := d.width * 0.10
 	y := d.height * 0.10
+	thumbsize := int(d.height * 0.05)
 	hdim.regionFill(d.bgcolor, d.textcolor)
 	headsize := d.width / 80
-	spacing := headsize * 2.0
+	spacing := openvg.VGfloat(thumbsize)
 	for i := len(data.Results) - 1; i >= 0; i-- {
-		openvg.TextMid(x, y, fromHTML.Replace(data.Results[i].Title), "serif", int(headsize))
+		openvg.Text(x, y, fromHTML.Replace(data.Results[i].Title), "serif", int(headsize))
+		if len(data.Results[i].Thumbnail) > 0 {
+			img, imerr := netimage(data.Results[i].Thumbnail)
+			if imerr != nil {
+				continue
+			}
+			g := gift.New()
+			g.Add(gift.Resize(0, thumbsize, gift.LanczosResampling))
+			gift.Resize(thumbsize, thumbsize, gift.BoxResampling)
+			resized := image.NewRGBA(g.Bounds(img.Bounds()))
+			g.Draw(resized, img)
+			openvg.Img(x-100, y-(spacing*0.25), resized)
+		}
 		y = y + spacing
 	}
 	openvg.Image(d.width*0.05, 15, 30, 30, "poweredby_nytimes_30a.png")
 	openvg.End()
+}
+
+// netimage reads an image from a URL
+func netimage(url string) (image.Image, error) {
+	r, err := netread(url)
+	defer r.Close()
+	if err != nil {
+		return nil, fmt.Errorf("Unable to read the image from %s", url)
+	}
+	im, _, err := image.Decode(r)
+	return im, err
 }
 
 // netread derefernces a URL, returning the Reader, with an error
