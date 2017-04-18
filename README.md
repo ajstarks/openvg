@@ -1,4 +1,4 @@
-#Testbed for exploring OpenVG on the Raspberry Pi.
+# Testbed for exploring OpenVG on the Raspberry Pi.
 
 <a href="http://www.flickr.com/photos/ajstarks/7811750326/" title="rotext by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg" width="500" height="281" alt="rotext"></a>
 
