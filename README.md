@@ -1,3 +1,7 @@
+**The repository is currently not accepting issue submissions as it is a fork of
+a different repository that already has issues. Issue submissions will be
+enabled shortly.**
+
 # OpenVG on Raspberry Pi
 
 [
