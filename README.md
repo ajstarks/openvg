@@ -1,39 +1,44 @@
 # Testbed for exploring OpenVG on the Raspberry Pi.
 
-<a href="http://www.flickr.com/photos/ajstarks/7811750326/" title="rotext by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg" width="500" height="281" alt="rotext"></a>
+<a href="https://github.com/mgthomas99/openvg">
+    <img    src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg"
+            alt="rotext"
+            height="281"
+            width="500" />
+</a>
 
 ## First program
 
 Here is the graphics equivalent of "hello, world"
 
-	// first OpenVG program
-	// Anthony Starks (ajstarks@gmail.com)
-	#include <stdio.h>
-	#include <stdlib.h>
-	#include <unistd.h>
-	#include "VG/openvg.h"
-	#include "VG/vgu.h"
-	#include "fontinfo.h"
-	#include "shapes.h"
-	
-	int main() {
-		int width, height;
-		char s[3];
-	
-		init(&width, &height);					// Graphics initialization
-	
-		Start(width, height);					// Start the picture
-		Background(0, 0, 0);					// Black background
-		Fill(44, 77, 232, 1);					// Big blue marble
-		Circle(width / 2, 0, width);			// The "world"
-		Fill(255, 255, 255, 1);					// White text
-		TextMid(width / 2, height / 2, "hello, world", SerifTypeface, width / 10);	// Greetings 
-		End();						   			// End the picture
-	
-		fgets(s, 2, stdin);				   		// look at the pic, end with [RETURN]
-		finish();					            // Graphics cleanup
-		exit(0);
-	}
+    // first OpenVG program
+    // Anthony Starks (ajstarks@gmail.com)
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <unistd.h>
+    #include "VG/openvg.h"
+    #include "VG/vgu.h"
+    #include "fontinfo.h"
+    #include "shapes.h"
+
+    int main() {
+        int width, height;
+        char s[3];
+
+        init(&width, &height);					// Graphics initialization
+
+        Start(width, height);					// Start the picture
+        Background(0, 0, 0);					// Black background
+        Fill(44, 77, 232, 1);					// Big blue marble
+        Circle(width / 2, 0, width);			// The "world"
+        Fill(255, 255, 255, 1);					// White text
+        TextMid(width / 2, height / 2, "hello, world", SerifTypeface, width / 10);	// Greetings 
+        End();						   			// End the picture
+
+    	fgets(s, 2, stdin);				   		// look at the pic, end with [RETURN]
+    	finish();					            // Graphics cleanup
+    	exit(0);
+    }
 
 <a href="http://www.flickr.com/photos/ajstarks/7828969180/" title="hellovg by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8436/7828969180_b73db3bf19.jpg" width="500" height="281" alt="hellovg"></a>
 
@@ -302,44 +307,3 @@ The openvg shapes library can now be used in C code by including shapes.h and fo
 	pi@raspberrypi ~ $ ./anysource
 
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
-
-## Go wrapper
-
-A Go programming language wrapper for the library is found in openvg.go. Sample clients are in the directory go-client.  The API closely follows the C API; here is the "hello, world" program in Go:
-
-<a href="https://godoc.org/github.com/ajstarks/openvg">The Go API</a>
-
-	package main
-
-	import (
-		"bufio"
-		"github.com/ajstarks/openvg"
-		"os"
-	)
-
-	func main() {
-		width, height := openvg.Init() // OpenGL, etc initialization
-
-		w2 := openvg.VGfloat(width / 2)
-		h2 := openvg.VGfloat(height / 2)
-		w := openvg.VGfloat(width)
-
-		openvg.Start(width, height)                               // Start the picture
-		openvg.BackgroundColor("black")                           // Black background
-		openvg.FillRGB(44, 77, 232, 1)                            // Big blue marble
-		openvg.Circle(w2, 0, w)                                   // The "world"
-		openvg.FillColor("white")                                 // White text
-		openvg.TextMid(w2, h2, "hello, world", "serif", width/10) // Greetings 
-		openvg.End()                                              // End the picture
-		bufio.NewReader(os.Stdin).ReadBytes('\n')                 // Pause until [RETURN]
-		openvg.Finish()                                           // Graphics cleanup
-	}
-
-	
-To build the wrapper: (make sure GOPATH is set)
-
-	pi@raspberrypi ~/openvg $ go install .
-	pi@raspberrypi ~/openvg $ cd go-client/hellovg
-	pi@raspberrypi ~/openvg/go-client/hellovg $ go build .
-	pi@raspberrypi ~/openvg/go-client/hellovg $ ./hellovg 
-
