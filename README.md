@@ -1,16 +1,14 @@
 # Testbed for exploring OpenVG on the Raspberry Pi.
 
-<a href="https://github.com/mgthomas99/openvg">
-    <img    src="http://farm8.staticflickr.com/7249/7811750326_614ea891ae.jpg"
-            alt="rotext"
-            height="281"
-            width="500" />
-</a>
+[
+    ![One](https://raw.githubusercontent.com/mgthomas99/openvg/develop/.github/assets/raspi-spiral.png)
+](https://github.com/mgthomas99/openvg)
 
 ## First program
 
 Here is the graphics equivalent of "hello, world"
 
+```c
     // first OpenVG program
     // Anthony Starks (ajstarks@gmail.com)
     #include <stdio.h>
@@ -25,20 +23,21 @@ Here is the graphics equivalent of "hello, world"
         int width, height;
         char s[3];
 
-        init(&width, &height);					// Graphics initialization
+        init(&width, &height);
 
-        Start(width, height);					// Start the picture
-        Background(0, 0, 0);					// Black background
-        Fill(44, 77, 232, 1);					// Big blue marble
-        Circle(width / 2, 0, width);			// The "world"
-        Fill(255, 255, 255, 1);					// White text
-        TextMid(width / 2, height / 2, "hello, world", SerifTypeface, width / 10);	// Greetings 
-        End();						   			// End the picture
+        Start(width, height);
+        Background(0, 0, 0);
+        Fill(44, 77, 232, 1);
+        Circle(width / 2, 0, width);
+        Fill(255, 255, 255, 1);
+        TextMid(width / 2, height / 2, "hello, world", SerifTypeface, width / 10);
+        End();
 
-    	fgets(s, 2, stdin);				   		// look at the pic, end with [RETURN]
-    	finish();					            // Graphics cleanup
-    	exit(0);
+        fgets(s, 2, stdin);
+        finish();
+        exit(0)
     }
+```
 
 <a href="http://www.flickr.com/photos/ajstarks/7828969180/" title="hellovg by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8436/7828969180_b73db3bf19.jpg" width="500" height="281" alt="hellovg"></a>
 
@@ -51,171 +50,171 @@ OpenVG specifies colors as a VGfloat array containing red, green, blue, alpha va
 
 ### Window (canvas) functions
 
-	void WindowClear() 
+    void WindowClear() 
 WindowClear clears the window to previously set background colour
 
-	void AreaClear(unsigned int x, unsigned int y, unsigned int w, unsigned int h)
+    void AreaClear(unsigned int x, unsigned int y, unsigned int w, unsigned int h)
 AreaClear clears a given rectangle in window coordinates
 
-	void WindowOpacity(unsigned int a)
+    void WindowOpacity(unsigned int a)
 WindowOpacity sets the  window opacity
 
-	void WindowPosition(int x, int y)
+    void WindowPosition(int x, int y)
 WindowPosition moves the window to given position
 
 ### Setup and shutdown
 
-	void init(int *w, int *h)
+    void init(int *w, int *h)
 Initialize the graphics: width and height of the canvas are returned.  This should begin every program.
 
-	void initWindowSize(int x, int y, unsigned int w, unsigned int h)
+    void initWindowSize(int x, int y, unsigned int w, unsigned int h)
 Initialize with specific dimensions
 
-	void finish() 
+    void finish() 
 Shutdown the graphics. This should end every program.
 
-	void Start(int width, int height)
+    void Start(int width, int height)
 Begin the picture, clear the screen with a default white, set the stroke and fill to black.
 
-	void End()
+    void End()
 End the picture, rendering to the screen.
 
-	void SaveEnd(char *filename)
+    void SaveEnd(char *filename)
 End the picture, rendering to the screen, save the raster to the named file as 4-byte RGBA words, with a stride of
 width*4 bytes. The program raw2png converts the "raw" raster to png.
 
-	void saveterm(), restoreterm(), rawterm()
+    void saveterm(), restoreterm(), rawterm()
 Terminal settings, save current settings, restore settings, put the terminal in raw mode.
 
 ### Attributes
 
-	void setfill(float color[4])
+    void setfill(float color[4])
 Set the fill color
 
-	void Background(unsigned int r, unsigned int g, unsigned int b)
+    void Background(unsigned int r, unsigned int g, unsigned int b)
 Fill the screen with the background color defined from RGB values.
 
-	void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
+    void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
 clears the screen to a background color with alpha
 
-	void StrokeWidth(float width)
+    void StrokeWidth(float width)
 Set the stroke width.
 
-	void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4])
+    void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4])
 fill a color vector from RGBA values.
 
-	void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4])
+    void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4])
 fill a color vector from RGB values.
 
-	void Stroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
+    void Stroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
 Set the Stroke color using RGBA values.
 
-	void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
+    void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
 Set the Fill color using RGBA values.
 
-	void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat *stops, int n)
+    void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat *stops, int n)
 Set the fill to a linear gradient bounded by (x1, y1) and (x2, y2). using offsets and colors specified in n number of stops
 
-	void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx VGfloat fy, VGfloat r, VGfloat *stops, int n)
+    void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx VGfloat fy, VGfloat r, VGfloat *stops, int n)
 Set the fill to a radial gradient centered at (cx, cy) with radius r, and focal point at (fx, ry), using offsets and colors specified in n number of stops
 
 ### Shapes
 
-	void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
+    void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
 Draw a line between (x1, y1) and (x2, y2).
 
-	void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
+    void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 Draw a rectangle with its origin (lower left) at (x,y), and size is (width,height).
 
-	void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
+    void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 Outlined version
 
-	void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
+    void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
 Draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).  
 The width and height of the corners are specified with (rw,rh).
 
-	void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
+    void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
 Outlined version
 
-	void Polygon(VGfloat *x, VGfloat *y, VGint n)
+    void Polygon(VGfloat *x, VGfloat *y, VGint n)
 Draw a polygon using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
 
-	void Polyline(VGfloat *x, VGfloat *y, VGint n)
+    void Polyline(VGfloat *x, VGfloat *y, VGint n)
 Draw a polyline using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
 
-	void Circle(VGfloat x, VGfloat y, VGfloat r)
+    void Circle(VGfloat x, VGfloat y, VGfloat r)
 Draw a circle centered at (x,y) with radius r.
 
-	void CircleOutline(VGfloat x, VGfloat y, VGfloat r)
+    void CircleOutline(VGfloat x, VGfloat y, VGfloat r)
 Outlined version
 
-	void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
+    void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 Draw an ellipse centered at (x,y) with radii (w, h).
 
-	void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
+    void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
 Outlined version
 
-	void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
+    void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
 Draw a quadratic bezier curve beginning at (sx, sy), using control points at (cx, cy), ending at (ex, ey).
 
-	void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
+    void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
 Outlined version
 
-	void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
+    void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
 Draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey).
 
-	void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) 
+    void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) 
 Outlined version
 
-	void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
+    void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
 Draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
 
-	void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
+    void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
 Outlined version
 
 ### Text and Images
 
-	void Text(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
+    void Text(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
 Draw a the text srtring (s) at location (x,y), using pointsize.
 
-	void TextMid(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
+    void TextMid(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
 Draw a the text srtring (s) at centered at location (x,y), using pointsize.
 
-	void TextEnd(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
+    void TextEnd(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
 Draw a the text srtring (s) at with its lend aligned to location (x,y), using pointsize
 
-	VGfloat TextWidth(char *s, Fontinfo f, int pointsize)
+    VGfloat TextWidth(char *s, Fontinfo f, int pointsize)
 Return the width of text
 
-	VGfloat TextHeight(Fontinfo f, int pointsize)
+    VGfloat TextHeight(Fontinfo f, int pointsize)
 Return a font's height
 
-	TextDepth(Fontinfo f, int pointsize)
+    TextDepth(Fontinfo f, int pointsize)
 Return a font's distance beyond the baseline.
 
-	void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
+    void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
 place a JPEG image with dimensions (w,h) at (x,y).
 
-	
 ### Transformations
 
-	void Translate(VGfloat x, VGfloat y)
+    void Translate(VGfloat x, VGfloat y)
 Translate the coordinate system to (x,y).
 
-	void Rotate(VGfloat r)
+    void Rotate(VGfloat r)
 Rotate the coordinate system around angle r (degrees).
 
-	void Scale(VGfloat x, VGfloat y)
+    void Scale(VGfloat x, VGfloat y)
 Scale by x,y.
 
-	void Shear(VGfloat x, VGfloat y)
+    void Shear(VGfloat x, VGfloat y)
 Shear by the angles x,y.
 
 ## Clipping
-	void ClipRect(VGint x, VGint y, VGint w, VGint h)
+
+    void ClipRect(VGint x, VGint y, VGint w, VGint h)
 Limit drawing the drawing area to the specified rectangle, end with ClipEnd()
 
-	void ClipEnd()
+    void ClipEnd()
 Ends clipping area
 
 ## Using fonts
@@ -227,27 +226,27 @@ If you want to use other fonts, adjust the Makefile accordingly, or generate the
 font2openvg takes three arguments: the TrueType font file, the output file to be included and the prefix for identifiers.
 For example to use the DejaVu Sans font:
 
-	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
+    ./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
 
 and include the generated code in your program:
 
-	#include "DejaVuSans.inc"
-	Fontinfo DejaFont
-	
+    #include "DejaVuSans.inc"
+    Fontinfo DejaFont
+
 The loadfont function creates OpenVG paths from the font data:
 
-	loadfont(DejaVuSans_glyphPoints, 
-            DejaVuSans_glyphPointIndices, 
-        	DejaVuSans_glyphInstructions,                
-        	DejaVuSans_glyphInstructionIndices, 
-            DejaVuSans_glyphInstructionCounts, 
+    loadfont(DejaVuSans_glyphPoints,
+            DejaVuSans_glyphPointIndices,
+            DejaVuSans_glyphInstructions,
+            DejaVuSans_glyphInstructionIndices,
+            DejaVuSans_glyphInstructionCounts,
             DejaVuSans_glyphAdvances,
-            DejaVuSans_characterMap, 
-        	DejaVuSans_glyphCount);
+            DejaVuSans_characterMap,
+            DejaVuSans_glyphCount);
 
 The unloadfont function releases the path information:
-	
-	unloadfont(DejaFont.Glyphs, DejaFont.Count);
+
+    unloadfont(DejaFont.Glyphs, DejaFont.Count);
 
 Note that the location of the font files may differ.  (The current location for Jessie is /usr/share/fonts/truetype/ttf-dejavu)
 Use the FONTLIB makefile variable to adjust this location.
@@ -257,53 +256,51 @@ Use the FONTLIB makefile variable to adjust this location.
 <i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the DejaVu fonts, and the jpeg and freetype libraries.
 The indent tool is also useful for code formatting.  Install them via:
 
-	pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent libfreetype6-dev ttf-dejavu-core
+    pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent libfreetype6-dev ttf-dejavu-core
 
 Next, build the library and test:
 
-	pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
-	pi@raspberrypi ~ $ cd openvg
-	pi@raspberrypi ~/openvg $ make
-	g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
-	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
-	224 glyphs written
-	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
-	224 glyphs written
-	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf DejaVuSerif.inc DejaVuSerif
-	224 glyphs written
-	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
-	gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
-	pi@raspberrypi ~/openvg/client $ cd client
-	pi@raspberrypi ~/openvg/client $ make test
-	cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
-	./shapedemo demo 5
-
+    pi@raspberrypi ~ $ git clone git://github.com/ajstarks/openvg
+    pi@raspberrypi ~ $ cd openvg
+    pi@raspberrypi ~/openvg $ make
+    g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
+    ./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
+    224 glyphs written
+    ./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
+    224 glyphs written
+    ./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf DejaVuSerif.inc DejaVuSerif
+    224 glyphs written
+    gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c libshapes.c
+    gcc -O2 -Wall -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -c oglinit.c
+    pi@raspberrypi ~/openvg/client $ cd client
+    pi@raspberrypi ~/openvg/client $ make test
+    cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
+    ./shapedemo demo 5
 
 The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
 
-	./shapedemo                      # show a reference card
-	./shapedemo raspi                # show a self-portrait
-	./shapedemo image                # show four test images
-	./shapedemo astro                # the sun and the earth, to scale
-	./shapedemo text                 # show blocks of text in serif, sans, and mono fonts
-	./shapedemo rand 10              # show 10 random shapes
-	./shapedemo rotate 10 a          # rotated and faded "a"
-	./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
-	./shapedemo fontsize             # show a range of font sizes (per <https://speakerdeck.com/u/idangazit/p/better-products-through-typography>)
-	./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
-	
+    ./shapedemo                      # show a reference card
+    ./shapedemo raspi                # show a self-portrait
+    ./shapedemo image                # show four test images
+    ./shapedemo astro                # the sun and the earth, to scale
+    ./shapedemo text                 # show blocks of text in serif, sans, and mono fonts
+    ./shapedemo rand 10              # show 10 random shapes
+    ./shapedemo rotate 10 a          # rotated and faded "a"
+    ./shapedemo test "hello, world"  # show a test pattern, with "hello, world" at mid-display in sans, serif, and mono.
+    ./shapedemo fontsize             # show a range of font sizes (per <https://speakerdeck.com/u/idangazit/p/better-products-through-typography>)
+    ./shapedemo demo 10              # run through the demo, pausing 10 seconds between each one; contemplate the awesome.
 
 To install the shapes library as a system-wide shared library
-	
-	pi@raspberrypi ~/openvg $ make library
-	pi@raspberrypi ~/openvg $ sudo make install
+
+    pi@raspberrypi ~/openvg $ make library
+    pi@raspberrypi ~/openvg $ sudo make install
 
 The openvg shapes library can now be used in C code by including shapes.h and fontinfo.h and linking with libshapes.so:
 
-	#include <shapes.h>
-	#include <fontinfo.h>
+    #include <shapes.h>
+    #include <fontinfo.h>
 
-	pi@raspberrypi ~ $ gcc -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads anysource.c -o anysource -lshapes
-	pi@raspberrypi ~ $ ./anysource
+    pi@raspberrypi ~ $ gcc -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads anysource.c -o anysource -lshapes
+    pi@raspberrypi ~ $ ./anysource
 
 <a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
