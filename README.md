@@ -1,4 +1,4 @@
-# Testbed for exploring OpenVG on the Raspberry Pi.
+# OpenVG on Raspberry Pi
 
 [
     ![One](https://raw.githubusercontent.com/mgthomas99/openvg/develop/.github/assets/raspi-spiral.png)
@@ -39,18 +39,19 @@ Here is the graphics equivalent of "hello, world"
     }
 ```
 
-<a href="http://www.flickr.com/photos/ajstarks/7828969180/" title="hellovg by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8436/7828969180_b73db3bf19.jpg" width="500" height="281" alt="hellovg"></a>
-
 ## API
 
-<a href="http://www.flickr.com/photos/ajstarks/7717370238/" title="OpenVG refcard by ajstarks, on Flickr"><img src="http://farm8.staticflickr.com/7256/7717370238_1d632cb179.jpg" width="500" height="281" alt="OpenVG refcard"></a>
+![One](http://farm8.staticflickr.com/7256/7717370238_1d632cb179.jpg)
 
-Coordinates are VGfloat values, with the origin at the lower left, with x increasing to the right, and y increasing up.
-OpenVG specifies colors as a VGfloat array containing red, green, blue, alpha values ranging from 0.0 to 1.0, but typically colors are specified as RGBA (0-255 for RGB, A from 0.0 to 1.0)
+Coordinates are VGfloat values, with the origin at the lower left, with x
+increasing to the right, and y increasing up. OpenVG specifies colors as a
+`VGfloat` array containing red, green, blue, alpha values ranging from 0.0 to
+1.0, but typically colors are specified as RGBA (0-255 for RGB, A from 0.0 to
+1.0).
 
 ### Window (canvas) functions
 
-    void WindowClear() 
+    void WindowClear()
 WindowClear clears the window to previously set background colour
 
     void AreaClear(unsigned int x, unsigned int y, unsigned int w, unsigned int h)
@@ -70,7 +71,7 @@ Initialize the graphics: width and height of the canvas are returned.  This shou
     void initWindowSize(int x, int y, unsigned int w, unsigned int h)
 Initialize with specific dimensions
 
-    void finish() 
+    void finish()
 Shutdown the graphics. This should end every program.
 
     void Start(int width, int height)
@@ -130,7 +131,7 @@ Draw a rectangle with its origin (lower left) at (x,y), and size is (width,heigh
 Outlined version
 
     void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
-Draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).  
+Draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).
 The width and height of the corners are specified with (rw,rh).
 
     void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
@@ -163,7 +164,7 @@ Outlined version
     void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
 Draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey).
 
-    void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) 
+    void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
 Outlined version
 
     void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
@@ -219,8 +220,8 @@ Ends clipping area
 
 ## Using fonts
 
-Also included is the font2openvg program, which turns font information into C source that 
-you can embed in your program. The Makefile makes font code from files found in /usr/share/fonts/truetype/ttf-dejavu/. 
+Also included is the font2openvg program, which turns font information into C source that
+you can embed in your program. The Makefile makes font code from files found in /usr/share/fonts/truetype/ttf-dejavu/.
 If you want to use other fonts, adjust the Makefile accordingly, or generate the font code on your own once the font2openvg program is built.
 
 font2openvg takes three arguments: the TrueType font file, the output file to be included and the prefix for identifiers.
@@ -253,7 +254,7 @@ Use the FONTLIB makefile variable to adjust this location.
 
 # Build and run
 
-<i>Note that you will need at least 64 Mbytes of GPU RAM:</i>. You will also need the DejaVu fonts, and the jpeg and freetype libraries.
+*Note that you will need at least 64 Mbytes of GPU RAM:*. You will also need the DejaVu fonts, and the jpeg and freetype libraries.
 The indent tool is also useful for code formatting.  Install them via:
 
     pi@raspberrypi ~ $ sudo apt-get install libjpeg8-dev indent libfreetype6-dev ttf-dejavu-core
@@ -277,7 +278,7 @@ Next, build the library and test:
     cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -o shapedemo shapedemo.c ../libshapes.o ../oglinit.o -L/opt/vc/lib -lGLESv2 -ljpeg
     ./shapedemo demo 5
 
-The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c. 
+The program "shapedemo" exercises a high-level API built on OpenVG found in libshapes.c.
 
     ./shapedemo                      # show a reference card
     ./shapedemo raspi                # show a self-portrait
@@ -302,5 +303,3 @@ The openvg shapes library can now be used in C code by including shapes.h and fo
 
     pi@raspberrypi ~ $ gcc -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads anysource.c -o anysource -lshapes
     pi@raspberrypi ~ $ ./anysource
-
-<a href="http://www.flickr.com/photos/ajstarks/7883988028/" title="The Raspberry Pi, drawn by the Raspberry Pi by ajstarks, on Flickr"><img src="http://farm9.staticflickr.com/8442/7883988028_21fd6533e0.jpg" width="500" height="281" alt="The Raspberry Pi, drawn by the Raspberry Pi"></a>
