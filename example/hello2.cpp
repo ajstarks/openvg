@@ -7,12 +7,12 @@
 #include "shapes.h"
 
 int main() {
-	const char msg[] = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', 0 };
-	int width, height;
-	char s[3];
+    const char msg[] = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', 0 };
+    int width, height;
+    char s[3];
 
-	init(&width, &height);
-	Start(width, height);
+    init(&width, &height);
+    Start(width, height);
     {
         Background(0, 0, 0);
         Fill(44, 77, 232, 1);
@@ -20,12 +20,12 @@ int main() {
         Fill(255, 255, 255, 1);
         TextMid(width / 2, (height * 0.7), msg, SerifTypeface, width / 15);
     }
-	End();
+    End();
 
     // We can use `fgets` to wait for user input before ending the program. This
     // is a neat way of keeping the rendered assets on screen until input is
     // detected.
-	fgets(s, 2, stdin);
-	finish();
-	exit(0);
+    fgets(s, 2, stdin);
+    finish();
+    exit(0);
 }
