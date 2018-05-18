@@ -1,20 +1,25 @@
-**The repository is currently not accepting issue submissions as it is a fork of
+[header-image]: https://raw.githubusercontent.com/mgthomas99/openvg/develop/.github/assets/raspi-spiral.png
+[git-repository-url]: https://github.com/mgthomas99/openvg
+[license-shield-url]: https://img.shields.io/github/license/mgthomas99/openvg.svg?style=flat-square
+[license-url]: https://github.com/mgthomas99/openvg/blob/master/LICENSE
+
+*The repository is currently not accepting issue submissions as it is a fork of
 a different repository that already has issues. Issue submissions will be
-enabled shortly.**
+enabled shortly.*
 
 # OpenVG on Raspberry Pi
 
-[
-    ![One](https://raw.githubusercontent.com/mgthomas99/openvg/develop/.github/assets/raspi-spiral.png)
-](https://github.com/mgthomas99/openvg)
+[![One][header-image]][git-repository-url]
+[![LICENSE][license-shield-url]][license-url]
+
+This project provides an abstraction layer on top of native OpenVG, for quickly
+creating contexts and drawing shapes, images, and text.
+
+*This project is a fork of [OpenVG by Anthony Starks <ajstarks>](https://github.com/ajstarks/openvg)*
 
 ## First program
 
-Here is the graphics equivalent of "hello, world"
-
 ```c
-    // first OpenVG program
-    // Anthony Starks (ajstarks@gmail.com)
     #include <stdio.h>
     #include <stdlib.h>
     #include <unistd.h>
@@ -52,175 +57,6 @@ increasing to the right, and y increasing up. OpenVG specifies colors as a
 `VGfloat` array containing red, green, blue, alpha values ranging from 0.0 to
 1.0, but typically colors are specified as RGBA (0-255 for RGB, A from 0.0 to
 1.0).
-
-### Window (canvas) functions
-
-    void WindowClear()
-WindowClear clears the window to previously set background colour
-
-    void AreaClear(unsigned int x, unsigned int y, unsigned int w, unsigned int h)
-AreaClear clears a given rectangle in window coordinates
-
-    void WindowOpacity(unsigned int a)
-WindowOpacity sets the  window opacity
-
-    void WindowPosition(int x, int y)
-WindowPosition moves the window to given position
-
-### Setup and shutdown
-
-    void init(int *w, int *h)
-Initialize the graphics: width and height of the canvas are returned.  This should begin every program.
-
-    void initWindowSize(int x, int y, unsigned int w, unsigned int h)
-Initialize with specific dimensions
-
-    void finish()
-Shutdown the graphics. This should end every program.
-
-    void Start(int width, int height)
-Begin the picture, clear the screen with a default white, set the stroke and fill to black.
-
-    void End()
-End the picture, rendering to the screen.
-
-    void SaveEnd(char *filename)
-End the picture, rendering to the screen, save the raster to the named file as 4-byte RGBA words, with a stride of
-width*4 bytes. The program raw2png converts the "raw" raster to png.
-
-    void saveterm(), restoreterm(), rawterm()
-Terminal settings, save current settings, restore settings, put the terminal in raw mode.
-
-### Attributes
-
-    void setfill(float color[4])
-Set the fill color
-
-    void Background(unsigned int r, unsigned int g, unsigned int b)
-Fill the screen with the background color defined from RGB values.
-
-    void BackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
-clears the screen to a background color with alpha
-
-    void StrokeWidth(float width)
-Set the stroke width.
-
-    void RGBA(unsigned int r, unsigned int g, unsigned int b, VGfloat a, VGfloat color[4])
-fill a color vector from RGBA values.
-
-    void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4])
-fill a color vector from RGB values.
-
-    void Stroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
-Set the Stroke color using RGBA values.
-
-    void Fill(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
-Set the Fill color using RGBA values.
-
-    void FillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGfloat *stops, int n)
-Set the fill to a linear gradient bounded by (x1, y1) and (x2, y2). using offsets and colors specified in n number of stops
-
-    void FillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx VGfloat fy, VGfloat r, VGfloat *stops, int n)
-Set the fill to a radial gradient centered at (cx, cy) with radius r, and focal point at (fx, ry), using offsets and colors specified in n number of stops
-
-### Shapes
-
-    void Line(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2)
-Draw a line between (x1, y1) and (x2, y2).
-
-    void Rect(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-Draw a rectangle with its origin (lower left) at (x,y), and size is (width,height).
-
-    void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-Outlined version
-
-    void Roundrect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
-Draw a rounded rectangle with its origin (lower left) at (x,y), and size is (width,height).
-The width and height of the corners are specified with (rw,rh).
-
-    void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh)
-Outlined version
-
-    void Polygon(VGfloat *x, VGfloat *y, VGint n)
-Draw a polygon using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
-
-    void Polyline(VGfloat *x, VGfloat *y, VGint n)
-Draw a polyline using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
-
-    void Circle(VGfloat x, VGfloat y, VGfloat r)
-Draw a circle centered at (x,y) with radius r.
-
-    void CircleOutline(VGfloat x, VGfloat y, VGfloat r)
-Outlined version
-
-    void Ellipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-Draw an ellipse centered at (x,y) with radii (w, h).
-
-    void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h)
-Outlined version
-
-    void Qbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
-Draw a quadratic bezier curve beginning at (sx, sy), using control points at (cx, cy), ending at (ex, ey).
-
-    void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey)
-Outlined version
-
-    void Cbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
-Draw a cubic bezier curve beginning at (sx, sy), using control points at (cx, cy) and (px, py), ending at (ex, ey).
-
-    void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey)
-Outlined version
-
-    void Arc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
-Draw an elliptical arc centered at (x, y), with width and height at (w, h).  Start angle (degrees) is sa, angle extent is aext.
-
-    void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext)
-Outlined version
-
-### Text and Images
-
-    void Text(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
-Draw a the text srtring (s) at location (x,y), using pointsize.
-
-    void TextMid(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
-Draw a the text srtring (s) at centered at location (x,y), using pointsize.
-
-    void TextEnd(VGfloat x, VGfloat y, char* s, Fontinfo f, int pointsize)
-Draw a the text srtring (s) at with its lend aligned to location (x,y), using pointsize
-
-    VGfloat TextWidth(char *s, Fontinfo f, int pointsize)
-Return the width of text
-
-    VGfloat TextHeight(Fontinfo f, int pointsize)
-Return a font's height
-
-    TextDepth(Fontinfo f, int pointsize)
-Return a font's distance beyond the baseline.
-
-    void Image(VGfloat x, VGfloat y, int w, int h, char * filename)
-place a JPEG image with dimensions (w,h) at (x,y).
-
-### Transformations
-
-    void Translate(VGfloat x, VGfloat y)
-Translate the coordinate system to (x,y).
-
-    void Rotate(VGfloat r)
-Rotate the coordinate system around angle r (degrees).
-
-    void Scale(VGfloat x, VGfloat y)
-Scale by x,y.
-
-    void Shear(VGfloat x, VGfloat y)
-Shear by the angles x,y.
-
-## Clipping
-
-    void ClipRect(VGint x, VGint y, VGint w, VGint h)
-Limit drawing the drawing area to the specified rectangle, end with ClipEnd()
-
-    void ClipEnd()
-Ends clipping area
 
 ## Using fonts
 
