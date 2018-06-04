@@ -3,5 +3,5 @@ LIBFLAGS=-L/opt/vc/lib -lEGL -lGLESv2 -lbcm_host -lpthread  -ljpeg
 
 all:    hello
 
-hello:    hello.c ../libshapes.o ../oglinit.o
-	gcc -Wall $(INCLUDEFLAGS) -o  hello hello.c ../libshapes.o ../oglinit.o $(LIBFLAGS)
+hello:    hello.c	./../build/libshapes.o	./../build/oglinit.o
+	gcc -Wall $(INCLUDEFLAGS) hello.c -o hello ../build/libshapes.o ../build/oglinit.o $(LIBFLAGS)
