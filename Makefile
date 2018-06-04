@@ -27,15 +27,15 @@ uninstall:
 libshapes:	./src/libshapes.c	./src/fontinfo.h	./src/shapes.h	fonts
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c
 
-oglinit:	oglinit.c
+oglinit:	./src/oglinit.c
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/oglinit.c
 
 fonts:	font
 libs:	lib
 lib:	font2openvg	font
 
-font2openvg:	lib/font2openvg.cpp
+font2openvg:	./lib/font2openvg.cpp
 	g++ -I/usr/include/freetype2 lib/font2openvg.cpp -o lib/font2openvg -lfreetype
 
 font:	/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf	font2openvg
-	./lib/font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
+	./lib/font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf ./lib/DejaVuSans.inc DejaVuSans
