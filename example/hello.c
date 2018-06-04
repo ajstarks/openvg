@@ -4,7 +4,7 @@
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "./../src/fontinfo.h"
-#include "./../src/shapes.h"
+#include "./../src/libshapes.h"
 
 int main() {
     const char msg[] = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', 0 };

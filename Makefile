@@ -11,7 +11,7 @@ install:	lib	src
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1.0
-	install -m 644 -p ./src/shapes.h /usr/include/
+	install -m 644 -p ./src/libshapes.h /usr/include/
 	install -m 644 -p ./src/fontinfo.h /usr/include/
 
 uninstall:
@@ -21,12 +21,12 @@ uninstall:
 	rm -f /usr/lib/libshapes.so.1.0
 	rm -f /usr/lib/libshapes.so.1
 	rm -f /usr/lib/libshapes.so
-	rm -f /usr/include/shapes.h
+	rm -f /usr/include/libshapes.h
 
-buildd-ir:
+build-dir:
 	mkdir "./build/"
 
-libshapes:	./src/libshapes.c	./src/fontinfo.h	./src/shapes.h	build-dir	fonts
+libshapes:	./src/libshapes.c	./src/fontinfo.h	./src/libshapes.h	build-dir	fonts
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c -o ./build/libshapes.o
 
 oglinit:	./src/oglinit.c	build-dir
