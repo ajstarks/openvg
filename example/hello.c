@@ -21,13 +21,17 @@ int main() {
         Fill(44, 77, 232, 1);
         Circle(width / 2, 0, width);
         Fill(255, 255, 255, 1);
-        TextMid(width / 2, (height * 0.7), msg, SerifTypeface, width / 15);
+        TextMid(width / 2,
+                height * 0.7,
+                msg,
+                SerifTypeface,
+                width / 15);
     }
     End();
 
     // We can use `fgets` to wait for user input before ending the program. This
-    // is a neat way of keeping the rendered assets on screen until input is
-    // detected.
+    // is a neat way of keeping the rendered assets on screen until the user
+    // presses a key.
     fgets(s, 2, stdin);
     finish();
     exit(0);
