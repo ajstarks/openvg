@@ -11,7 +11,7 @@ clean:
 	indent -linux -c 60 -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
 
 install:
-	install -m 755 -p font2openvg /usr/bin/
+	install -m 755 -p font2openvg/ /usr/bin/
 	install -m 755 -p libshapes.so /usr/lib/libshapes.so.1.0.0
 	strip --strip-unneeded /usr/lib/libshapes.so.1.0.0
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so
@@ -21,7 +21,7 @@ install:
 	install -m 644 -p fontinfo.h /usr/include/
 
 uninstall:
-	rm -f /usr/bin/font2openvg
+	rm -f /usr/bin/font2openvg/
 	rm -f /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1.0 /usr/lib/libshapes.so.1 /usr/lib/libshapes.so
 	rm -f /usr/include/shapes.h /usr/include/fontinfo.h
 
