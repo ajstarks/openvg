@@ -17,8 +17,6 @@
 #include "eglstate.h"
 #include "fontinfo.h"
 #include "DejaVuSans.inc"
-#include "DejaVuSerif.inc"
-#include "DejaVuSansMono.inc"
 
 static STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 500;
@@ -221,7 +219,7 @@ void dumpscreen(int w, int h, FILE * fp) {
     free(ScreenBuffer);
 }
 
-Fontinfo SansTypeface, SerifTypeface, MonoTypeface;
+Fontinfo SansTypeface;
 
 // initWindowSize requests a specific window size & position, if not called
 // then init() will open a full screen window.
@@ -247,27 +245,11 @@ void init(int *w, int *h) {
                 DejaVuSans_glyphInstructions,
                 DejaVuSans_glyphInstructionIndices,
                 DejaVuSans_glyphInstructionCounts,
-                DejaVuSans_glyphAdvances, DejaVuSans_characterMap, DejaVuSans_glyphCount);
+                DejaVuSans_glyphAdvances,
+                DejaVuSans_characterMap,
+                DejaVuSans_glyphCount);
     SansTypeface.descender_height = DejaVuSans_descender_height;
     SansTypeface.font_height = DejaVuSans_font_height;
-
-    SerifTypeface = loadfont(DejaVuSerif_glyphPoints,
-                 DejaVuSerif_glyphPointIndices,
-                 DejaVuSerif_glyphInstructions,
-                 DejaVuSerif_glyphInstructionIndices,
-                 DejaVuSerif_glyphInstructionCounts,
-                 DejaVuSerif_glyphAdvances, DejaVuSerif_characterMap, DejaVuSerif_glyphCount);
-    SerifTypeface.descender_height = DejaVuSerif_descender_height;
-    SerifTypeface.font_height = DejaVuSerif_font_height;
-
-    MonoTypeface = loadfont(DejaVuSansMono_glyphPoints,
-                DejaVuSansMono_glyphPointIndices,
-                DejaVuSansMono_glyphInstructions,
-                DejaVuSansMono_glyphInstructionIndices,
-                DejaVuSansMono_glyphInstructionCounts,
-                DejaVuSansMono_glyphAdvances, DejaVuSansMono_characterMap, DejaVuSansMono_glyphCount);
-    MonoTypeface.descender_height = DejaVuSansMono_descender_height;
-    MonoTypeface.font_height = DejaVuSansMono_font_height;
 
     *w = state->window_width;
     *h = state->window_height;
@@ -276,8 +258,6 @@ void init(int *w, int *h) {
 // finish cleans up
 void finish() {
     unloadfont(SansTypeface.Glyphs, SansTypeface.Count);
-    unloadfont(SerifTypeface.Glyphs, SerifTypeface.Count);
-    unloadfont(MonoTypeface.Glyphs, MonoTypeface.Count);
     eglSwapBuffers(state->display, state->surface);
     eglMakeCurrent(state->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroySurface(state->display, state->surface);
