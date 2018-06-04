@@ -25,10 +25,10 @@ uninstall:
 	rm -f /usr/include/shapes.h
 
 libshapes:	./src/libshapes.c	./src/fontinfo.h	./src/shapes.h	fonts
-	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c
+	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c -o ./build/libshapes
 
 oglinit:	./src/oglinit.c
-	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/oglinit.c
+	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/oglinit.c -o ./build/oglinit
 
 fonts:	font
 libs:	lib
