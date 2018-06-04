@@ -1,7 +1,6 @@
 
 GCC_INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -fPIC
 GCC_LIBFLAGS=-L/opt/vc/lib -lbrcmEGL -lbrcmGLESv2 -ljpeg
-FONTFILES=DejaVuSans.inc
 
 all:	lib	src	library
 src:	libshapes	oglinit
@@ -40,7 +39,6 @@ font2openvg:	lib/font2openvg.cpp
 	g++ -I/usr/include/freetype2 lib/font2openvg.cpp -o font2openvg -lfreetype
 
 font:	/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf	font2openvg
-	font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf
 	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
 
 
