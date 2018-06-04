@@ -5,18 +5,18 @@
 // Additional outline / windowing functions
 // Paeryn (github.com/paeryn)
 //
+#include <assert.h>
+#include <jpeglib.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <termios.h>
-#include <assert.h>
-#include <jpeglib.h>
+#include "EGL/egl.h"
 #include "VG/openvg.h"
 #include "VG/vgu.h"
-#include "EGL/egl.h"
+#include "./../lib/DejaVuSans.inc"
 #include "bcm_host.h"
 #include "eglstate.h"
 #include "fontinfo.h"
-#include "DejaVuSans.inc"
 
 static STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 500;
