@@ -3,10 +3,6 @@
 [license-shield-url]: https://img.shields.io/github/license/mgthomas99/openvg.svg?style=flat-square
 [license-url]: https://github.com/mgthomas99/openvg/blob/master/LICENSE
 
-*The repository is currently not accepting issue submissions as it is a fork of
-a different repository that already has issues. Issue submissions will be
-enabled shortly.*
-
 # OpenVG on Raspberry Pi
 
 [![One][header-image]][git-repository-url]
