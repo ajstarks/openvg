@@ -3,8 +3,8 @@
 #include <unistd.h>
 #include "VG/openvg.h"
 #include "VG/vgu.h"
-#include "fontinfo.h"
-#include "shapes.h"
+#include "./../src/fontinfo.h"
+#include "./../src/shapes.h"
 
 int main() {
     const char msg[] = { 'H', 'e', 'l', 'l', 'o', ',', ' ', 'w', 'o', 'r', 'l', 'd', 0 };
@@ -24,7 +24,7 @@ int main() {
         TextMid(width / 2,
                 height * 0.7,
                 msg,
-                SerifTypeface,
+                SansTypeface,
                 width / 15);
     }
     End();
