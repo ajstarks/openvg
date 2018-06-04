@@ -1,7 +1,7 @@
 #include <EGL/egl.h>
 #include <bcm_host.h>
 #include <assert.h>
-#include "eglstate.h"
+#include "oglinit.h"
 
 // setWindowParams sets the window's position, adjusting if need be to
 // prevent it from going fully off screen. Also sets the dispman rects

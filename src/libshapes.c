@@ -14,8 +14,8 @@
 #include "VG/openvg.h"
 #include "VG/vgu.h"
 #include "bcm_host.h"
-#include "eglstate.h"
 #include "fontinfo.h"
+#include "oglinit.h"
 #include "./../lib/DejaVuSans.inc"
 
 static STATE_T _state, *state = &_state;	// global graphics state
