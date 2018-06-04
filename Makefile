@@ -3,8 +3,8 @@ GCC_INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -
 GCC_LIBFLAGS=-L/opt/vc/lib -lbrcmEGL -lbrcmGLESv2 -ljpeg
 FONTFILES=DejaVuSans.inc
 
-all:	lib src library
-src:    libshapes oglinit
+all:	lib	src	library
+src:	libshapes	oglinit
 
 clean:
 	rm -f *.o *.inc *.so font2openvg *.c~ *.h~
@@ -26,23 +26,23 @@ uninstall:
 	rm -f /usr/include/shapes.h /usr/include/fontinfo.h
 
 
-libshapes:	libshapes.c fontinfo.h shapes.h fonts
+libshapes:	libshapes.c	fontinfo.h	shapes.h	fonts
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c libshapes.c
 
 oglinit:	oglinit.c
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c oglinit.c
 
-fonts:  font
-libs:   lib
-lib:    font2openvg font
+fonts:	font
+libs:	lib
+lib:	font2openvg	font
 
 font2openvg:	lib/font2openvg.cpp
 	g++ -I/usr/include/freetype2 lib/font2openvg.cpp -o font2openvg -lfreetype
 
-font:   /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf
-    font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf
+font:	/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf	font2openvg
+	font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf
 	./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
 
 
-library:    libshapes oglinit
+library:	libshapes	oglinit
 	gcc $(GCC_LIBFLAGS) -shared -o libshapes.so oglinit.o libshapes.o
