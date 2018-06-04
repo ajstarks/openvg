@@ -3,6 +3,7 @@ GCC_INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -
 GCC_LIBFLAGS=-L/opt/vc/lib -lbrcmEGL -lbrcmGLESv2 -ljpeg
 
 all:	lib	src
+build:	src
 src:	libshapes	oglinit
 
 install:	lib
@@ -24,10 +25,13 @@ uninstall:
 	rm -f /usr/lib/libshapes.so
 	rm -f /usr/include/shapes.h
 
-libshapes:	./src/libshapes.c	./src/fontinfo.h	./src/shapes.h	fonts
+builddir:
+	mkdir "./build/"
+
+libshapes:	./src/libshapes.c	./src/fontinfo.h	./src/shapes.h	builddir	fonts
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c -o ./build/libshapes.o
 
-oglinit:	./src/oglinit.c
+oglinit:	./src/oglinit.c	builddir
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/oglinit.c -o ./build/oglinit.o
 
 fonts:	font
