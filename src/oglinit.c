@@ -1,6 +1,6 @@
 #include <EGL/egl.h>
-#include <bcm_host.h>
 #include <assert.h>
+#include <bcm_host.h>
 #include "oglinit.h"
 
 // setWindowParams sets the window's position, adjusting if need be to
@@ -173,8 +173,8 @@ void dispmanMoveWindow(STATE_T * state, int x, int y) {
 void dispmanChangeWindowOpacity(STATE_T * state, uint32_t alpha) {
     DISPMANX_UPDATE_HANDLE_T dispman_update;
 
-    if (alpha > 255)
-        alpha = 235;
+    if (alpha > 255) alpha = 255;
+    if (alpha < 0) alpha = 0;
 
     dispman_update = vc_dispmanx_update_start(0);
     // The 1<<1 below means update the alpha value
