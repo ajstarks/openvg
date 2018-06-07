@@ -1,6 +1,6 @@
-[header-image]: https://raw.githubusercontent.com/mgthomas99/openvg/develop/.github/assets/raspi-spiral.png
+[header-image]: https://raw.githubusercontent.com/mgthomas99/easy-vg/develop/.github/assets/raspi-spiral.png
 [git-repository-url]: https://github.com/mgthomas99/openvg
-[license-shield-url]: https://img.shields.io/github/license/mgthomas99/openvg.svg?style=flat-square
+[license-shield-url]: https://img.shields.io/github/license/mgthomas99/easy-vg.svg?style=flat-square
 [license-url]: https://github.com/mgthomas99/openvg/blob/master/LICENSE
 
 # EasyVG
@@ -78,7 +78,7 @@ Next, build the library:
 ```shell
 pi@raspberrypi ~ $ git clone https://github.com/mgthomas99/easy-vg
 pi@raspberrypi ~ $ cd easy-vg
-pi@raspberrypi ~/openvg $ make
+pi@raspberrypi ~/easy-vg $ make
  g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
  ./font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
  224 glyphs written
@@ -89,10 +89,10 @@ pi@raspberrypi ~/openvg $ make
 Next, build the examples:
 
 ```shell
-pi@raspberrypi ~/openvg/client $ cd example
-pi@raspberrypi ~/openvg/client $ make hello
+pi@raspberrypi ~/easy-vg/client $ cd example
+pi@raspberrypi ~/easy-vg/client $ make hello
  cc -Wall -I/opt/vc/include -I/opt/vc/include/interface/vcms_host/linux -I/opt/vc/include/interface/vcos/pthreads -I.. hello.c -o hello ../build/libshapes.o ../build/oglinit.o -L/opt/vc/lib -lEGL -lGLESv2 -lbcm_host -ljpeg -lpthread
-pi@raspberrypi ~/openvg/client $ ./hello
+pi@raspberrypi ~/easy-vg/client $ ./hello
 ```
 
 ### Installing as a Global Library
@@ -100,17 +100,19 @@ pi@raspberrypi ~/openvg/client $ ./hello
 To install the library as a system-wide shared library:
 
 ```shell
-pi@raspberrypi ~/openvg $ make library
-pi@raspberrypi ~/openvg $ sudo make install
+pi@raspberrypi ~/easy-vg $ make library
+pi@raspberrypi ~/easy-vg $ sudo make install
 ```
 
-The openvg shapes library can now be used in C code by including `shapes.h` and
+The EasyVG shapes library can now be used in C code by including `shapes.h` and
 `fontinfo.h`, and linking with `libshapes.so`:
 
-```shell
+```c
 #include <shapes.h>
 #include <fontinfo.h>
+```
 
+```shell
 pi@raspberrypi ~ $ gcc -I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads anysource.c -o anysource -lshapes
 pi@raspberrypi ~ $ ./anysource
 ```
