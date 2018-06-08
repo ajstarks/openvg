@@ -19,6 +19,7 @@
 #include "fontinfo.h"
 #include "oglinit.h"
 #include "./../lib/DejaVuSans.inc"
+#include "./img.h"
 
 static EVG_STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 500;
@@ -397,7 +398,7 @@ void evgTextMid(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) 
 // TextEnd draws text, with its end aligned to (x,y)
 void evgTextEnd(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) {
     VGfloat tw = TextWidth(s, f, pointsize);
-    Text(x - tw, y, s, f, pointsize);
+    evgText(x - tw, y, s, f, pointsize);
 }
 
 // TextHeight reports a font's height
@@ -423,7 +424,7 @@ VGPath evgNewPath() {
 
 // makecurve makes path data using specified segments and coordinates
 void evgMakeCurve(VGubyte * segments, VGfloat * coords, VGbitfield flags) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vgAppendPathData(path, 2, segments, coords);
     vgDrawPath(path, flags);
     vgDestroyPath(path);
@@ -473,7 +474,7 @@ void evgPolyline(VGfloat * x, VGfloat * y, VGint n) {
 
 // Rect makes a rectangle at the specified location and dimensions
 void evgRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguRect(path, x, y, w, h);
     vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -481,7 +482,7 @@ void evgRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
 
 // Line makes a line from (x1,y1) to (x2,y2)
 void evgLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguLine(path, x1, y1, x2, y2);
     vgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -489,7 +490,7 @@ void evgLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
 
 // Roundrect makes an rounded rectangle at the specified location and dimensions
 void evgRoundRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguRoundRect(path, x, y, w, h, rw, rh);
     vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -497,7 +498,7 @@ void evgRoundRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloa
 
 // Ellipse makes an ellipse at the specified location and dimensions
 void evgEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguEllipse(path, x, y, w, h);
     vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -505,12 +506,12 @@ void evgEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
 
 // Circle makes a circle at the specified location and dimensions
 void evgCircle(VGfloat x, VGfloat y, VGfloat r) {
-    Ellipse(x, y, r, r);
+    evgEllipse(x, y, r, r);
 }
 
 // Arc makes an elliptical arc at the specified location and dimensions
 void evgArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguArc(path, x, y, w, h, sa, aext, VGU_ARC_OPEN);
     vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -596,7 +597,7 @@ void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, 
 
 // RectOutline makes a rectangle at the specified location and dimensions, outlined
 void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguRect(path, x, y, w, h);
     vgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -604,7 +605,7 @@ void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
 
 // RoundrectOutline  makes an rounded rectangle at the specified location and dimensions, outlined
 void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguRoundRect(path, x, y, w, h, rw, rh);
     vgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -612,7 +613,7 @@ void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VG
 
 // EllipseOutline makes an ellipse at the specified location and dimensions, outlined
 void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguEllipse(path, x, y, w, h);
     vgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -625,7 +626,7 @@ void CircleOutline(VGfloat x, VGfloat y, VGfloat r) {
 
 // ArcOutline makes an elliptical arc at the specified location and dimensions, outlined
 void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     vguArc(path, x, y, w, h, sa, aext, VGU_ARC_OPEN);
     vgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
