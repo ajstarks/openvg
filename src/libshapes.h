@@ -29,7 +29,8 @@ extern "C" {
 	extern void evgCircle(VGfloat, VGfloat, VGfloat);
 	extern void evgArc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 	extern void evgImage(VGfloat, VGfloat, int, int, const char *);
-	extern void evgBegin(int, int);
+	extern void evgBegin();
+    extern void evgClear();
 	extern void evgEnd();
 	extern void evgSaveEnd(const char *);
 	extern void evgBackground(unsigned int, unsigned int, unsigned int);
@@ -53,7 +54,6 @@ extern "C" {
 	extern void evgCircleOutline(VGfloat, VGfloat, VGfloat);
 	extern void evgArcOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 	extern void evgClearRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
-	extern void evgClear();
 
 	extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const int *, const int *, const int *,
 				 const short *, int);

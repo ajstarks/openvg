@@ -28,8 +28,8 @@ typedef struct {
     EGLDisplay display;
     EGLSurface surface;
     EGLContext context;
-} STATE_T;
+} EVG_STATE_T;
 
-extern void oglinit(STATE_T *);
-extern void dispmanMoveWindow(STATE_T *, int, int);
-extern void dispmanChangeWindowOpacity(STATE_T *, unsigned int);
+extern void oglinit(EVG_STATE_T *);
+extern void dispmanMoveWindow(EVG_STATE_T *, int, int);
+extern void dispmanChangeWindowOpacity(EVG_STATE_T *, unsigned int);
