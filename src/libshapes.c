@@ -20,7 +20,7 @@
 #include "oglinit.h"
 #include "./../lib/DejaVuSans.inc"
 
-static STATE_T _state, *state = &_state;	// global graphics state
+static EVG_STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 500;
 static int init_x = 0;		// Initial window position and size
 static int init_y = 0;
