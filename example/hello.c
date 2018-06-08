@@ -14,25 +14,25 @@ int main() {
     /* We have to initialise the OpenVG canvas and renderer by using
      * `init(&w, &h)`.
      */
-    init(&width, &height);
-    Start(width, height);
+    evgInit(&width, &height);
+    evgBegin(width, height);
     {
-        Background(0, 0, 0);
-        Fill(44, 77, 232, 1);
-        Circle(width / 2, 0, width);
-        Fill(255, 255, 255, 1);
-        TextMid(width / 2,
+        evgBackground(0, 0, 0);
+        evgFill(44, 77, 232, 1);
+        evgCircle(width / 2, 0, width);
+        evgFill(255, 255, 255, 1);
+        evgTextMid(width / 2,
                 height * 0.7,
                 msg,
                 SansTypeface,
                 width / 15);
     }
-    End();
+    evgEnd();
 
     // We can use `fgets` to wait for user input before ending the program. This
     // is a neat way of keeping the rendered assets on screen until the user
     // presses a key.
     fgets(s, 2, stdin);
-    finish();
+    evgFinish();
     exit(0);
 }

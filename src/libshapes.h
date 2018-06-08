@@ -5,46 +5,60 @@
 #if defined(__cplusplus)
 extern "C" {
 #endif
-	extern void Translate(VGfloat, VGfloat);
-	extern void Rotate(VGfloat);
-	extern void Shear(VGfloat, VGfloat);
-	extern void Scale(VGfloat, VGfloat);
-	extern void Text(VGfloat, VGfloat, const char *, Fontinfo, int);
-	extern void TextMid(VGfloat, VGfloat, const char *, Fontinfo, int);
-	extern void TextEnd(VGfloat, VGfloat, const char *, Fontinfo, int);
-	extern VGfloat TextWidth(const char *, Fontinfo, int);
-	extern void Cbezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Qbezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Polygon(VGfloat *, VGfloat *, VGint);
-	extern void Polyline(VGfloat *, VGfloat *, VGint);
-	extern void Rect(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Line(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Roundrect(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Ellipse(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Circle(VGfloat, VGfloat, VGfloat);
-	extern void Arc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void Image(VGfloat, VGfloat, int, int, const char *);
-	extern void Start(int, int);
-	extern void End();
-	extern void SaveEnd(const char *);
-	extern void Background(unsigned int, unsigned int, unsigned int);
-	extern void BackgroundRGB(unsigned int, unsigned int, unsigned int, VGfloat);
-	extern void init(int *, int *);
-	extern void finish();
-	extern void setfill(VGfloat[4]);
-	extern void setstroke(VGfloat[4]);
-	extern void StrokeWidth(VGfloat);
-	extern void Stroke(unsigned int, unsigned int, unsigned int, VGfloat);
-	extern void Fill(unsigned int, unsigned int, unsigned int, VGfloat);
-	extern void RGBA(unsigned int, unsigned int, unsigned int, VGfloat, VGfloat[4]);
+    extern VGfloat TextHeight(Fontinfo f, int pointsize);
+	extern VGfloat TextDepth(Fontinfo f, int pointsize);
+    extern VGfloat TextWidth(const char *, Fontinfo, int);
+    extern void RGBA(unsigned int, unsigned int, unsigned int, VGfloat, VGfloat[4]);
 	extern void RGB(unsigned int, unsigned int, unsigned int, VGfloat[4]);
-	extern void FillLinearGradient(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat *, int);
-	extern void FillRadialGradient(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat *, int);
-	extern void ClipRect(VGint x, VGint y, VGint w, VGint h);
-	extern void ClipEnd();
+
+	extern void evgTranslate(VGfloat, VGfloat);
+	extern void evgRotate(VGfloat);
+	extern void evgShear(VGfloat, VGfloat);
+	extern void evgScale(VGfloat, VGfloat);
+	extern void evgText(VGfloat, VGfloat, const char *, Fontinfo, int);
+	extern void evgTextMid(VGfloat, VGfloat, const char *, Fontinfo, int);
+	extern void evgTextEnd(VGfloat, VGfloat, const char *, Fontinfo, int);
+	extern void evgCbezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgQbezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgPolygon(VGfloat *, VGfloat *, VGint);
+	extern void evgPolyline(VGfloat *, VGfloat *, VGint);
+	extern void evgRect(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgLine(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgRoundrect(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgEllipse(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgCircle(VGfloat, VGfloat, VGfloat);
+	extern void evgArc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgImage(VGfloat, VGfloat, int, int, const char *);
+	extern void evgBegin(int, int);
+	extern void evgEnd();
+	extern void evgSaveEnd(const char *);
+	extern void evgBackground(unsigned int, unsigned int, unsigned int);
+	extern void evgBackgroundRGB(unsigned int, unsigned int, unsigned int, VGfloat);
+	extern void evgInit(int *, int *);
+	extern void evgFinish();
+	extern void evgSetFill(VGfloat[4]);
+	extern void evgSetStroke(VGfloat[4]);
+	extern void evgStrokeWidth(VGfloat);
+	extern void evgStroke(unsigned int, unsigned int, unsigned int, VGfloat);
+	extern void evgFill(unsigned int, unsigned int, unsigned int, VGfloat);
+	extern void evgFillLinearGradient(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat *, int);
+	extern void evgFillRadialGradient(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat *, int);
+	extern void evgClipRect(VGint x, VGint y, VGint w, VGint h);
+	extern void evgClipEnd();
+	extern void evgCbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgQbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgRectOutline(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgRoundrectOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgEllipseOutline(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgCircleOutline(VGfloat, VGfloat, VGfloat);
+	extern void evgArcOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgClearRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+	extern void evgClear();
+
 	extern Fontinfo loadfont(const int *, const int *, const unsigned char *, const int *, const int *, const int *,
 				 const short *, int);
 	extern void unloadfont(VGPath *, int);
+    extern VGImage createImageFromJpeg(const char *);
 	extern void makeimage(VGfloat, VGfloat, int, int, VGubyte *);
 	extern void saveterm();
 	extern void restoreterm();
@@ -52,20 +66,8 @@ extern "C" {
 
 	// Added by Paeryn
 	extern void initWindowSize(int x, int y, unsigned int w, unsigned int h);
-	extern VGfloat TextHeight(Fontinfo f, int pointsize);
-	extern VGfloat TextDepth(Fontinfo f, int pointsize);
-	extern void AreaClear(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
-	extern void WindowClear();
 	extern void WindowOpacity(unsigned int alpha);
 	extern void WindowPosition(int x, int y);
-	extern void CbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void QbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void RectOutline(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void RoundrectOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void EllipseOutline(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void CircleOutline(VGfloat, VGfloat, VGfloat);
-	extern void ArcOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern VGImage createImageFromJpeg(const char *);
 #if defined(__cplusplus)
 }
 #endif
