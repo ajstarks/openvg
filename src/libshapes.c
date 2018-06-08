@@ -154,8 +154,19 @@ void evgInit(int *w, int *h) {
     *h = state->window_height;
 }
 
+// AreaClear clears a given rectangle in window coordinates (not affected by
+// transformations)
+void evgClearRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
+    vgClear(x, y, w, h);
+}
+
+// WindowClear clears the window to previously set background colour
+void evgClear() {
+    evgClearRect(0, 0, state->window_width, state->window_height);
+}
+
 // finish cleans up
-void finish() {
+void evgFinish() {
     unloadfont(SansTypeface.Glyphs, SansTypeface.Count);
     eglSwapBuffers(state->display, state->surface);
     eglMakeCurrent(state->display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
@@ -251,14 +262,14 @@ void RGB(unsigned int r, unsigned int g, unsigned int b, VGfloat color[4]) {
 void evgStroke(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
     VGfloat color[4];
     RGBA(r, g, b, a, color);
-    setstroke(color);
+    evgSetStroke(color);
 }
 
 // Fill sets the fillcolor, defined as a RGBA quad.
 void evgFill(unsigned int r, unsigned int g, unsigned int b, VGfloat a) {
     VGfloat color[4];
     RGBA(r, g, b, a, color);
-    setfill(color);
+    evgSetFill(color);
 }
 
 // setstops sets color stops for gradients
@@ -277,7 +288,7 @@ void evgFillLinearGradient(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2, VGflo
     VGPaint paint = vgCreatePaint();
     vgSetParameteri(paint, VG_PAINT_TYPE, VG_PAINT_TYPE_LINEAR_GRADIENT);
     vgSetParameterfv(paint, VG_PAINT_LINEAR_GRADIENT, 4, lgcoord);
-    setstop(paint, stops, ns);
+    evgSetStop(paint, stops, ns);
     vgDestroyPaint(paint);
 }
 
@@ -287,7 +298,7 @@ void evgFillRadialGradient(VGfloat cx, VGfloat cy, VGfloat fx, VGfloat fy, VGflo
     VGPaint paint = vgCreatePaint();
     vgSetParameteri(paint, VG_PAINT_TYPE, VG_PAINT_TYPE_RADIAL_GRADIENT);
     vgSetParameterfv(paint, VG_PAINT_RADIAL_GRADIENT, 5, radialcoord);
-    setstop(paint, stops, ns);
+    evgSetStop(paint, stops, ns);
     vgDestroyPaint(paint);
 }
 
@@ -380,7 +391,7 @@ VGfloat TextWidth(const char *s, Fontinfo f, int pointsize) {
 // TextMid draws text, centered on (x,y)
 void evgTextMid(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) {
     VGfloat tw = TextWidth(s, f, pointsize);
-    Text(x - (tw / 2.0), y, s, f, pointsize);
+    evgText(x - (tw / 2.0), y, s, f, pointsize);
 }
 
 // TextEnd draws text, with its end aligned to (x,y)
@@ -422,14 +433,14 @@ void evgMakeCurve(VGubyte * segments, VGfloat * coords, VGbitfield flags) {
 void evgCbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
     VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
     VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
-    makecurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
+    evgMakeCurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
 // QBezier makes a quadratic bezier curve
 void evgQbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
     VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
     VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
-    makecurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
+    evgMakeCurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
 // interleave interleaves arrays of x, y into a single array
@@ -452,12 +463,12 @@ void evgPoly(VGfloat * x, VGfloat * y, VGint n, VGbitfield flag) {
 
 // Polygon makes a filled polygon with vertices in x, y arrays
 void evgPolygon(VGfloat * x, VGfloat * y, VGint n) {
-    poly(x, y, n, VG_FILL_PATH);
+    evgPoly(x, y, n, VG_FILL_PATH);
 }
 
 // Polyline makes a polyline with vertices at x, y arrays
 void evgPolyline(VGfloat * x, VGfloat * y, VGint n) {
-    poly(x, y, n, VG_STROKE_PATH);
+    evgPoly(x, y, n, VG_STROKE_PATH);
 }
 
 // Rect makes a rectangle at the specified location and dimensions
@@ -543,7 +554,7 @@ void evgBackground(unsigned int r, unsigned int g, unsigned int b) {
     VGfloat colour[4];
     RGB(r, g, b, colour);
     vgSetfv(VG_CLEAR_COLOR, 4, colour);
-    vgClear(0, 0, state->window_width, state->window_height);
+    evgClear();
 }
 
 // BackgroundRGB clears the screen to a background color with alpha
@@ -552,17 +563,6 @@ void evgBackgroundRGB(unsigned int r, unsigned int g, unsigned int b, VGfloat a)
     RGBA(r, g, b, a, colour);
     vgSetfv(VG_CLEAR_COLOR, 4, colour);
     evgClear();
-}
-
-// WindowClear clears the window to previously set background colour
-void evgClear() {
-    evgClearRect(0, 0, state->window_width, state->window_height);
-}
-
-// AreaClear clears a given rectangle in window coordinates (not affected by
-// transformations)
-void evgClearRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h) {
-    vgClear(x, y, w, h);
 }
 
 // WindowOpacity sets the  window opacity
@@ -584,14 +584,14 @@ void WindowPosition(int x, int y) {
 void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
     VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
     VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
-    makecurve(segments, coords, VG_STROKE_PATH);
+    evgMakeCurve(segments, coords, VG_STROKE_PATH);
 }
 
 // QBezierOutline makes a quadratic bezier curve, outlined
 void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
     VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
     VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
-    makecurve(segments, coords, VG_STROKE_PATH);
+    evgMakeCurve(segments, coords, VG_STROKE_PATH);
 }
 
 // RectOutline makes a rectangle at the specified location and dimensions, outlined
