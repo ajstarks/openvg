@@ -17,3 +17,10 @@ trim_trailing_whitespace = true
 [**/Makefile]
 indent_size = 4
 indent_style = tab
+
+# Different indent sizes within the same project is discouraged as it makes code
+# more difficult to read and maintain across platforms, but an exception can be
+# made with HTML as HTML code is very heavily indented, and having an
+# `indent_size` of 4 makes it difficult to read.
+[docs/**/*.html]
+indent_size = 2
