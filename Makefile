@@ -26,7 +26,7 @@ uninstall:
 build-dir:
 	mkdir "./build/"
 
-libshapes:	./src/img.c	./src/img.h	./src/libshapes.c	./src/libshapes.h	./src/fontinfo.h	build-dir	fonts
+libshapes:	./src/libshapes.c	./src/libshapes.h	./src/fontinfo.h	build-dir	fonts
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c -o ./build/libshapes.o
 
 oglinit:	./src/oglinit.c	build-dir
