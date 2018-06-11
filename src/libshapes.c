@@ -562,7 +562,7 @@ void interleave(VGfloat * x, VGfloat * y, int n, VGfloat * points) {
 // poly makes either a polygon or polyline
 void evgPoly(VGfloat * x, VGfloat * y, VGint n, VGbitfield flag) {
     VGfloat points[n * 2];
-    VGPath path = newpath();
+    VGPath path = evgNewPath();
     interleave(x, y, n, points);
     vguPolygon(path, points, n, VG_FALSE);
     vgDrawPath(path, flag);
