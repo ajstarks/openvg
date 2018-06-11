@@ -2,11 +2,14 @@
 [git-repository-url]: https://github.com/mgthomas99/openvg
 [license-shield-url]: https://img.shields.io/github/license/mgthomas99/easy-vg.svg?style=flat-square
 [license-url]: https://github.com/mgthomas99/openvg/blob/master/LICENSE
+[raspberry-pi-shield-url]: https://img.shields.io/badge/raspberry%20pi-compatible-C5194A.svg?style=flat-square
+[raspberry-pi-url]: https://www.raspberrypi.org/
 
 # EasyVG
 
 [![One][header-image]][git-repository-url]
 [![LICENSE][license-shield-url]][license-url]
+[![RaspberryPi][raspberry-pi-shield-url]][raspberry-pi-url]
 
 EasyVG provides an abstraction layer above native OpenVG, for quickly and easily
 creating OpenVG contexts and drawing shapes, images, and text.
