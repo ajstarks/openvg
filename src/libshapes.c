@@ -530,15 +530,21 @@ void evgTextEnd(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) 
     evgText(x - tw, y, s, f, pointsize);
 }
 
-VGPath evgMakeCurve(VGubyte * segments, VGfloat * coords, VGbitfield flags) {
+VGPath evgMakeCurve(VGubyte * segments, VGfloat * coords) {
     VGPath path = evgNewPath();
     vgAppendPathData(path, 2, segments, coords);
     return path;
 }
 
-void evgCurve(VGubyte* segments, VGfloat* coords, VGbitfield flags) {
-    VGPath path = evgMakeCurve(segments, coords, flags);
-    evgDrawPath(path, flags);
+void evgDrawCurve(VGubyte* segments, VGfloat* coords) {
+    VGPath path = evgMakeCurve(segments, coords);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillCurve(VGubyte* segments, VGfloat* coords) {
+    VGPath path = evgMakeCurve(segments, coords);
+    evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
@@ -548,9 +554,15 @@ VGPath evgMakeCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px
     return evgMakeCurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
-void evgCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
+void evgDrawCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
     VGPath path = evgMakeCBezier(sx, sy, cx, cy, px, py, ex, ey);
-    evgDrawPath(path, flags);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
+    VGPath path = evgMakeCBezier(sx, sy, cx, cy, px, py, ex, ey);
+    evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
@@ -561,13 +573,13 @@ VGPath evgMakeQBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex
 }
 
 void evgDrawQBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
-    VGPath path = evgMakeQBezier(sx, sy, cx, cy, px, py, ex, ey);
+    VGPath path = evgMakeQBezier(sx, sy, cx, cy, ex, ey);
     evgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
 void evgFillQbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
-    VGPath path = evgMakeQBezier(sx, sy, cx, cy, px, py, ex, ey);
+    VGPath path = evgMakeQBezier(sx, sy, cx, cy, ex, ey);
     evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
