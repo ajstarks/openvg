@@ -560,10 +560,15 @@ VGPath evgMakeQBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex
     return evgMakeCurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
 }
 
-// QBezier makes a quadratic bezier curve
-void evgQbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
+void evgDrawQBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
     VGPath path = evgMakeQBezier(sx, sy, cx, cy, px, py, ex, ey);
-    evgDrawPath(path, flags);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillQbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
+    VGPath path = evgMakeQBezier(sx, sy, cx, cy, px, py, ex, ey);
+    evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
@@ -573,9 +578,15 @@ VGPath evgMakePolygon(VGfloat* points, VGint n) {
     return path;
 }
 
-void evgPolygon(VGfloat* points, VGint n, VGbitfield flag) {
+void evgDrawPolygon(VGfloat* points, VGint n) {
     VGPath path = evgMakePolygon(points, n);
-    evgDrawPath(path, flag);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillPolygon(VGfloat* points, VGint n) {
+    VGPath path = evgMakePolygon(points, n);
+    evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
@@ -585,9 +596,15 @@ VGPath evgMakeRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height) {
     return path;
 }
 
-void evgRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = evgMakeRect();
-    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+void evgDrawRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+    VGPath path = evgMakeRect(x, y, w, h);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+    VGPath path = evgMakeRect(x, y, w, h);
+    evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
@@ -597,7 +614,7 @@ VGPath evgMakeLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
     return path;
 }
 
-void evgLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
+void evgDrawLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
     VGPath path = evgNewPath(x1, y1, x2, y2);
     evgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
@@ -609,9 +626,15 @@ VGPath evgMakeRoundRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height, VGf
     return path;
 }
 
-void evgRoundRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height, VGfloat rw, VGfloat rh) {
+void evgDrawRoundRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height, VGfloat rw, VGfloat rh) {
     VGPath path = evgMakeRoundRect(x, y, width, height, rw, rh);
-    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillRoundRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height, VGfloat rw, VGfloat rh) {
+    VGPath path = evgMakeRoundRect(x, y, width, height, rw, rh);
+    evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
@@ -621,9 +644,15 @@ VGPath evgMakeEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
     return path;
 }
 
-void evgEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+void evgDrawEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
     VGPath path = evgMakeEllipse(x, y, w, h);
-    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
+    VGPath path = evgMakeEllipse(x, y, w, h);
+    evgDrawPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
@@ -632,8 +661,12 @@ VGPath evgMakeCircle(VGfloat x, VGfloat y, VGfloat radius) {
     return path;
 }
 
-void evgCircle(VGfloat x, VGfloat y, VGfloat radius) {
-    evgEllipse(x, y, radius, radius);
+void evgDrawCircle(VGfloat x, VGfloat y, VGfloat radius) {
+    evgDrawEllipse(x, y, radius, radius);
+}
+
+void evgFillCircle(VGfloat x, VGfloat y, VGfloat radius) {
+    evgFillEllipse(x, y, radius, radius);
 }
 
 VGPath evgMakeArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
@@ -642,9 +675,15 @@ VGPath evgMakeArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloa
     return path;
 }
 
-void evgArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
+void evgDrawArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
     VGPath path = evgMakeArc(x, y, w, h, sa, aext);
-    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+    evgDrawPath(path, VG_STROKE_PATH);
+    vgDestroyPath(path);
+}
+
+void evgFillArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
+    VGPath path = evgMakeArc(x, y, w, h, sa, aext);
+    evgFillPath(path, VG_FILL_PATH);
     vgDestroyPath(path);
 }
 
