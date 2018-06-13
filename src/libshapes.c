@@ -117,17 +117,6 @@ VGImage createImageFromJpeg(const char *filename) {
     return img;
 }
 
-// makeimage makes an image from a raw raster of red, green, blue, alpha values
-void makeimage(VGfloat x, VGfloat y, int w, int h, VGubyte * data) {
-    unsigned int dstride = w * 4;
-    VGImageFormat rgbaFormat = VG_sABGR_8888;
-    VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
-    vgImageSubData(img, (void *)data, dstride, rgbaFormat, 0, 0, w, h);
-    vgSetPixels(x, y, img, 0, 0, w, h);
-    vgDestroyImage(img);
-}
-
-
 static EVG_STATE_T _state, *state = &_state;	// global graphics state
 static const int MAXFONTPATH = 500;
 static int init_x = 0;		// Initial window position and size
@@ -209,6 +198,30 @@ void unloadfont(VGPath * glyphs, int n) {
     for (i = 0; i < n; i++) {
         vgDestroyPath(glyphs[i]);
     }
+}
+
+void evgDrawPath(VGPath path, VGbitfield flags) {
+    vgDrawPath(path, flags);
+}
+
+// makeimage makes an image from a raw raster of red, green, blue, alpha values
+VGImage evgMakeImage(VGfloat x, VGfloat y, int w, int h, VGubyte* data) {
+    unsigned int dstride = w * 4;
+    VGImageFormat rgbaFormat = VG_sABGR_8888;
+    VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
+    vgImageSubData(img, (void *)data, dstride, rgbaFormat, 0, 0, w, h);
+    vgSetPixels(x, y, img, 0, 0, w, h);
+    vgDestroyImage(img);
+}
+
+void evgImage(VGfloat x, VGfloat y, int width, int height, VGubyte* data) {
+    VGImage img = evgMakeImage(x, y, width, height, data);
+    vgSetPixels(x, y, img, 0, 0, width, height);
+    vgDestroyImage(img);
+}
+
+VGImage evgMakeImage(const char* filename) {
+    VGImage img =
 }
 
 // Image places an image at the specifed location
@@ -471,7 +484,7 @@ void evgText(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) {
         };
         vgLoadMatrix(mm);
         vgMultMatrix(mat);
-        vgDrawPath(f.Glyphs[glyph], VG_FILL_PATH);
+        evgDrawPath(f.Glyphs[glyph], VG_FILL_PATH);
         xx += size * f.GlyphAdvances[glyph] / 65536.0f;
     }
     vgLoadMatrix(mm);
@@ -537,7 +550,7 @@ VGPath evgMakeCurve(VGubyte * segments, VGfloat * coords, VGbitfield flags) {
 
 void evgCurve(VGubyte* segments, VGfloat* coords, VGbitfield flags) {
     VGPath path = evgMakeCurve(segments, coords, flags);
-    vgDrawPath(path, flags);
+    evgDrawPath(path, flags);
     vgDestroyPath(path);
 }
 
@@ -549,7 +562,7 @@ VGPath evgMakeCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px
 
 void evgCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
     VGPath path = evgMakeCBezier(sx, sy, cx, cy, px, py, ex, ey);
-    vgDrawPath(path, flags);
+    evgDrawPath(path, flags);
     vgDestroyPath(path);
 }
 
@@ -562,20 +575,20 @@ VGPath evgMakeQBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex
 // QBezier makes a quadratic bezier curve
 void evgQbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
     VGPath path = evgMakeQBezier(sx, sy, cx, cy, px, py, ex, ey);
-    vgDrawPath(path, flags);
+    evgDrawPath(path, flags);
     vgDestroyPath(path);
 }
 
 VGPath evgMakePolygon(VGfloat* points, VGint n) {
     VGPath path = evgNewPath();
     vguPolygon(path, points, n, VG_FALSE);
-    vgDrawPath(path, flag);
+    evgDrawPath(path, flag);
     vgDestroyPath(path);
 }
 
 void evgPolygon(VGfloat* points, VGint n, VGbitfield flag) {
     VGPath path = evgMakePolygon(points, n);
-    vgDrawPath(path, flag);
+    evgDrawPath(path, flag);
     vgDestroyPath(path);
 }
 
@@ -587,7 +600,7 @@ VGPath evgMakeRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height) {
 
 void evgRect(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
     VGPath path = evgMakeRect();
-    vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
@@ -599,7 +612,7 @@ VGPath evgMakeLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
 
 void evgLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
     VGPath path = evgNewLine(x1, y1, x2, y2);
-    vgDrawPath(path, VG_STROKE_PATH);
+    evgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
@@ -611,7 +624,7 @@ VGPath evgMakeRoundRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height, VGf
 
 void evgRoundRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height, VGfloat rw, VGfloat rh) {
     VGPath path = evgMakeRoundRect(x, y, width, height, rw, rh);
-    vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
@@ -623,7 +636,7 @@ VGPath evgMakeEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
 
 void evgEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
     VGPath path = evgMakeEllipse();
-    vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
@@ -644,7 +657,7 @@ VGPath evgMakeArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloa
 
 void evgArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
     VGPath path = evgMakeArc();
-    vgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
+    evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
@@ -705,60 +718,4 @@ void evgWindowOpacity(unsigned int a) {
 // WindowPosition moves the window to given position
 void WindowPosition(int x, int y) {
     dispmanMoveWindow(state, x, y);
-}
-
-// Outlined shapes
-// Hollow shapes -because filling still happens even with a fill of 0,0,0,0
-// unlike where using a strokewidth of 0 disables the stroke.
-// Either this or change the original functions to require the VG_x_PATH flags
-
-// CBezier makes a quadratic bezier curve, stroked
-void CbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
-    VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
-    VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
-    evgMakeCurve(segments, coords, VG_STROKE_PATH);
-}
-
-// QBezierOutline makes a quadratic bezier curve, outlined
-void QbezierOutline(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
-    VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
-    VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
-    evgMakeCurve(segments, coords, VG_STROKE_PATH);
-}
-
-// RectOutline makes a rectangle at the specified location and dimensions, outlined
-void RectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = evgNewPath();
-    vguRect(path, x, y, w, h);
-    vgDrawPath(path, VG_STROKE_PATH);
-    vgDestroyPath(path);
-}
-
-// RoundrectOutline  makes an rounded rectangle at the specified location and dimensions, outlined
-void RoundrectOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat rw, VGfloat rh) {
-    VGPath path = evgNewPath();
-    vguRoundRect(path, x, y, w, h, rw, rh);
-    vgDrawPath(path, VG_STROKE_PATH);
-    vgDestroyPath(path);
-}
-
-// EllipseOutline makes an ellipse at the specified location and dimensions, outlined
-void EllipseOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = evgNewPath();
-    vguEllipse(path, x, y, w, h);
-    vgDrawPath(path, VG_STROKE_PATH);
-    vgDestroyPath(path);
-}
-
-// CircleOutline makes a circle at the specified location and dimensions, outlined
-void CircleOutline(VGfloat x, VGfloat y, VGfloat r) {
-    EllipseOutline(x, y, r, r);
-}
-
-// ArcOutline makes an elliptical arc at the specified location and dimensions, outlined
-void ArcOutline(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
-    VGPath path = evgNewPath();
-    vguArc(path, x, y, w, h, sa, aext, VGU_ARC_OPEN);
-    vgDrawPath(path, VG_STROKE_PATH);
-    vgDestroyPath(path);
 }
