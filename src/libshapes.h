@@ -14,7 +14,7 @@ extern "C" {
     extern VGPath evgMakeCBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 	extern VGPath evgMakeQBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 	extern VGPath evgMakePolygon(VGfloat*, VGint);
-	extern VGPath evgMakePolyline(VGfloat *, VGfloat *, VGint);
+	extern VGPath evgMakePolyline(VGfloat*, VGfloat*, VGint);
 	extern VGPath evgMakeRect(VGfloat, VGfloat, VGfloat, VGfloat);
 	extern VGPath evgMakeLine(VGfloat, VGfloat, VGfloat, VGfloat);
 	extern VGPath evgMakeRoundrect(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);

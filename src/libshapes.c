@@ -570,8 +570,7 @@ void evgQbezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfl
 VGPath evgMakePolygon(VGfloat* points, VGint n) {
     VGPath path = evgNewPath();
     vguPolygon(path, points, n, VG_FALSE);
-    evgDrawPath(path, flag);
-    vgDestroyPath(path);
+    return path;
 }
 
 void evgPolygon(VGfloat* points, VGint n, VGbitfield flag) {
@@ -599,14 +598,14 @@ VGPath evgMakeLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
 }
 
 void evgLine(VGfloat x1, VGfloat y1, VGfloat x2, VGfloat y2) {
-    VGPath path = evgNewLine(x1, y1, x2, y2);
+    VGPath path = evgNewPath(x1, y1, x2, y2);
     evgDrawPath(path, VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
 VGPath evgMakeRoundRect(VGfloat x, VGfloat y, VGfloat width, VGfloat height, VGfloat rw, VGfloat rh) {
     VGPath path = evgNewPath();
-    vguRoundRect(path, x, y, w, h, rw, rh);
+    vguRoundRect(path, x, y, width, height, rw, rh);
     return path;
 }
 
@@ -623,28 +622,28 @@ VGPath evgMakeEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
 }
 
 void evgEllipse(VGfloat x, VGfloat y, VGfloat w, VGfloat h) {
-    VGPath path = evgMakeEllipse();
+    VGPath path = evgMakeEllipse(x, y, w, h);
     evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
 }
 
-void evgMakeCircle(VGfloat x, VGfloat y, VGfloat radius) {
-    const path = evgMakeEllipse(x, y, radius, radius);
+VGPath evgMakeCircle(VGfloat x, VGfloat y, VGfloat radius) {
+    VGPath path = evgMakeEllipse(x, y, radius, radius);
     return path;
 }
 
 void evgCircle(VGfloat x, VGfloat y, VGfloat radius) {
-    evgEllipse(x, y, radius);
+    evgEllipse(x, y, radius, radius);
 }
 
 VGPath evgMakeArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
     VGPath path = evgNewPath();
     vguArc(path, x, y, w, h, sa, aext, VGU_ARC_OPEN);
-    return path
+    return path;
 }
 
 void evgArc(VGfloat x, VGfloat y, VGfloat w, VGfloat h, VGfloat sa, VGfloat aext) {
-    VGPath path = evgMakeArc();
+    VGPath path = evgMakeArc(x, y, w, h, sa, aext);
     evgDrawPath(path, VG_FILL_PATH | VG_STROKE_PATH);
     vgDestroyPath(path);
 }
