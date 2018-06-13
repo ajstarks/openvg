@@ -210,24 +210,12 @@ VGImage evgMakeImage(VGfloat x, VGfloat y, int w, int h, VGubyte* data) {
     VGImageFormat rgbaFormat = VG_sABGR_8888;
     VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
     vgImageSubData(img, (void *)data, dstride, rgbaFormat, 0, 0, w, h);
-    vgSetPixels(x, y, img, 0, 0, w, h);
-    vgDestroyImage(img);
+    return img;
 }
 
 void evgImage(VGfloat x, VGfloat y, int width, int height, VGubyte* data) {
     VGImage img = evgMakeImage(x, y, width, height, data);
     vgSetPixels(x, y, img, 0, 0, width, height);
-    vgDestroyImage(img);
-}
-
-VGImage evgMakeImage(const char* filename) {
-    VGImage img =
-}
-
-// Image places an image at the specifed location
-void Image(VGfloat x, VGfloat y, int w, int h, const char *filename) {
-    VGImage img = createImageFromJpeg(filename);
-    vgSetPixels(x, y, img, 0, 0, w, h);
     vgDestroyImage(img);
 }
 
