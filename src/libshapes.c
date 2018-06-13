@@ -530,7 +530,7 @@ void evgTextEnd(VGfloat x, VGfloat y, const char *s, Fontinfo f, int pointsize) 
     evgText(x - tw, y, s, f, pointsize);
 }
 
-VGPath evgMakeCurve(VGubyte * segments, VGfloat * coords) {
+VGPath evgMakeCurve(VGubyte* segments, VGfloat* coords) {
     VGPath path = evgNewPath();
     vgAppendPathData(path, 2, segments, coords);
     return path;
@@ -551,7 +551,7 @@ void evgFillCurve(VGubyte* segments, VGfloat* coords) {
 VGPath evgMakeCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
     VGubyte segments[] = { VG_MOVE_TO_ABS, VG_CUBIC_TO };
     VGfloat coords[] = { sx, sy, cx, cy, px, py, ex, ey };
-    return evgMakeCurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
+    return evgMakeCurve(segments, coords);
 }
 
 void evgDrawCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, VGfloat py, VGfloat ex, VGfloat ey) {
@@ -569,7 +569,7 @@ void evgFillCBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat px, 
 VGPath evgMakeQBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
     VGubyte segments[] = { VG_MOVE_TO_ABS, VG_QUAD_TO };
     VGfloat coords[] = { sx, sy, cx, cy, ex, ey };
-    return evgMakeCurve(segments, coords, VG_FILL_PATH | VG_STROKE_PATH);
+    return evgMakeCurve(segments, coords);
 }
 
 void evgDrawQBezier(VGfloat sx, VGfloat sy, VGfloat cx, VGfloat cy, VGfloat ex, VGfloat ey) {
