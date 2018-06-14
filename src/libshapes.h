@@ -21,26 +21,39 @@ extern "C" {
 	extern VGPath evgMakeEllipse(VGfloat, VGfloat, VGfloat, VGfloat);
 	extern VGPath evgMakeCircle(VGfloat, VGfloat, VGfloat);
 	extern VGPath evgMakeArc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern VGPath evgMakeImage(VGfloat, VGfloat, int, int, const char*);
+	extern VGPath evgMakeImage(VGfloat, VGfloat, int, int, const VGubyte*);
 
-	extern void evgTranslate(VGfloat, VGfloat);
+    extern void evgDrawCBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgDrawQBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgDrawPolygon(VGfloat*, VGint);
+	extern void evgDrawPolyline(VGfloat*, VGfloat*, VGint);
+	extern void evgDrawRect(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgDrawLine(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgDrawRoundrect(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgDrawEllipse(VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgDrawCircle(VGfloat, VGfloat, VGfloat);
+	extern void evgDrawArc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+	extern void evgDrawImage(VGfloat, VGfloat, int, int, const VGubyte*);
+
+    extern void evgFillCBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+    extern void evgFillQBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+    extern void evgFillPolygon(VGfloat*, VGint);
+    extern void evgFillPolyline(VGfloat*, VGfloat*, VGint);
+    extern void evgFillRect(VGfloat, VGfloat, VGfloat, VGfloat);
+    extern void evgFillLine(VGfloat, VGfloat, VGfloat, VGfloat);
+    extern void evgFillRoundrect(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+    extern void evgFillEllipse(VGfloat, VGfloat, VGfloat, VGfloat);
+    extern void evgFillCircle(VGfloat, VGfloat, VGfloat);
+    extern void evgFillArc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
+    extern void evgFillImage(VGfloat, VGfloat, int, int, const char*);
+
+    extern void evgTranslate(VGfloat, VGfloat);
 	extern void evgRotate(VGfloat);
 	extern void evgShear(VGfloat, VGfloat);
 	extern void evgScale(VGfloat, VGfloat);
 	extern void evgText(VGfloat, VGfloat, const char*, Fontinfo, int);
 	extern void evgTextMid(VGfloat, VGfloat, const char*, Fontinfo, int);
 	extern void evgTextEnd(VGfloat, VGfloat, const char*, Fontinfo, int);
-	extern void evgCBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgQBezier(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgPolygon(VGfloat*, VGint);
-	extern void evgPolyline(VGfloat*, VGfloat*, VGint);
-	extern void evgRect(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgLine(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgRoundrect(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgEllipse(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgCircle(VGfloat, VGfloat, VGfloat);
-	extern void evgArc(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgImage(VGfloat, VGfloat, int, int, const char*);
 	extern void evgBegin();
     extern void evgClear();
 	extern void evgEnd();
@@ -58,23 +71,15 @@ extern "C" {
 	extern void evgFillRadialGradient(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat*, int);
 	extern void evgClipRect(VGint x, VGint y, VGint w, VGint h);
 	extern void evgClipEnd();
-	extern void evgCbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgQbezierOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgRectOutline(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgRoundrectOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgEllipseOutline(VGfloat, VGfloat, VGfloat, VGfloat);
-	extern void evgCircleOutline(VGfloat, VGfloat, VGfloat);
-	extern void evgArcOutline(VGfloat, VGfloat, VGfloat, VGfloat, VGfloat, VGfloat);
 	extern void evgClearRect(unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+
+    extern void* evgReadScreen(int, int, int, int);
+    extern void evgDumpScreen(int, int, int, int, FILE*);
 
 	extern Fontinfo loadfont(const int*, const int*, const unsigned char*, const int*, const int*, const int*,
 				 const short*, int);
 	extern void unloadfont(VGPath*, int);
     extern VGImage createImageFromJpeg(const char*);
-	extern void makeimage(VGfloat, VGfloat, int, int, VGubyte*);
-	extern void saveterm();
-	extern void restoreterm();
-	extern void rawterm();
 
 	// Added by Paeryn
 	extern void initWindowSize(int x, int y, unsigned int w, unsigned int h);

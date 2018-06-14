@@ -150,25 +150,6 @@ static unsigned int init_h = 0;
 struct termios new_term_attr;
 struct termios orig_term_attr;
 
-// saveterm saves the current terminal settings
-void saveterm() {
-    tcgetattr(fileno(stdin), &orig_term_attr);
-}
-
-// rawterm sets the terminal to raw mode
-void rawterm() {
-    memcpy(&new_term_attr, &orig_term_attr, sizeof(struct termios));
-    new_term_attr.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL);
-    new_term_attr.c_cc[VTIME] = 0;
-    new_term_attr.c_cc[VMIN] = 0;
-    tcsetattr(fileno(stdin), TCSANOW, &new_term_attr);
-}
-
-// restore resets the terminal to the previously saved setting
-void restoreterm() {
-    tcsetattr(fileno(stdin), TCSANOW, &orig_term_attr);
-}
-
 //
 // Font functions
 //
@@ -236,7 +217,7 @@ VGImage evgMakeImage(VGfloat x, VGfloat y, int w, int h, VGubyte* data) {
     return img;
 }
 
-void evgImage(VGfloat x, VGfloat y, int width, int height, VGubyte* data) {
+void evgDrawImage(VGfloat x, VGfloat y, int width, int height, VGubyte* data) {
     VGImage img = evgMakeImage(x, y, width, height, data);
     vgSetPixels(x, y, img, 0, 0, width, height);
     vgDestroyImage(img);
