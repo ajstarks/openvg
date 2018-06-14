@@ -24,7 +24,7 @@ uninstall:
 	rm -f /usr/include/libshapes.h
 
 build-dir:
-	mkdir "./build/"
+	mkdir -p "./build/"
 
 libshapes:	./src/libshapes.c	./src/libshapes.h	./src/fontinfo.h	build-dir	fonts
 	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c -o ./build/libshapes.o
