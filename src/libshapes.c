@@ -213,7 +213,7 @@ VGImage evgMakeImage(VGfloat x, VGfloat y, int w, int h, VGubyte* data) {
     unsigned int dstride = w * 4;
     VGImageFormat rgbaFormat = VG_sABGR_8888;
     VGImage img = vgCreateImage(rgbaFormat, w, h, VG_IMAGE_QUALITY_BETTER);
-    vgImageSubData(img, (void *)data, dstride, rgbaFormat, 0, 0, w, h);
+    vgImageSubData(img, (void*) data, dstride, rgbaFormat, 0, 0, w, h);
     return img;
 }
 
