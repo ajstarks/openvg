@@ -219,14 +219,6 @@ void evgImage(VGfloat x, VGfloat y, int width, int height, VGubyte* data) {
     vgDestroyImage(img);
 }
 
-// dumpscreen writes the raster
-void dumpscreen(int w, int h, FILE * fp) {
-    void *ScreenBuffer = malloc(w * h * 4);
-    vgReadPixels(ScreenBuffer, (w * 4), VG_sABGR_8888, 0, 0, w, h);
-    fwrite(ScreenBuffer, 1, w * h * 4, fp);
-    free(ScreenBuffer);
-}
-
 Fontinfo SansTypeface;
 
 // initWindowSize requests a specific window size & position, if not called
@@ -720,11 +712,11 @@ void evgSaveEnd(const char *filename) {
     FILE *fp;
     assert(vgGetError() == VG_NO_ERROR);
     if (strlen(filename) == 0) {
-        dumpscreen(state->screen_width, state->screen_height, stdout);
+        evgDumpScreen(0, 0, state->screen_width, state->screen_height, stdout);
     } else {
         fp = fopen(filename, "wb");
         if (fp != NULL) {
-            dumpscreen(state->screen_width, state->screen_height, fp);
+            evgDumpScreen(0, 0, state->screen_width, state->screen_height, fp);
             fclose(fp);
         }
     }
@@ -756,4 +748,16 @@ void evgWindowOpacity(unsigned int a) {
 // WindowPosition moves the window to given position
 void WindowPosition(int x, int y) {
     dispmanMoveWindow(state, x, y);
+}
+
+void* evgReadScreen(int x, int y, int width, int height) {
+    void* buf = malloc(width * height * 4);
+    vgReadPixels(buf, width * 4, VG_sABGR_8888, x, y, width, height);
+    return buf;
+}
+
+void evgDumpScreen(int x, int y, int width, int height, FILE* fp) {
+    void* screenbuffer = evgReadScreen(x, y, width, height);
+    fwrite(screenbuffer, 1, w * h * 4, fp);
+    free(screenbuffer);
 }
