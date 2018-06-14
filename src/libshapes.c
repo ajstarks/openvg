@@ -20,6 +20,25 @@
 #include "oglinit.h"
 #include "./../lib/DejaVuSans.inc"
 
+
+/**
+ *
+ */
+void* evgReadScreen(int x, int y, int width, int height) {
+    void* buf = malloc(width * height * 4);
+    vgReadPixels(buf, width * 4, VG_sABGR_8888, x, y, width, height);
+    return buf;
+}
+
+/**
+ *
+ */
+void evgDumpScreen(int x, int y, int width, int height, FILE* fp) {
+    void* screenbuffer = evgReadScreen(x, y, width, height);
+    fwrite(screenbuffer, 1, width * height * 4, fp);
+    free(screenbuffer);
+}
+
 // createImageFromJpeg decompresses a JPEG image to the standard image format
 // source: https://github.com/ileben/ShivaVG/blob/master/examples/test_image.c
 VGImage createImageFromJpeg(const char *filename) {
@@ -201,7 +220,11 @@ void unloadfont(VGPath * glyphs, int n) {
 }
 
 void evgDrawPath(VGPath path, VGbitfield flags) {
-    vgDrawPath(path, flags);
+    vgDrawPath(path, VG_STROKE_PATH);
+}
+
+void evgFillPath(VGPath path) {
+    vgDrawPath(path, VG_FILL_PATH);
 }
 
 // makeimage makes an image from a raw raster of red, green, blue, alpha values
@@ -748,16 +771,4 @@ void evgWindowOpacity(unsigned int a) {
 // WindowPosition moves the window to given position
 void WindowPosition(int x, int y) {
     dispmanMoveWindow(state, x, y);
-}
-
-void* evgReadScreen(int x, int y, int width, int height) {
-    void* buf = malloc(width * height * 4);
-    vgReadPixels(buf, width * 4, VG_sABGR_8888, x, y, width, height);
-    return buf;
-}
-
-void evgDumpScreen(int x, int y, int width, int height, FILE* fp) {
-    void* screenbuffer = evgReadScreen(x, y, width, height);
-    fwrite(screenbuffer, 1, w * h * 4, fp);
-    free(screenbuffer);
 }
