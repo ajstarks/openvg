@@ -1,51 +1,43 @@
+GCC_INCLUDEFLAGS=-I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include -fPIC
+GCC_LIBFLAGS=-L/opt/vc/lib -lbrcmEGL -lbrcmGLESv2 -ljpeg
 
-LIBFLAGS=-L/opt/vc/lib -lbrcmEGL -lbrcmGLESv2 -ljpeg
-INCLUDEFLAGS=-I/opt/vc/include -I/opt/vc/include/interface/vmcs_host/linux -I/opt/vc/include/interface/vcos/pthreads -fPIC
-FONTLIB=/usr/share/fonts/truetype/ttf-dejavu
-FONTFILES=DejaVuSans.inc  DejaVuSansMono.inc DejaVuSerif.inc
-all:	font2openvg fonts library	
+all:	lib	src
+src:	libshapes	oglinit
 
-libshapes.o:	libshapes.c shapes.h fontinfo.h fonts
-	gcc -O2 -Wall $(INCLUDEFLAGS) -c libshapes.c
-
-gopenvg:	openvg.go
-	go install .
-
-oglinit.o:	oglinit.c
-	gcc -O2 -Wall $(INCLUDEFLAGS) -c oglinit.c
-
-font2openvg:	fontutil/font2openvg.cpp
-	g++ -I/usr/include/freetype2 fontutil/font2openvg.cpp -o font2openvg -lfreetype
-
-fonts:	$(FONTFILES)
-
-DejaVuSans.inc: font2openvg $(FONTLIB)/DejaVuSans.ttf
-	./font2openvg $(FONTLIB)/DejaVuSans.ttf DejaVuSans.inc DejaVuSans
-
-DejaVuSerif.inc: font2openvg $(FONTLIB)/DejaVuSerif.ttf
-	./font2openvg $(FONTLIB)/DejaVuSerif.ttf DejaVuSerif.inc DejaVuSerif
-
-DejaVuSansMono.inc: font2openvg $(FONTLIB)/DejaVuSansMono.ttf
-	./font2openvg $(FONTLIB)/DejaVuSansMono.ttf DejaVuSansMono.inc DejaVuSansMono
-
-clean:
-	rm -f *.o *.inc *.so font2openvg *.c~ *.h~
-	indent -linux -c 60 -brf -l 132  libshapes.c oglinit.c shapes.h fontinfo.h
-
-library: oglinit.o libshapes.o
-	gcc $(LIBFLAGS) -shared -o libshapes.so oglinit.o libshapes.o
-
-install:
-	install -m 755 -p font2openvg /usr/bin/
-	install -m 755 -p libshapes.so /usr/lib/libshapes.so.1.0.0
+install:	lib	src
+	install -m 755 -p ./lib/font2openvg /usr/bin/
+	install -m 755 -p ./build/libshapes.so /usr/lib/libshapes.so.1.0.0
 	strip --strip-unneeded /usr/lib/libshapes.so.1.0.0
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1
 	ln -f -s /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1.0
-	install -m 644 -p shapes.h /usr/include/
-	install -m 644 -p fontinfo.h /usr/include/
+	install -m 644 -p ./src/libshapes.h /usr/include/
+	install -m 644 -p ./src/fontinfo.h /usr/include/
 
 uninstall:
 	rm -f /usr/bin/font2openvg
-	rm -f /usr/lib/libshapes.so.1.0.0 /usr/lib/libshapes.so.1.0 /usr/lib/libshapes.so.1 /usr/lib/libshapes.so
-	rm -f /usr/include/shapes.h /usr/include/fontinfo.h
+	rm -f /usr/include/fontinfo.h
+	rm -f /usr/lib/libshapes.so.1.0.0
+	rm -f /usr/lib/libshapes.so.1.0
+	rm -f /usr/lib/libshapes.so.1
+	rm -f /usr/lib/libshapes.so
+	rm -f /usr/include/libshapes.h
+
+build-dir:
+	mkdir -p "./build/"
+
+libshapes:	./src/libshapes.c	./src/libshapes.h	./src/fontinfo.h	build-dir	fonts
+	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/libshapes.c -o ./build/libshapes.o
+
+oglinit:	./src/oglinit.c	build-dir
+	gcc -O2 -Wall $(GCC_INCLUDEFLAGS) -c ./src/oglinit.c -o ./build/oglinit.o
+
+libs:	lib
+lib:	font2openvg	font
+
+font2openvg:	./lib/font2openvg.cpp
+	g++ -I/usr/include/freetype2 lib/font2openvg.cpp -o lib/font2openvg -lfreetype
+
+fonts:	font
+font:	/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf	font2openvg
+	./lib/font2openvg /usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf ./lib/DejaVuSans.inc DejaVuSans

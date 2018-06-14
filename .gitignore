@@ -1,4 +1,5 @@
-font2openvg
+.vscode/
+build/
 *~
 *.o
 *.so
