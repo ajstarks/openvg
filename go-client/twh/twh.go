@@ -75,8 +75,8 @@ const (
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 	HNTopURL      = "https://hacker-news.firebaseio.com/v0/topstories.json"
 	HNItemfmt     = "https://hacker-news.firebaseio.com/v0/item/%d.json"
-	weatherAPIkey = "-api-key-"
-	NYTAPIkey     = "-api-key-"
+	weatherAPIkey = "-API-Key"
+	NYTAPIkey     = "-API-Key"
 )
 
 var fromHTML = strings.NewReplacer(
@@ -144,6 +144,7 @@ func main() {
 		case <-headticker.C:
 			canvas.headlines(*section, *thumb)
 		case <-sigint:
+			openvg.SaveEnd("twh.raw")
 			openvg.Finish()
 			os.Exit(0)
 		}
@@ -314,10 +315,13 @@ func (d *display) nytheadlines(section string, thumb bool) {
 	thumbsize := int(d.height * 0.05)
 	hdim.regionFill(d.bgcolor, d.textcolor)
 	headsize := d.width / 80
-	spacing := openvg.VGfloat(thumbsize)
+	spacing := openvg.VGfloat(thumbsize) + 3
+	if !thumb {
+		x -= 100
+	}
 	for i := len(data.Results) - 1; i >= 0; i-- {
 		openvg.Text(x, y, fromHTML.Replace(data.Results[i].Title), "serif", int(headsize))
-		if len(data.Results[i].Thumbnail) > 0 {
+		if len(data.Results[i].Thumbnail) > 0 && thumb {
 			img, imerr := netimage(data.Results[i].Thumbnail)
 			if imerr != nil {
 				continue
