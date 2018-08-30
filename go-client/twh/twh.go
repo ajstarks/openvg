@@ -75,8 +75,8 @@ const (
 	NYTfmt        = "http://api.nytimes.com/svc/news/v3/content/all/%s/.json?api-key=%s&limit=5"
 	HNTopURL      = "https://hacker-news.firebaseio.com/v0/topstories.json"
 	HNItemfmt     = "https://hacker-news.firebaseio.com/v0/item/%d.json"
-	weatherAPIkey = "-API-Key"
-	NYTAPIkey     = "-API-Key"
+	weatherAPIkey = "-API-Key-"
+	NYTAPIkey     = "-API-Key-"
 )
 
 var fromHTML = strings.NewReplacer(
@@ -144,7 +144,7 @@ func main() {
 		case <-headticker.C:
 			canvas.headlines(*section, *thumb)
 		case <-sigint:
-			openvg.SaveEnd("twh.raw")
+			openvg.End()
 			openvg.Finish()
 			os.Exit(0)
 		}
