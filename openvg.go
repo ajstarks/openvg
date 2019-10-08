@@ -447,9 +447,9 @@ func Ellipse(x, y, w, h VGfloat) {
 	C.Ellipse(C.VGfloat(x), C.VGfloat(y), C.VGfloat(w), C.VGfloat(h))
 }
 
-// Circle draws a circle centered at (x,y), with radius r
-func Circle(x, y, r VGfloat) {
-	C.Circle(C.VGfloat(x), C.VGfloat(y), C.VGfloat(r))
+// Circle draws a circle centered at (x,y), with diameter d
+func Circle(x, y, d VGfloat) {
+	C.Circle(C.VGfloat(x), C.VGfloat(y), C.VGfloat(d))
 }
 
 // Qbezier draws a quadratic bezier curve with extrema (sx, sy) and (ex, ey)

@@ -138,8 +138,8 @@ Draw a polygon using the coordinates in arrays pointed to by x and y.  The numbe
 	void Polyline(VGfloat *x, VGfloat *y, VGint n)
 Draw a polyline using the coordinates in arrays pointed to by x and y.  The number of coordinates is n.
 
-	void Circle(VGfloat x, VGfloat y, VGfloat r)
-Draw a circle centered at (x,y) with radius r.
+	void Circle(VGfloat x, VGfloat y, VGfloat d)
+Draw a circle centered at (x,y) with diameter d.
 
 	void CircleOutline(VGfloat x, VGfloat y, VGfloat r)
 Outlined version
